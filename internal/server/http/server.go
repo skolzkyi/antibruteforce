@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	storagedIP "github.com/skolzkyi/hwOTUS_YIA/antibruteforce/internal/storage/storagedIP"
+	storagedIP "github.com/skolzkyi/antibruteforce/internal/storage/storagedIP"
 	"go.uber.org/zap"
 )
 

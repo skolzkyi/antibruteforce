@@ -18,7 +18,7 @@ import (
 
 	"github.com/skolzkyi/antibruteforce/internal/app"
 	"github.com/skolzkyi/antibruteforce/internal/logger"
-	storagedIP "github.com/skolzkyi/antibruteforce/internal/storage/storagedIP"
+	storageData  "github.com/skolzkyi/antibruteforce/internal/storage/storageData"
 	//memorystorage "github.com/skolzkyi/hwOTUS_YIA/hw12_13_14_15_calendar/internal/storage/memory"
 	"github.com/stretchr/testify/require"
 )

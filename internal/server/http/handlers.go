@@ -7,18 +7,23 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strconv"
+	//"strconv"
 	"strings"
-	"time"
+	//"time"
 
 	helpers "github.com/skolzkyi/antibruteforce/helpers"
-	storagedIP "github.com/skolzkyi/antibruteforce/internal/storage/storagedIP"
+	//storageData "github.com/skolzkyi/antibruteforce/internal/storage/storageData"
 )
-
+/*
 type Request struct {
 	Login    string
 	Password string
 	IP       string
+}
+*/
+type storageIPData struct {
+	IP                    string
+	ID                    int
 }
 
 type outputJSON struct {
@@ -36,7 +41,7 @@ type EventRawData struct {
 	ID                    int
 }
 type IPListAnswer struct {
-	IPList  []storagedIP.storagedIP
+	IPList  []storageIPData
 	Message outputJSON
 }
 
@@ -73,15 +78,15 @@ func (s *Server) helloWorld(w http.ResponseWriter, _ *http.Request) {
 	w.Write([]byte("Hello world!"))
 }
 
-func (s *Server) AuthorizationRequest(w http.ResponseWriter, _ *http.Request) {
+func (s *Server) AuthorizationRequest(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
-	ctx, cancel := context.WithTimeout(r.Context(), s.Config.GetDBTimeOut())
-	defer cancel()
+	//ctx, cancel := context.WithTimeout(r.Context(), s.Config.GetDBTimeOut())
+	//defer cancel()
 	switch r.Method {
 	case http.MethodGet:
-		newRequest:=Request{}
-		newMessage := outputJSON{}
+		newRequest:=RequestAuth{}
+		//newMessage := outputJSON{}
 
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
@@ -103,14 +108,14 @@ func (s *Server) AuthorizationRequest(w http.ResponseWriter, _ *http.Request) {
 	}
 }
 
-func (s *Server) ClearBucketByLogin(w http.ResponseWriter, _ *http.Request) {
+func (s *Server) ClearBucketByLogin(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
-	ctx, cancel := context.WithTimeout(r.Context(), s.Config.GetDBTimeOut())
-	defer cancel()
+	//ctx, cancel := context.WithTimeout(r.Context(), s.Config.GetDBTimeOut())
+	//defer cancel()
 	switch r.Method {
 	case http.MethodDelete:
-		newMessage := outputJSON{}
+		//newMessage := outputJSON{}
 
 		path := strings.Trim(r.URL.Path, "/")
 		pathParts := strings.Split(path, "/")
@@ -129,14 +134,14 @@ func (s *Server) ClearBucketByLogin(w http.ResponseWriter, _ *http.Request) {
 	}
 }
 
-func (s *Server) ClearBucketByIP(w http.ResponseWriter, _ *http.Request) {
+func (s *Server) ClearBucketByIP(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
-	ctx, cancel := context.WithTimeout(r.Context(), s.Config.GetDBTimeOut())
-	defer cancel()
+	//ctx, cancel := context.WithTimeout(r.Context(), s.Config.GetDBTimeOut())
+	//defer cancel()
 	switch r.Method {
 	case http.MethodDelete:
-		newMessage := outputJSON{}
+		//newMessage := outputJSON{}
 
 		path := strings.Trim(r.URL.Path, "/")
 		pathParts := strings.Split(path, "/")
@@ -177,7 +182,7 @@ func (s *Server) WhiteList_REST(w http.ResponseWriter, r *http.Request) { //noli
 				newMessage.Text = "OK!"
 				newMessage.Code = 0
 			}
-			IPListAnsw.IPList = make([]storagedIP.storagedIP, len(IPList))
+			IPListAnsw.IPList = make([]storageIPData, len(IPList))
 			IPListAnsw.IPList = IPList
 			IPListAnsw.Message = newMessage
 			jsonstring, err := json.Marshal(IPListAnsw)
@@ -193,10 +198,7 @@ func (s *Server) WhiteList_REST(w http.ResponseWriter, r *http.Request) { //noli
 			return
 		}
 		IP:=pathParts[1]
-		if err != nil {
-			apiErrHandler(err, &w)
-			return
-		}
+		
 		fmt.Println("IP: ", IP)
 		ok, errInner := s.app.IsIPInWhiteList(ctx, IP)
 		if errInner != nil {
@@ -211,7 +213,7 @@ func (s *Server) WhiteList_REST(w http.ResponseWriter, r *http.Request) { //noli
 			}
 			newMessage.Code = 0
 		}
-		IPListAnsw.IPList = make([]storagedIP.storagedIP, 0)
+		IPListAnsw.IPList = make([]storageIPData, 0)
 		IPListAnsw.Message = newMessage
 		jsonstring, err := json.Marshal(IPListAnsw)
 		if err != nil {
@@ -248,7 +250,7 @@ func (s *Server) WhiteList_REST(w http.ResponseWriter, r *http.Request) { //noli
 
 		fmt.Println("newIP: ", newIP)
 
-		id, errInner := s.app.AddIPToWhiteList(ctx, IP) 
+		id, errInner := s.app.AddIPToWhiteList(ctx, newIP) 
 		if errInner != nil {
 			newMessage.Text = errInner.Error()
 			newMessage.Code = 1
@@ -338,7 +340,7 @@ func (s *Server) BlackList_REST(w http.ResponseWriter, r *http.Request) { //noli
 				newMessage.Text = "OK!"
 				newMessage.Code = 0
 			}
-			IPListAnsw.IPList = make([]storagedIP.storagedIP, len(IPList))
+			IPListAnsw.IPList = make([]storageIPData, len(IPList))
 			IPListAnsw.IPList = IPList
 			IPListAnsw.Message = newMessage
 			jsonstring, err := json.Marshal(IPListAnsw)
@@ -354,10 +356,7 @@ func (s *Server) BlackList_REST(w http.ResponseWriter, r *http.Request) { //noli
 			return
 		}
 		IP:=pathParts[1]
-		if err != nil {
-			apiErrHandler(err, &w)
-			return
-		}
+		
 		fmt.Println("IP: ", IP)
 		ok, errInner := s.app.IsIPInBlackList(ctx, IP)
 		if errInner != nil {
@@ -372,7 +371,7 @@ func (s *Server) BlackList_REST(w http.ResponseWriter, r *http.Request) { //noli
 			}
 			newMessage.Code = 0
 		}
-		IPListAnsw.IPList = make([]storagedIP.storagedIP, 0)
+		IPListAnsw.IPList = make([]storageIPData, 0)
 		IPListAnsw.Message = newMessage
 		jsonstring, err := json.Marshal(IPListAnsw)
 		if err != nil {
@@ -409,7 +408,7 @@ func (s *Server) BlackList_REST(w http.ResponseWriter, r *http.Request) { //noli
 
 		fmt.Println("newIP: ", newIP)
 
-		id, errInner := s.app.AddIPToBlackList(ctx, IP) 
+		id, errInner := s.app.AddIPToBlackList(ctx, newIP) 
 		if errInner != nil {
 			newMessage.Text = errInner.Error()
 			newMessage.Code = 1

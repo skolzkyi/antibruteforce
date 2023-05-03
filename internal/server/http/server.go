@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	storagedIP "github.com/skolzkyi/antibruteforce/internal/storage/storagedIP"
+	storageData  "github.com/skolzkyi/antibruteforce/internal/storage/storageData"
 	"go.uber.org/zap"
 )
 
@@ -49,16 +49,16 @@ type Logger interface {
 }
 
 type Application interface {
-	InitStorage(ctx context.Context, config storage.Config) error
+	InitStorage(ctx context.Context, config storageData.Config) error
 	CloseStorage(ctx context.Context) error
 	AddIPToWhiteList(ctx context.Context, IP string) (int, error)
 	RemoveIPInWhiteList(ctx context.Context, IP string) error
 	IsIPInWhiteList(ctx context.Context, IP string) (bool, error)
-	GetAllIPInWhiteList(ctx context.Context) ([]storagedIP.storagedIP, error)
+	GetAllIPInWhiteList(ctx context.Context) ([]storageIPData, error)
 	AddIPToBlackList(ctx context.Context, IP string) (int, error)
 	RemoveIPInBlackList(ctx context.Context, IP string) error
 	IsIPInBlackList(ctx context.Context, IP string) (bool, error)
-	GetAllIPInBlackList(ctx context.Context) ([]storagedIP.storagedIP, error)
+	GetAllIPInBlackList(ctx context.Context) ([]storageIPData, error)
 }
 
 func NewServer(logger Logger, app Application, config Config) *Server {

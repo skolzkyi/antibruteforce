@@ -1,4 +1,4 @@
-package storagedIP
+package storageData
 
 import (
 	"errors"
@@ -45,12 +45,12 @@ type Logger interface {
 	GetZapLogger() *zap.SugaredLogger
 }
 
-type storagedIP struct {
+type storageIPData struct {
 	IP                    string
 	ID                    int
 }
 
-func (ip *storagedIP) String() string {
+func (ip *storageIPData) String() string {
 	res := helpers.StringBuild("[ID: ", strconv.Itoa(ip.ID), ", IP: ", ip.IP, "]") 
 	return res
 }

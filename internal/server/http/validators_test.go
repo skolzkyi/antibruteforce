@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	storagedIP "github.com/skolzkyi/antibruteforce/internal/storage/storagedIP"
+	storageData  "github.com/skolzkyi/antibruteforce/internal/storage/storageData"
 	"github.com/stretchr/testify/require"
 )
 

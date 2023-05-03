@@ -2,12 +2,12 @@ package internalhttp
 
 import (
 	"errors"
-	"time"
+	//"time"
 
-	storagedIP "github.com/skolzkyi/antibruteforce/internal/storage/storagedIP"
+	//storageData "github.com/skolzkyi/antibruteforce/internal/storage/storageData"
 )
 
-type Request struct {
+type RequestAuth struct {
 	Login    string
 	Password string
 	IP       string
@@ -19,15 +19,15 @@ var (
 	ErrVoidIP       		= errors.New("IP is void")
 )
 
-func SimpleRequestValidator(login string, password string, IP string) (storage.Event, error) { //nolint:lll
-	request := Request{Login: login, Password: password, IP: IP} //nolint:lll
+func SimpleRequestValidator(login string, password string, IP string) (RequestAuth, error) { //nolint:lll
+	request := RequestAuth{Login: login, Password: password, IP: IP} //nolint:lll
 	switch {
 	case request.Login == "":
-		return Request{}, ErrVoidLogin 
+		return RequestAuth{}, ErrVoidLogin 
 	case request.Password == "":
-		return Request{}, ErrVoidPassword 
+		return RequestAuth{}, ErrVoidPassword 
 	case request.IP == "":
-		return Request{}, ErrVoidIP
+		return RequestAuth{}, ErrVoidIP
 	default:
 	}
 

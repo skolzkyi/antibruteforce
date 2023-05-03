@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"os"
 	"time"
 	
 
@@ -99,9 +98,9 @@ func (config *Config) Init(path string) error {
 	config.address = viper.GetString("REDIS_ADDRESS")
 	config.port = viper.GetString("REDIS_PORT")
 	config.limitTimeCheck = viper.GetDuration("LIMIT_TIMECHECK")
-	config.address = viper.GetInt("LIMITFACTOR_LOGIN")
-	config.port = viper.GetInt("LIMITFACTOR_PASSWORD")
-	config.address = viper.GetInt("LIMITFACTOR_IP")
+	config.address = viper.GetString("LIMITFACTOR_LOGIN")
+	config.port = viper.GetString("LIMITFACTOR_PASSWORD")
+	config.address = viper.GetString("LIMITFACTOR_IP")
 
 	return nil
 }
@@ -166,15 +165,15 @@ func (config *Config) GetRedisPort() string {
 	return config.redisPort
 }
 
-func (config *Config) GetLimitFactorLogin() int {
+func (config *Config) GetLimitFactorLogin() string {
 	return config.limitFactorLogin 
 }
 
-func (config *Config) GetLimitFactorPassword() int {
+func (config *Config) GetLimitFactorPassword() string{
 	return config.limitFactorPassword
 }
 
-func (config *Config) GetLimitFactorIP() int {
+func (config *Config) GetLimitFactorIP() string {
 	return config.limitFactorIP
 }
 

@@ -4,13 +4,18 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"time"
-	"fmt"
+	//"time"
+	//"fmt"
 
 	_ "github.com/go-sql-driver/mysql" // for driver
 	helpers "github.com/skolzkyi/antibruteforce/helpers"
-	storagedIP "github.com/skolzkyi/antibruteforce/internal/storage/storagedIP"
+	storageData  "github.com/skolzkyi/antibruteforce/internal/storage/storageData"
 )
+
+type storageIPData struct {
+	IP                    string
+	ID                    int
+}
 
 type Storage struct {
 	DB *sql.DB
@@ -20,7 +25,7 @@ func New() *Storage {
 	return &Storage{}
 }
 
-func (s *Storage) Init(ctx context.Context, logger storage.Logger, config storage.Config) error {
+func (s *Storage) Init(ctx context.Context, logger storageData.Logger, config storageData.Config) error {
 	err := s.Connect(ctx, logger, config)
 	if err != nil {
 		logger.Error("SQL connect error: " + err.Error())
@@ -35,10 +40,10 @@ func (s *Storage) Init(ctx context.Context, logger storage.Logger, config storag
 	return err
 }
 
-func (s *Storage) Connect(ctx context.Context, logger storage.Logger, config storage.Config) error {
+func (s *Storage) Connect(ctx context.Context, logger storageData.Logger, config storageData.Config) error {
 	select {
 	case <-ctx.Done():
-		return storage.ErrStorageTimeout
+		return storageData.ErrStorageTimeout
 	default:
 		dsn := helpers.StringBuild(config.GetDBUser(), ":", config.GetDBPassword(), "@tcp(",config.GetDBAddress(),":",config.GetDBPort(),")/", config.GetDBName(), "?parseTime=true") //nolint:lll
 		// fmt.Println("dsn: ", dsn)
@@ -57,10 +62,10 @@ func (s *Storage) Connect(ctx context.Context, logger storage.Logger, config sto
 	}
 }
 
-func (s *Storage) Close(ctx context.Context, logger storage.Logger) error {
+func (s *Storage) Close(ctx context.Context, logger storageData.Logger) error {
 	select {
 	case <-ctx.Done():
-		return storage.ErrStorageTimeout
+		return storageData.ErrStorageTimeout
 	default:
 		err := s.DB.Close()
 		if err != nil {
@@ -73,7 +78,7 @@ func (s *Storage) Close(ctx context.Context, logger storage.Logger) error {
 
 // WHITELIST
 
-func(s *Storage)AddIPToWhiteList(ctx context.Context, logger storage.Logger, IP string)(int, error) {
+func(s *Storage)AddIPToWhiteList(ctx context.Context, logger storageData.Logger, IP string)(int, error) {
 	stmt := "INSERT INTO whitelist(IP) VALUES (?)"                          
 	res, err := s.DB.ExecContext(ctx, stmt, IP) 
 	if err != nil {
@@ -89,7 +94,7 @@ func(s *Storage)AddIPToWhiteList(ctx context.Context, logger storage.Logger, IP 
 	return int(id), nil
 }
 
-func (s *Storage) RemoveIPInWhiteList(ctx context.Context, logger storage.Logger, IP string) error {
+func (s *Storage) RemoveIPInWhiteList(ctx context.Context, logger storageData.Logger, IP string) error {
 	stmt := "DELETE from whitelist WHERE IP=?"
 
 	_, err := s.DB.ExecContext(ctx, stmt, IP)
@@ -100,12 +105,12 @@ func (s *Storage) RemoveIPInWhiteList(ctx context.Context, logger storage.Logger
 	return nil
 }
 
-func (s *Storage) IsIPInWhiteList(ctx context.Context,logger storage.Logger, IP string) (bool,error) {
+func (s *Storage) IsIPInWhiteList(ctx context.Context,logger storageData.Logger, IP string) (bool,error) {
 	stmt := "SELECT id, IP FROM whitelist WHERE IP = ?" 
 
 	row := s.DB.QueryRowContext(ctx, stmt, IP)
 
-	storagedIP:= &storagedIP.storagedIP{}
+	storagedIP:= &storageIPData{}
 
 	err := row.Scan(&storagedIP.ID, &storagedIP.IP)
 	if err != nil {
@@ -118,8 +123,8 @@ func (s *Storage) IsIPInWhiteList(ctx context.Context,logger storage.Logger, IP 
 	return true,nil
 }
 
-func (s *Storage) GetAllIPInWhiteList(ctx context.Context,logger storage.Logger) ([]storagedIP.storagedIP,error) {
-	resIP := make([]storagedIP.storagedIP, 0)
+func (s *Storage) GetAllIPInWhiteList(ctx context.Context,logger storageData.Logger) ([]storageIPData,error) {
+	resIP := make([]storageIPData, 0)
 	
 	stmt := "SELECT id, IP  FROM whitelist" 
 
@@ -131,17 +136,17 @@ func (s *Storage) GetAllIPInWhiteList(ctx context.Context,logger storage.Logger)
 
 	defer rows.Close()
 
-	storagedIP:= &storagedIP.storagedIP{}
+	storagedIP:= storageIPData{}
 
 	for rows.Next() {
-		err = rows.Scan(&storagedIP.id, &storagedIP.IP)
+		err = rows.Scan(&storagedIP.ID, &storagedIP.IP)
 		if err != nil {
 			logger.Error("SQL rows scan GetAllIPInWhiteList error")
 			return nil, err
 		}
 
 		resIP = append(resIP, storagedIP)
-		storagedIP = storagedIP.storagedIP{}
+		storagedIP = storageIPData{}
 	}
 
 	if err = rows.Err(); err != nil {
@@ -154,7 +159,7 @@ func (s *Storage) GetAllIPInWhiteList(ctx context.Context,logger storage.Logger)
 
 // BLACKLIST
 
-func(s *Storage)AddIPToBlackList(ctx context.Context, logger storage.Logger, IP string)(int, error) {
+func(s *Storage)AddIPToBlackList(ctx context.Context, logger storageData.Logger, IP string)(int, error) {
 	stmt := "INSERT INTO blacklist(IP) VALUES (?)"                          
 	res, err := s.DB.ExecContext(ctx, stmt, IP) 
 	if err != nil {
@@ -170,7 +175,7 @@ func(s *Storage)AddIPToBlackList(ctx context.Context, logger storage.Logger, IP 
 	return int(id), nil
 }
 
-func (s *Storage) RemoveIPInBlackList(ctx context.Context, logger storage.Logger, IP string) error {
+func (s *Storage) RemoveIPInBlackList(ctx context.Context, logger storageData.Logger, IP string) error {
 	stmt := "DELETE from blacklist WHERE IP=?"
 
 	_, err := s.DB.ExecContext(ctx, stmt, IP)
@@ -181,12 +186,12 @@ func (s *Storage) RemoveIPInBlackList(ctx context.Context, logger storage.Logger
 	return nil
 }
 
-func (s *Storage) IsIPInBlackList(ctx context.Context,logger storage.Logger, IP string) (bool,error) {
+func (s *Storage) IsIPInBlackList(ctx context.Context,logger storageData.Logger, IP string) (bool,error) {
 	stmt := "SELECT id, IP FROM blacklist WHERE IP = ?" 
 
 	row := s.DB.QueryRowContext(ctx, stmt, IP)
 
-	storagedIP:= &storagedIP.storagedIP{}
+	storagedIP:= &storageIPData{}
 
 	err := row.Scan(&storagedIP.ID, &storagedIP.IP)
 	if err != nil {
@@ -199,8 +204,8 @@ func (s *Storage) IsIPInBlackList(ctx context.Context,logger storage.Logger, IP 
 	return true,nil
 }
 
-func (s *Storage) GetAllIPInBlackList(ctx context.Context,logger storage.Logger) ([]storagedIP.storagedIP,error) {
-	resIP := make([]storagedIP.storagedIP, 0)
+func (s *Storage) GetAllIPInBlackList(ctx context.Context,logger storageData.Logger) ([]storageIPData,error) {
+	resIP := make([]storageIPData, 0)
 	
 	stmt := "SELECT id, IP  FROM blacklist" 
 
@@ -212,17 +217,17 @@ func (s *Storage) GetAllIPInBlackList(ctx context.Context,logger storage.Logger)
 
 	defer rows.Close()
 
-	storagedIP:= &storagedIP.storagedIP{}
+	storagedIP:= storageIPData{}
 
 	for rows.Next() {
-		err = rows.Scan(&storagedIP.id, &storagedIP.IP)
+		err = rows.Scan(&storagedIP.ID, &storagedIP.IP)
 		if err != nil {
 			logger.Error("SQL rows scan GetAllIPInBlackList error")
 			return nil, err
 		}
 
 		resIP = append(resIP, storagedIP)
-		storagedIP = storagedIP.storagedIP{}
+		storagedIP = storageIPData{}
 	}
 
 	if err = rows.Err(); err != nil {

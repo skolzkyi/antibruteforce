@@ -34,9 +34,9 @@ type Config interface {
 	GetDBPort() string
 	GetResisAddress() string 
 	GetRedisPort() string 
-	GetLimitFactorLogin() int 
-	GetLimitFactorPassword() int 
-	GetLimitFactorIP() int 
+	GetLimitFactorLogin() string 
+	GetLimitFactorPassword() string 
+	GetLimitFactorIP() string  
 	GetLimitTimeCheck() time.Duration
 }
 

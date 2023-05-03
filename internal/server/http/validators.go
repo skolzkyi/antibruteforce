@@ -4,7 +4,7 @@ import (
 	"errors"
 	"time"
 
-	storagedIP "github.com/skolzkyi/hwOTUS_YIA/hw12_13_14_15_calendar/internal/storage/storagedIP"
+	storagedIP "github.com/skolzkyi/antibruteforce/internal/storage/storagedIP"
 )
 
 type Request struct {

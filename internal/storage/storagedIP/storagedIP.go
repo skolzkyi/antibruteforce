@@ -6,7 +6,7 @@ import (
 	"time"
 	"go.uber.org/zap"
 
-	helpers "github.com/skolzkyi/hwOTUS_YIA/hw12_13_14_15_calendar/helpers"
+	helpers "github.com/skolzkyi/antibruteforce/helpers"
 )
 
 var (

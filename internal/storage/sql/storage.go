@@ -8,8 +8,8 @@ import (
 	"fmt"
 
 	_ "github.com/go-sql-driver/mysql" // for driver
-	helpers "github.com/skolzkyi/hwOTUS_YIA/hw12_13_14_15_calendar/helpers"
-	storagedIP "github.com/skolzkyi/hwOTUS_YIA/hw12_13_14_15_calendar/internal/storage/storagedIP"
+	helpers "github.com/skolzkyi/antibruteforce/helpers"
+	storagedIP "github.com/skolzkyi/antibruteforce/internal/storage/storagedIP"
 )
 
 type Storage struct {

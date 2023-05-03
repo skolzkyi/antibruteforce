@@ -12,12 +12,12 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	//nolint:gci,gofmt,gofumpt,nolintlint
-	"github.com/skolzkyi/hwOTUS_YIA/hw12_13_14_15_calendar/internal/app"
-	"github.com/skolzkyi/hwOTUS_YIA/hw12_13_14_15_calendar/internal/logger"
+	"github.com/skolzkyi/antibruteforce/internal/app"
+	"github.com/skolzkyi/antibruteforce/internal/logger"
 	
-	internalhttp "github.com/skolzkyi/hwOTUS_YIA/hw12_13_14_15_calendar/internal/server/http"
+	internalhttp "github.com/skolzkyi/antibruteforce/internal/server/http"
 	
-	SQLstorage "github.com/skolzkyi/hwOTUS_YIA/hw12_13_14_15_calendar/internal/storage/sql"
+	SQLstorage "github.com/skolzkyi/antibruteforce/internal/storage/sql"
 )
 
 var configFilePath string

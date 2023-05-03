@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	storage "github.com/skolzkyi/hwOTUS_YIA/hw12_13_14_15_calendar/internal/storage/event"
+	storagedIP "github.com/skolzkyi/antibruteforce/internal/storage/storagedIP"
 	"github.com/stretchr/testify/require"
 )
 

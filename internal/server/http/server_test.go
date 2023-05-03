@@ -16,10 +16,10 @@ import (
 	"time"
 	"encoding/json"
 
-	"github.com/skolzkyi/hwOTUS_YIA/hw12_13_14_15_calendar/internal/app"
-	"github.com/skolzkyi/hwOTUS_YIA/hw12_13_14_15_calendar/internal/logger"
-	storage "github.com/skolzkyi/hwOTUS_YIA/hw12_13_14_15_calendar/internal/storage/event"
-	memorystorage "github.com/skolzkyi/hwOTUS_YIA/hw12_13_14_15_calendar/internal/storage/memory"
+	"github.com/skolzkyi/antibruteforce/internal/app"
+	"github.com/skolzkyi/antibruteforce/internal/logger"
+	storage "github.com/skolzkyi/antibruteforce/internal/storage/event"
+	//memorystorage "github.com/skolzkyi/hwOTUS_YIA/hw12_13_14_15_calendar/internal/storage/memory"
 	"github.com/stretchr/testify/require"
 )
 

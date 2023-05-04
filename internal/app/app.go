@@ -25,31 +25,31 @@ type Logger interface {
 	Fatal(msg string)
 	GetZapLogger() *zap.SugaredLogger
 }
-
+/*
 type storageIPData struct {
 	IP                    string
 	ID                    int
 }
-
+*/
 type Storage interface {
-	Init(ctx context.Context, logger Logger, config storageData.Config) error
-	Close(ctx context.Context, logger Logger) error
-	AddIPToWhiteList(ctx context.Context, logger Logger, IP string)(int, error) 
-	RemoveIPInWhiteList(ctx context.Context, logger Logger, IP string) error 
-	IsIPInWhiteList(ctx context.Context,logger Logger, IP string) (bool,error)
-	GetAllIPInWhiteList(ctx context.Context,logger Logger) ([]storageIPData,error)
-	AddIPToBlackList(ctx context.Context, logger Logger, IP string)(int, error) 
-	RemoveIPInBlackList(ctx context.Context, logger Logger, IP string) error 
-	IsIPInBlackList(ctx context.Context,logger Logger, IP string) (bool,error) 
-	GetAllIPInBlackList(ctx context.Context,logger Logger) ([]storageIPData,error)
+	Init(ctx context.Context, logger storageData.Logger, config storageData.Config) error
+	Close(ctx context.Context, logger storageData.Logger) error
+	AddIPToWhiteList(ctx context.Context, logger storageData.Logger, IP string)(int, error) 
+	RemoveIPInWhiteList(ctx context.Context, logger storageData.Logger, IP string) error 
+	IsIPInWhiteList(ctx context.Context,logger storageData.Logger, IP string) (bool,error)
+	GetAllIPInWhiteList(ctx context.Context,logger storageData.Logger) ([]storageData.StorageIPData,error)
+	AddIPToBlackList(ctx context.Context, logger storageData.Logger, IP string)(int, error) 
+	RemoveIPInBlackList(ctx context.Context, logger storageData.Logger, IP string) error 
+	IsIPInBlackList(ctx context.Context,logger storageData.Logger, IP string) (bool,error) 
+	GetAllIPInBlackList(ctx context.Context,logger storageData.Logger) ([]storageData.StorageIPData,error)
 }
 
 type BStorage interface {
-	Init(ctx context.Context, logger Logger, config storageData.Config) error
-	Close(ctx context.Context, logger Logger) error
-	IncrementBucketValue(ctx context.Context, logger Logger, key string) error
-	GetBucketValue(ctx context.Context, logger Logger, key string) (int,error)
-	FlushBStorage(ctx context.Context, logger Logger) error
+	Init(ctx context.Context, logger storageData.Logger, config storageData.Config) error
+	Close(ctx context.Context, logger storageData.Logger) error
+	IncrementBucketValue(ctx context.Context, logger storageData.Logger, key string) error
+	GetBucketValue(ctx context.Context, logger storageData.Logger, key string) (int,error)
+	FlushBStorage(ctx context.Context, logger storageData.Logger) error
 }
 
 func New(logger Logger, storage Storage) *App {
@@ -92,7 +92,7 @@ func (a *App) IsIPInWhiteList(ctx context.Context, IP string) (bool, error) {
 	return ok, err
 }
 
-func (a *App) GetAllIPInWhiteList(ctx context.Context) ([]storageIPData, error) {
+func (a *App) GetAllIPInWhiteList(ctx context.Context) ([]storageData.StorageIPData, error) {
 	whiteList, err := a.storage.GetAllIPInWhiteList(ctx, a.logger)
 	return whiteList, err
 }
@@ -120,7 +120,7 @@ func (a *App) IsIPInBlackList(ctx context.Context, IP string) (bool, error) {
 	return ok, err
 }
 
-func (a *App) GetAllIPInBlackList(ctx context.Context) ([]storageIPData, error) {
+func (a *App) GetAllIPInBlackList(ctx context.Context) ([]storageData.StorageIPData, error) {
 	whiteList, err := a.storage.GetAllIPInBlackList(ctx, a.logger)
 	return whiteList, err
 }

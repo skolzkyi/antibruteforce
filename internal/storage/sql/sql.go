@@ -11,12 +11,12 @@ import (
 	helpers "github.com/skolzkyi/antibruteforce/helpers"
 	storageData  "github.com/skolzkyi/antibruteforce/internal/storage/storageData"
 )
-
+/*
 type storageIPData struct {
 	IP                    string
 	ID                    int
 }
-
+*/
 type Storage struct {
 	DB *sql.DB
 }
@@ -110,7 +110,7 @@ func (s *Storage) IsIPInWhiteList(ctx context.Context,logger storageData.Logger,
 
 	row := s.DB.QueryRowContext(ctx, stmt, IP)
 
-	storagedIP:= &storageIPData{}
+	storagedIP:= &storageData.StorageIPData{}
 
 	err := row.Scan(&storagedIP.ID, &storagedIP.IP)
 	if err != nil {
@@ -123,8 +123,8 @@ func (s *Storage) IsIPInWhiteList(ctx context.Context,logger storageData.Logger,
 	return true,nil
 }
 
-func (s *Storage) GetAllIPInWhiteList(ctx context.Context,logger storageData.Logger) ([]storageIPData,error) {
-	resIP := make([]storageIPData, 0)
+func (s *Storage) GetAllIPInWhiteList(ctx context.Context,logger storageData.Logger) ([]storageData.StorageIPData,error) {
+	resIP := make([]storageData.StorageIPData, 0)
 	
 	stmt := "SELECT id, IP  FROM whitelist" 
 
@@ -136,7 +136,7 @@ func (s *Storage) GetAllIPInWhiteList(ctx context.Context,logger storageData.Log
 
 	defer rows.Close()
 
-	storagedIP:= storageIPData{}
+	storagedIP:= storageData.StorageIPData{}
 
 	for rows.Next() {
 		err = rows.Scan(&storagedIP.ID, &storagedIP.IP)
@@ -146,7 +146,7 @@ func (s *Storage) GetAllIPInWhiteList(ctx context.Context,logger storageData.Log
 		}
 
 		resIP = append(resIP, storagedIP)
-		storagedIP = storageIPData{}
+		storagedIP = storageData.StorageIPData{}
 	}
 
 	if err = rows.Err(); err != nil {
@@ -191,7 +191,7 @@ func (s *Storage) IsIPInBlackList(ctx context.Context,logger storageData.Logger,
 
 	row := s.DB.QueryRowContext(ctx, stmt, IP)
 
-	storagedIP:= &storageIPData{}
+	storagedIP:= &storageData.StorageIPData{}
 
 	err := row.Scan(&storagedIP.ID, &storagedIP.IP)
 	if err != nil {
@@ -204,8 +204,8 @@ func (s *Storage) IsIPInBlackList(ctx context.Context,logger storageData.Logger,
 	return true,nil
 }
 
-func (s *Storage) GetAllIPInBlackList(ctx context.Context,logger storageData.Logger) ([]storageIPData,error) {
-	resIP := make([]storageIPData, 0)
+func (s *Storage) GetAllIPInBlackList(ctx context.Context,logger storageData.Logger) ([]storageData.StorageIPData,error) {
+	resIP := make([]storageData.StorageIPData, 0)
 	
 	stmt := "SELECT id, IP  FROM blacklist" 
 
@@ -217,7 +217,7 @@ func (s *Storage) GetAllIPInBlackList(ctx context.Context,logger storageData.Log
 
 	defer rows.Close()
 
-	storagedIP:= storageIPData{}
+	storagedIP:= storageData.StorageIPData{}
 
 	for rows.Next() {
 		err = rows.Scan(&storagedIP.ID, &storagedIP.IP)
@@ -227,7 +227,7 @@ func (s *Storage) GetAllIPInBlackList(ctx context.Context,logger storageData.Log
 		}
 
 		resIP = append(resIP, storagedIP)
-		storagedIP = storageIPData{}
+		storagedIP = storageData.StorageIPData{}
 	}
 
 	if err = rows.Err(); err != nil {

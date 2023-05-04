@@ -1,0 +1,121 @@
+version: '3.9'
+
+services:
+  calendar:
+    container_name: calendar
+    build:
+      context: ../
+      dockerfile: ./build/Dockerfile
+    env_file:
+    - ../configs/dc/config.env
+    restart: always
+    ports:
+      - "8888:4000"
+      - "5000:5000"
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+    volumes:
+      - "./configs:/app/configs"
+    networks:
+    - ofl_network
+  sheduler:
+    container_name: sheduler
+    build:
+      context: ../
+      dockerfile: ./build/sheduler/Dockerfile
+    env_file:
+    - ../configs/dc/config_sheduler.env
+    restart: always
+    volumes:
+      - "./configs:/app/configs"
+    depends_on:
+       mysql-db:
+        condition: service_healthy
+       kafka:
+        condition: service_started
+       calendar:
+        condition: service_started
+    networks:
+    - ofl_network
+  sender:
+    container_name: sender
+    build:
+      context: ../
+      dockerfile: ./build/sender/Dockerfile
+    env_file:
+    - ../configs/dc/config_sender.env
+    restart: always
+    volumes:
+      - "./configs:/app/configs"
+    depends_on:
+       mysql-db:
+        condition: service_healthy
+       kafka:
+        condition: service_started
+       calendar:
+        condition: service_started
+       sheduler:
+        condition: service_started
+    networks:
+      - ofl_network
+  mysql-db:
+    container_name: mysql-db
+    image: mysql:8
+    restart: always
+    env_file:
+    - ../configs/config.env
+    healthcheck:
+      test: "mysql $$MYSQL_DATABASE -u$$MYSQL_USER -p$$MYSQL_PASSWORD -e 'SELECT 1;'"
+      interval: 20s
+      timeout: 15s
+      retries: 10
+    ports:
+    - "3306:3306"
+    expose:
+    - "3306"
+    volumes:
+    - ../migrations/dc_migration.sql:/docker-entrypoint-initdb.d/dump.sql
+    networks:
+    - ofl_network
+  phpmyadmin:
+    container_name: phpmyadmin
+    image: phpmyadmin
+    restart: always
+    ports:
+      - "9999:80"
+    environment:
+      - PMA_ARBITRARY=1
+      - PMA_HOST=mysql-db
+      - PMA_PORT=3306
+      - PMA_USER=root
+      - PMA_PASSWORD=123456
+    networks:
+    - ofl_network
+  zookeeper:
+    container_name: zookeeper
+    image: wurstmeister/zookeeper:3.4.6
+    ports:
+      - "2181:2181"
+    networks:
+    - ofl_network
+  kafka:
+    container_name:  kafka
+    image: wurstmeister/kafka
+    restart: always
+    env_file:
+    - ../configs/dc/config_sheduler.env
+    depends_on:
+      zookeeper:
+        condition: service_started
+    expose:
+    - "9092"
+    ports:
+    - "9092:9092"
+    networks:
+    - ofl_network
+
+networks:
+  ofl_network:
+    driver: bridge
+  

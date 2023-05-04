@@ -12,7 +12,7 @@ import (
 	//"time"
 
 	helpers "github.com/skolzkyi/antibruteforce/helpers"
-	//storageData "github.com/skolzkyi/antibruteforce/internal/storage/storageData"
+	storageData "github.com/skolzkyi/antibruteforce/internal/storage/storageData"
 )
 /*
 type Request struct {
@@ -21,11 +21,12 @@ type Request struct {
 	IP       string
 }
 */
+/*
 type storageIPData struct {
 	IP                    string
 	ID                    int
 }
-
+*/
 type outputJSON struct {
 	Text string
 	Code int
@@ -41,7 +42,7 @@ type EventRawData struct {
 	ID                    int
 }
 type IPListAnswer struct {
-	IPList  []storageIPData
+	IPList  []storageData.StorageIPData
 	Message outputJSON
 }
 
@@ -182,7 +183,7 @@ func (s *Server) WhiteList_REST(w http.ResponseWriter, r *http.Request) { //noli
 				newMessage.Text = "OK!"
 				newMessage.Code = 0
 			}
-			IPListAnsw.IPList = make([]storageIPData, len(IPList))
+			IPListAnsw.IPList = make([]storageData.StorageIPData, len(IPList))
 			IPListAnsw.IPList = IPList
 			IPListAnsw.Message = newMessage
 			jsonstring, err := json.Marshal(IPListAnsw)
@@ -213,7 +214,7 @@ func (s *Server) WhiteList_REST(w http.ResponseWriter, r *http.Request) { //noli
 			}
 			newMessage.Code = 0
 		}
-		IPListAnsw.IPList = make([]storageIPData, 0)
+		IPListAnsw.IPList = make([]storageData.StorageIPData, 0)
 		IPListAnsw.Message = newMessage
 		jsonstring, err := json.Marshal(IPListAnsw)
 		if err != nil {
@@ -340,7 +341,7 @@ func (s *Server) BlackList_REST(w http.ResponseWriter, r *http.Request) { //noli
 				newMessage.Text = "OK!"
 				newMessage.Code = 0
 			}
-			IPListAnsw.IPList = make([]storageIPData, len(IPList))
+			IPListAnsw.IPList = make([]storageData.StorageIPData, len(IPList))
 			IPListAnsw.IPList = IPList
 			IPListAnsw.Message = newMessage
 			jsonstring, err := json.Marshal(IPListAnsw)
@@ -371,7 +372,7 @@ func (s *Server) BlackList_REST(w http.ResponseWriter, r *http.Request) { //noli
 			}
 			newMessage.Code = 0
 		}
-		IPListAnsw.IPList = make([]storageIPData, 0)
+		IPListAnsw.IPList = make([]storageData.StorageIPData, 0)
 		IPListAnsw.Message = newMessage
 		jsonstring, err := json.Marshal(IPListAnsw)
 		if err != nil {

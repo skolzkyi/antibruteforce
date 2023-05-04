@@ -1,0 +1,26 @@
+version: '3.9'
+
+services:
+  integration_tests:
+    container_name: integration_tests
+    build:
+      context: ../
+      dockerfile: ./build/integrationTests/Dockerfile
+    env_file:
+    - ../configs/dc/config.env
+    depends_on:
+       mysql-db:
+        condition: service_healthy
+       kafka:
+        condition: service_started
+       calendar:
+        condition: service_started
+       sheduler:
+        condition: service_started
+       sender:
+        condition: service_started
+    volumes:
+      - "./configs:/app/configs"
+    networks:
+    - ofl_network
+  

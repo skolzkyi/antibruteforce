@@ -54,11 +54,11 @@ type Application interface {
 	AddIPToWhiteList(ctx context.Context, IP string) (int, error)
 	RemoveIPInWhiteList(ctx context.Context, IP string) error
 	IsIPInWhiteList(ctx context.Context, IP string) (bool, error)
-	GetAllIPInWhiteList(ctx context.Context) ([]storageIPData, error)
+	GetAllIPInWhiteList(ctx context.Context) ([]storageData.StorageIPData, error)
 	AddIPToBlackList(ctx context.Context, IP string) (int, error)
 	RemoveIPInBlackList(ctx context.Context, IP string) error
 	IsIPInBlackList(ctx context.Context, IP string) (bool, error)
-	GetAllIPInBlackList(ctx context.Context) ([]storageIPData, error)
+	GetAllIPInBlackList(ctx context.Context) ([]storageData.StorageIPData, error)
 }
 
 func NewServer(logger Logger, app Application, config Config) *Server {

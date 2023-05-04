@@ -1,0 +1,58 @@
+version: '3.9'
+
+services:
+  antibruteforce:
+    container_name: antibruteforce
+    build:
+      context: ../
+      dockerfile: ./build/Dockerfile
+    env_file:
+    - ../configs/dc/config.env
+    restart: always
+    ports:
+      - "8888:4000"
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+    volumes:
+      - "./configs:/app/configs"
+    networks:
+    - ab_network
+  mysql-db:
+    container_name: mysql-db
+    image: mysql:8
+    restart: always
+    env_file:
+    - ../configs/dc/config.env
+    healthcheck:
+      test: "mysql $$MYSQL_DATABASE -u$$MYSQL_USER -p$$MYSQL_PASSWORD -e 'SELECT 1;'"
+      interval: 20s
+      timeout: 15s
+      retries: 10
+    ports:
+    - "3306:3306"
+    expose:
+    - "3306"
+    volumes:
+    - ../migrations/dc_migration.sql:/docker-entrypoint-initdb.d/dump.sql
+    networks:
+    - ab_network
+  phpmyadmin:
+    container_name: phpmyadmin
+    image: phpmyadmin
+    restart: always
+    ports:
+      - "9999:80"
+    environment:
+      - PMA_ARBITRARY=1
+      - PMA_HOST=mysql-db
+      - PMA_PORT=3306
+      - PMA_USER=root
+      - PMA_PASSWORD=123456
+    networks:
+    - ab_network
+
+networks:
+  ab_network:
+    driver: bridge
+  

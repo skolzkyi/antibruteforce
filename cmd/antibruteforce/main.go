@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	//"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	//nolint:gci,gofmt,gofumpt,nolintlint
@@ -27,6 +28,7 @@ func init() {
 }
 
 func main() {
+	//time.Sleep(30*time.Second)
 	flag.Parse()
 
 	if flag.Arg(0) == "version" {

@@ -51,13 +51,13 @@ type Logger interface {
 type Application interface {
 	InitStorage(ctx context.Context, config storageData.Config) error
 	CloseStorage(ctx context.Context) error
-	AddIPToWhiteList(ctx context.Context, IP string) (int, error)
-	RemoveIPInWhiteList(ctx context.Context, IP string) error
-	IsIPInWhiteList(ctx context.Context, IP string) (bool, error)
+	AddIPToWhiteList(ctx context.Context, IPData storageData.StorageIPData) (int, error)
+	RemoveIPInWhiteList(ctx context.Context, IPData storageData.StorageIPData) error
+	IsIPInWhiteList(ctx context.Context, IPData storageData.StorageIPData) (bool, error)
 	GetAllIPInWhiteList(ctx context.Context) ([]storageData.StorageIPData, error)
-	AddIPToBlackList(ctx context.Context, IP string) (int, error)
-	RemoveIPInBlackList(ctx context.Context, IP string) error
-	IsIPInBlackList(ctx context.Context, IP string) (bool, error)
+	AddIPToBlackList(ctx context.Context, IPData storageData.StorageIPData) (int, error)
+	RemoveIPInBlackList(ctx context.Context, IPData storageData.StorageIPData) error
+	IsIPInBlackList(ctx context.Context, IPData storageData.StorageIPData) (bool, error)
 	GetAllIPInBlackList(ctx context.Context) ([]storageData.StorageIPData, error)
 }
 
@@ -76,7 +76,7 @@ func NewServer(logger Logger, app Application, config Config) *Server {
 }
 
 func (s *Server) Start(ctx context.Context) error {
-	s.logg.Info("calendar is running...")
+	s.logg.Info("antibruteforce is running...")
 	err := s.serv.ListenAndServe()
 	if err != nil {
 		if !errors.Is(err, http.ErrServerClosed) {

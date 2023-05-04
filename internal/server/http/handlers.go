@@ -86,7 +86,7 @@ func (s *Server) AuthorizationRequest(w http.ResponseWriter, r *http.Request) {
 	//defer cancel()
 	switch r.Method {
 	case http.MethodGet:
-		newRequest:=RequestAuth{}
+		newRequest:=storageData.RequestAuth{}
 		//newMessage := outputJSON{}
 
 		body, err := io.ReadAll(r.Body)
@@ -169,11 +169,25 @@ func (s *Server) WhiteList_REST(w http.ResponseWriter, r *http.Request) { //noli
 	switch r.Method {
 	case http.MethodGet:
 		fmt.Println("Get")
-		newMessage := outputJSON{}
+		
 		IPListAnsw := IPListAnswer{}
-		path := strings.Trim(r.URL.Path, "/")
-		pathParts := strings.Split(path, "/")
-		if len(pathParts) < 2 {
+		newData:=storageData.StorageIPData{}
+		newMessage := outputJSON{}
+
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			apiErrHandler(err, &w)
+			return
+		}
+
+		err = json.Unmarshal(body, &newData)
+		if err != nil {
+			apiErrHandler(err, &w)
+			return
+		}
+		
+		fmt.Println("newData: ", newData)
+		if newData.IP=="ALL" {
 			IPList,errInner:=s.app.GetAllIPInWhiteList(ctx)
 			if errInner != nil {
 				newMessage.Text = errInner.Error()
@@ -198,10 +212,8 @@ func (s *Server) WhiteList_REST(w http.ResponseWriter, r *http.Request) { //noli
 			}
 			return
 		}
-		IP:=pathParts[1]
-		
-		fmt.Println("IP: ", IP)
-		ok, errInner := s.app.IsIPInWhiteList(ctx, IP)
+
+		ok, errInner := s.app.IsIPInWhiteList(ctx, newData)
 		if errInner != nil {
 			newMessage.Text = errInner.Error()
 			newMessage.Code = 1
@@ -234,7 +246,7 @@ func (s *Server) WhiteList_REST(w http.ResponseWriter, r *http.Request) { //noli
 
 		fmt.Println("Post")
 
-		newIP:=""
+		newData:=storageData.StorageIPData{}
 		newMessage := outputJSON{}
 
 		body, err := io.ReadAll(r.Body)
@@ -243,15 +255,15 @@ func (s *Server) WhiteList_REST(w http.ResponseWriter, r *http.Request) { //noli
 			return
 		}
 
-		err = json.Unmarshal(body, &newIP)
+		err = json.Unmarshal(body, &newData)
 		if err != nil {
 			apiErrHandler(err, &w)
 			return
 		}
 
-		fmt.Println("newIP: ", newIP)
+		fmt.Println("newData: ", newData)
 
-		id, errInner := s.app.AddIPToWhiteList(ctx, newIP) 
+		id, errInner := s.app.AddIPToWhiteList(ctx, newData) 
 		if errInner != nil {
 			newMessage.Text = errInner.Error()
 			newMessage.Code = 1
@@ -278,18 +290,24 @@ func (s *Server) WhiteList_REST(w http.ResponseWriter, r *http.Request) { //noli
 	case http.MethodDelete:
 
 		fmt.Println("Delete")
+		removeData:=storageData.StorageIPData{}
 		newMessage := outputJSON{}
 
-		path := strings.Trim(r.URL.Path, "/")
-		pathParts := strings.Split(path, "/")
-		if len(pathParts) < 2 {
-			apiErrHandler(ErrNoIDInIPHandler, &w)
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			apiErrHandler(err, &w)
 			return
 		}
 
-		IP:=pathParts[1]
+		err = json.Unmarshal(body, &removeData)
+		if err != nil {
+			apiErrHandler(err, &w)
+			return
+		}
+
+		fmt.Println("removeData: ", removeData)
 		
-		errInner := s.app.RemoveIPInWhiteList(ctx, IP)
+		errInner := s.app.RemoveIPInWhiteList(ctx, removeData)
 		if errInner != nil {
 			newMessage.Text = errInner.Error()
 			newMessage.Code = 1
@@ -327,11 +345,25 @@ func (s *Server) BlackList_REST(w http.ResponseWriter, r *http.Request) { //noli
 	switch r.Method {
 	case http.MethodGet:
 		fmt.Println("Get")
-		newMessage := outputJSON{}
+		
 		IPListAnsw := IPListAnswer{}
-		path := strings.Trim(r.URL.Path, "/")
-		pathParts := strings.Split(path, "/")
-		if len(pathParts) < 2 {
+		newData:=storageData.StorageIPData{}
+		newMessage := outputJSON{}
+
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			apiErrHandler(err, &w)
+			return
+		}
+
+		err = json.Unmarshal(body, &newData)
+		if err != nil {
+			apiErrHandler(err, &w)
+			return
+		}
+		
+		fmt.Println("newData: ", newData)
+		if newData.IP=="ALL" {
 			IPList,errInner:=s.app.GetAllIPInBlackList(ctx)
 			if errInner != nil {
 				newMessage.Text = errInner.Error()
@@ -356,10 +388,8 @@ func (s *Server) BlackList_REST(w http.ResponseWriter, r *http.Request) { //noli
 			}
 			return
 		}
-		IP:=pathParts[1]
-		
-		fmt.Println("IP: ", IP)
-		ok, errInner := s.app.IsIPInBlackList(ctx, IP)
+
+		ok, errInner := s.app.IsIPInBlackList(ctx, newData)
 		if errInner != nil {
 			newMessage.Text = errInner.Error()
 			newMessage.Code = 1
@@ -392,7 +422,7 @@ func (s *Server) BlackList_REST(w http.ResponseWriter, r *http.Request) { //noli
 
 		fmt.Println("Post")
 
-		newIP:=""
+		newData:=storageData.StorageIPData{}
 		newMessage := outputJSON{}
 
 		body, err := io.ReadAll(r.Body)
@@ -401,15 +431,15 @@ func (s *Server) BlackList_REST(w http.ResponseWriter, r *http.Request) { //noli
 			return
 		}
 
-		err = json.Unmarshal(body, &newIP)
+		err = json.Unmarshal(body, &newData)
 		if err != nil {
 			apiErrHandler(err, &w)
 			return
 		}
 
-		fmt.Println("newIP: ", newIP)
+		fmt.Println("newData: ", newData)
 
-		id, errInner := s.app.AddIPToBlackList(ctx, newIP) 
+		id, errInner := s.app.AddIPToBlackList(ctx, newData) 
 		if errInner != nil {
 			newMessage.Text = errInner.Error()
 			newMessage.Code = 1
@@ -436,18 +466,24 @@ func (s *Server) BlackList_REST(w http.ResponseWriter, r *http.Request) { //noli
 	case http.MethodDelete:
 
 		fmt.Println("Delete")
+		removeData:=storageData.StorageIPData{}
 		newMessage := outputJSON{}
 
-		path := strings.Trim(r.URL.Path, "/")
-		pathParts := strings.Split(path, "/")
-		if len(pathParts) < 2 {
-			apiErrHandler(ErrNoIDInIPHandler, &w)
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			apiErrHandler(err, &w)
 			return
 		}
 
-		IP:=pathParts[1]
+		err = json.Unmarshal(body, &removeData)
+		if err != nil {
+			apiErrHandler(err, &w)
+			return
+		}
+
+		fmt.Println("removeData: ", removeData)
 		
-		errInner := s.app.RemoveIPInBlackList(ctx, IP)
+		errInner := s.app.RemoveIPInBlackList(ctx, removeData)
 		if errInner != nil {
 			newMessage.Text = errInner.Error()
 			newMessage.Code = 1

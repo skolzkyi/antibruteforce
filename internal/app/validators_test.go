@@ -1,7 +1,7 @@
 //go:build !integration
 // +build !integration
 
-package internalhttp
+package app
 
 import (
 	"errors"

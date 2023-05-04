@@ -95,12 +95,12 @@ func (config *Config) Init(path string) error {
 	config.dbAddress = viper.GetString("DB_ADDRESS")
 	config.dbPort = viper.GetString("DB_PORT")
 
-	config.address = viper.GetString("REDIS_ADDRESS")
-	config.port = viper.GetString("REDIS_PORT")
+	config.redisAddress = viper.GetString("REDIS_ADDRESS")
+	config.redisPort = viper.GetString("REDIS_PORT")
 	config.limitTimeCheck = viper.GetDuration("LIMIT_TIMECHECK")
-	config.address = viper.GetString("LIMITFACTOR_LOGIN")
-	config.port = viper.GetString("LIMITFACTOR_PASSWORD")
-	config.address = viper.GetString("LIMITFACTOR_IP")
+	config.limitFactorLogin = viper.GetString("LIMITFACTOR_LOGIN")
+	config.limitFactorPassword = viper.GetString("LIMITFACTOR_PASSWORD")
+	config.limitFactorIP = viper.GetString("LIMITFACTOR_IP")
 
 	return nil
 }

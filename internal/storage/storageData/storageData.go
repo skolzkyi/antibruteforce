@@ -47,10 +47,23 @@ type Logger interface {
 
 type StorageIPData struct {
 	IP                    string
+	Mask 				  int
 	ID                    int
 }
 
 func (ip *StorageIPData) String() string {
 	res := helpers.StringBuild("[ID: ", strconv.Itoa(ip.ID), ", IP: ", ip.IP, "]") 
+	return res
+}
+
+
+type RequestAuth struct {
+	Login    string
+	Password string
+	IP       string
+}
+
+func (r *RequestAuth) String() string {
+	res := helpers.StringBuild("[Login: ", r.Login," Password: ",r.Password, ", IP: ", r.IP, "]") 
 	return res
 }

@@ -19,6 +19,7 @@ import (
 	internalhttp "github.com/skolzkyi/antibruteforce/internal/server/http"
 	
 	SQLstorage "github.com/skolzkyi/antibruteforce/internal/storage/sql"
+	//storageSQLMock "github.com/skolzkyi/antibruteforce/internal/storage/storageSQLMock"
 )
 
 var configFilePath string
@@ -49,13 +50,22 @@ func main() {
 	log.Info("servAddr: " + config.GetAddress())
 	var storage app.Storage
 	ctxStor, cancelStore := context.WithTimeout(context.Background(), config.GetDBTimeOut())
+	
 	storage = SQLstorage.New()
 	err = storage.Init(ctxStor, log, &config)
 	if err != nil {
 		cancelStore()
 		log.Fatal("fatal error of inintialization SQL storage: " + err.Error())
 	}
-
+    
+    /*
+	storage = storageSQLMock.New()
+	err = storage.Init(ctxStor, log, &config)
+	if err != nil {
+		cancelStore()
+		log.Fatal("fatal error of inintialization SQL Mock storage: " + err.Error())
+	}
+	*/
 	//TODO init redis
 	
 	calendar := app.New(log, storage)

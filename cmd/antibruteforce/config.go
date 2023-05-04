@@ -26,9 +26,9 @@ type Config struct {
 	dbName                string `mapstructure:"MYSQL_DATABASE"`
 	dbUser                string `mapstructure:"MYSQL_USER"`
 	dbPassword            string `mapstructure:"MYSQL_PASSWORD"`
-	limitFactorLogin 	  string `mapstructure:"LIMITFACTOR_LOGIN"`
-	limitFactorPassword   string `mapstructure:"LIMITFACTOR_PASSWORD"`
-	limitFactorIP 	      string `mapstructure:"LIMITFACTOR_IP"`
+	limitFactorLogin 	  int 	 `mapstructure:"LIMITFACTOR_LOGIN"`
+	limitFactorPassword   int    `mapstructure:"LIMITFACTOR_PASSWORD"`
+	limitFactorIP 	      int    `mapstructure:"LIMITFACTOR_IP"`
 	dbMaxOpenConns        int    `mapstructure:"DB_MAX_OPEN_CONNS"`
 	dbMaxIdleConns        int    `mapstructure:"DB_MAX_IDLE_CONNS"`
 	
@@ -98,9 +98,9 @@ func (config *Config) Init(path string) error {
 	config.redisAddress = viper.GetString("REDIS_ADDRESS")
 	config.redisPort = viper.GetString("REDIS_PORT")
 	config.limitTimeCheck = viper.GetDuration("LIMIT_TIMECHECK")
-	config.limitFactorLogin = viper.GetString("LIMITFACTOR_LOGIN")
-	config.limitFactorPassword = viper.GetString("LIMITFACTOR_PASSWORD")
-	config.limitFactorIP = viper.GetString("LIMITFACTOR_IP")
+	config.limitFactorLogin = viper.GetInt("LIMITFACTOR_LOGIN")
+	config.limitFactorPassword = viper.GetInt("LIMITFACTOR_PASSWORD")
+	config.limitFactorIP = viper.GetInt("LIMITFACTOR_IP")
 
 	return nil
 }
@@ -165,15 +165,15 @@ func (config *Config) GetRedisPort() string {
 	return config.redisPort
 }
 
-func (config *Config) GetLimitFactorLogin() string {
+func (config *Config) GetLimitFactorLogin() int {
 	return config.limitFactorLogin 
 }
 
-func (config *Config) GetLimitFactorPassword() string{
+func (config *Config) GetLimitFactorPassword() int {
 	return config.limitFactorPassword
 }
 
-func (config *Config) GetLimitFactorIP() string {
+func (config *Config) GetLimitFactorIP() int {
 	return config.limitFactorIP
 }
 

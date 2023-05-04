@@ -35,7 +35,7 @@ func SimpleIPDataValidator(IPData storageData.StorageIPData, isAllRequest bool) 
 	switch {
 	case IPData.IP == "":
 		return  ErrVoidIP
-	case IPData.Mask == 0 && IPData.IP != "ALL" && isAllRequest:
+	case IPData.Mask == 0 && IPData.IP != "ALL" && !isAllRequest:
 		return ErrVoidMask 
 	default:
 	}

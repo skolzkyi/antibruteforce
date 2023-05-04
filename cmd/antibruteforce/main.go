@@ -68,9 +68,9 @@ func main() {
 	*/
 	//TODO init redis
 	
-	calendar := app.New(log, storage)
+	antibruteforce := app.New(log, storage)
 
-	server := internalhttp.NewServer(log, calendar, &config)
+	server := internalhttp.NewServer(log, antibruteforce, &config)
 
 	ctx, cancel := signal.NotifyContext(context.Background(),
 		syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)

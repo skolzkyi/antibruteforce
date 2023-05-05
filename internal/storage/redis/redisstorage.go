@@ -2,12 +2,13 @@ package redisclient
 
 import (
     "context"
-    "github.com/redis/go-redis/v9"
+    redis "github.com/redis/go-redis/v9"
+    storageData  "github.com/skolzkyi/antibruteforce/internal/storage/storageData"
     //"fmt"
 )
 
-type RedisStorage type {
-	rdb *Client
+type RedisStorage struct {
+	rdb *redis.Client
 }
 
 
@@ -21,7 +22,7 @@ func(rs *RedisStorage)Init(ctx context.Context, logger storageData.Logger, confi
         Password: "", // no password set
         DB:       0,  // use default DB
     })
-    _, err := client.Ping().Result()
+    _, err := rs.rdb.Ping(ctx).Result()
     if err != nil {
 		logger.Error("Redis DB ping error: " + err.Error())
 		return err
@@ -34,8 +35,8 @@ func(rs *RedisStorage)Close(ctx context.Context, logger storageData.Logger) erro
 
 }
 */
-func(rs *RedisStorage)IncrementAndGetBucketValue(ctx context.Context, logger storageData.Logger, key string)(int, error) {
-    result, err := rdb.Incr(ctx, key).Int()
+func(rs *RedisStorage)IncrementAndGetBucketValue(ctx context.Context, logger storageData.Logger, key string)(int64, error) {
+    result, err := rs.rdb.Incr(ctx, key).Result()
 	if err != nil {
 		logger.Error("Redis DB IncrementAndGetBucketValue error: " + err.Error())
 		return 0,err
@@ -49,4 +50,5 @@ func(rs *RedisStorage)GetBucketValue(ctx context.Context, logger storageData.Log
 */	
 func(rs *RedisStorage)FlushStorage(ctx context.Context, _ storageData.Logger) error {
 	rs.rdb.FlushDB(ctx)
+    return nil
 }

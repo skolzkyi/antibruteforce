@@ -9,7 +9,7 @@ import (
 	"net/http"
 	//"strconv"
 	"strings"
-	//"time"
+	"time"
 
 	helpers "github.com/skolzkyi/antibruteforce/helpers"
 	storageData "github.com/skolzkyi/antibruteforce/internal/storage/storageData"
@@ -74,9 +74,9 @@ func (s *Server) helloWorld(w http.ResponseWriter, _ *http.Request) {
 
 func (s *Server) AuthorizationRequest(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-
-	//ctx, cancel := context.WithTimeout(r.Context(), s.Config.GetDBTimeOut())
-	//defer cancel()
+	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+	defer cancel()
+	
 	switch r.Method {
 	case http.MethodGet:
 		newRequest:=storageData.RequestAuth{}

@@ -9,7 +9,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	//"time"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	//nolint:gci,gofmt,gofumpt,nolintlint
@@ -19,7 +19,7 @@ import (
 	internalhttp "github.com/skolzkyi/antibruteforce/internal/server/http"
 	
 	SQLstorage "github.com/skolzkyi/antibruteforce/internal/storage/sql"
-	RedisStorage "github.com/skolzkyi/antibruteforce/internal/storage/redisstorage"
+	RedisStorage "github.com/skolzkyi/antibruteforce/internal/storage/redis"
 	//storageSQLMock "github.com/skolzkyi/antibruteforce/internal/storage/storageSQLMock"
 )
 
@@ -58,7 +58,7 @@ func main() {
 		cancelStore()
 		log.Fatal("fatal error of inintialization SQL storage: " + err.Error())
 	}
-	redis = RedisStorage.New()
+	redis := RedisStorage.New()
 	err = redis.Init(ctxStor, log, &config)
 	if err != nil {
 		cancelStore()

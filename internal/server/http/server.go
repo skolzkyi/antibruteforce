@@ -59,6 +59,9 @@ type Application interface {
 	RemoveIPInBlackList(ctx context.Context, IPData storageData.StorageIPData) error
 	IsIPInBlackList(ctx context.Context, IPData storageData.StorageIPData) (bool, error)
 	GetAllIPInBlackList(ctx context.Context) ([]storageData.StorageIPData, error)
+	InitBStorageAndLimits(ctx context.Context, config storageData.Config) error
+	CloseBStorage(ctx context.Context) error 
+	CheckInputRequest(ctx context.Context, req storageData.RequestAuth) (bool,string,error)
 }
 
 func NewServer(logger Logger, app Application, config Config) *Server {

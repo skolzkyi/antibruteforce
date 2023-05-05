@@ -25,7 +25,7 @@ func SimpleRequestValidator(login string, password string, IP string) (storageDa
 	err:=checkIP(IP,1,254)
 	switch {
 	case err !=nil:
-		return err
+		return storageData.RequestAuth{}, err
 	case request.Login == "":
 		return storageData.RequestAuth{}, ErrVoidLogin 
 	case request.Password == "":

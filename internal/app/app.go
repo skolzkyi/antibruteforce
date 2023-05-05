@@ -124,10 +124,10 @@ func (a *App) CheckInputRequest(ctx context.Context, req storageData.RequestAuth
 	if err != nil {
 		message := helpers.StringBuild("CheckInputRequest IncrementAndGetBucketValue - IP error: ", err.Error(),", key: ",req.IP)
 		a.logger.Error(message)
-		return false,"rate limit by IP",err
+		return false,"",err
 	}
 	if countIP > int64(a.limitFactorIP)  {
-		return false,"",nil
+		return false,"rate limit by IP",nil
 	}
 	fmt.Println("countIP: ",strconv.Itoa(int(countIP))," a.limitFactorIP: ",a.limitFactorIP)
 	return true,"clear check",nil

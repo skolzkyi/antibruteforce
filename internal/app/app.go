@@ -3,7 +3,7 @@ package app
 import (
 	"context"
 	"strconv"
-	//"time"
+	"time"
 	"go.uber.org/zap"
 	"errors"
 	"net"
@@ -23,6 +23,8 @@ type App struct {
 	logger 		  		Logger
 	storage       		Storage
 	bucketStorage 		BStorage
+	ticker              *time.Ticker
+	periodic            time.Duration
 	limitFactorLogin 	int
 	limitFactorPassword int
 	limitFactorIP 		int
@@ -65,17 +67,15 @@ func New(logger Logger, storage Storage, bStorage BStorage, config storageData.C
 		limitFactorLogin: config.GetLimitFactorLogin(),
 		limitFactorPassword: config.GetLimitFactorPassword(),
 		limitFactorIP: config.GetLimitFactorIP(),
+		periodic: config.GetLimitTimeCheck(),
 	}
 	return &app
 }
-/*
+
 func (a *App) InitBStorageAndLimits(ctx context.Context, config storageData.Config) error {
-	a.limitFactorLogin = config.GetLimitFactorLogin()
-	a.limitFactorPassword = config.GetLimitFactorPassword()
-	a.limitFactorIP = config.GetLimitFactorIP()
 	return a.bucketStorage.Init(ctx, a.logger, config)
 }
-*/
+
 func (a *App) CloseBStorage(ctx context.Context) error {
 	return a.bucketStorage.FlushStorage(ctx, a.logger)
 }
@@ -130,6 +130,23 @@ func (a *App) CheckInputRequest(ctx context.Context, req storageData.RequestAuth
 	}
 	fmt.Println("countIP: ",strconv.Itoa(int(countIP))," a.limitFactorIP: ",a.limitFactorIP)
 	return true,"clear check",nil
+}
+
+func (a *App)RLTicker(ctx context.Context) {
+	a.logger.Info("ticker start")
+	a.ticker = time.NewTicker(a.periodic)
+	go func() {
+		for {
+			select {
+				case <-ctx.Done():
+					a.logger.Info("ticker stop")
+					break
+				case <-a.ticker.C:
+					a.bucketStorage.FlushStorage(ctx, a.logger)
+					a.logger.Info("buckets flush")
+			}
+		}
+	}()
 }
 
 func (a *App) InitStorage(ctx context.Context, config storageData.Config) error {

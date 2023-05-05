@@ -59,9 +59,10 @@ type Application interface {
 	RemoveIPInBlackList(ctx context.Context, IPData storageData.StorageIPData) error
 	IsIPInBlackList(ctx context.Context, IPData storageData.StorageIPData) (bool, error)
 	GetAllIPInBlackList(ctx context.Context) ([]storageData.StorageIPData, error)
-	//InitBStorageAndLimits(ctx context.Context, config storageData.Config) error
+	InitBStorageAndLimits(ctx context.Context, config storageData.Config) error
 	CloseBStorage(ctx context.Context) error 
 	CheckInputRequest(ctx context.Context, req storageData.RequestAuth) (bool,string,error)
+	RLTicker(ctx context.Context) 
 }
 
 func NewServer(logger Logger, app Application, config Config) *Server {
@@ -80,6 +81,7 @@ func NewServer(logger Logger, app Application, config Config) *Server {
 
 func (s *Server) Start(ctx context.Context) error {
 	s.logg.Info("antibruteforce is running...")
+	s.app.RLTicker(ctx)
 	err := s.serv.ListenAndServe()
 	if err != nil {
 		if !errors.Is(err, http.ErrServerClosed) {

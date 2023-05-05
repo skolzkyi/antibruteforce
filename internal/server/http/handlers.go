@@ -80,8 +80,7 @@ func (s *Server) AuthorizationRequest(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 		newRequest:=storageData.RequestAuth{}
-		//newMessage := outputJSON{}
-
+		
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			apiErrHandler(err, &w)

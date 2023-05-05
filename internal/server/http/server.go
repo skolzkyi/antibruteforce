@@ -63,6 +63,8 @@ type Application interface {
 	CloseBStorage(ctx context.Context) error 
 	CheckInputRequest(ctx context.Context, req storageData.RequestAuth) (bool,string,error)
 	RLTicker(ctx context.Context) 
+	ClearBucketByLogin(ctx context.Context, login string)error
+	ClearBucketByIP(ctx context.Context, IP string)error
 }
 
 func NewServer(logger Logger, app Application, config Config) *Server {

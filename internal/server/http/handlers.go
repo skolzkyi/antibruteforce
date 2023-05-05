@@ -80,7 +80,7 @@ func (s *Server) AuthorizationRequest(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 		newRequest:=storageData.RequestAuth{}
-		
+
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			apiErrHandler(err, &w)
@@ -126,11 +126,11 @@ func (s *Server) AuthorizationRequest(w http.ResponseWriter, r *http.Request) {
 func (s *Server) ClearBucketByLogin(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
-	//ctx, cancel := context.WithTimeout(r.Context(), s.Config.GetDBTimeOut())
-	//defer cancel()
+	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+	defer cancel()
 	switch r.Method {
 	case http.MethodDelete:
-		//newMessage := outputJSON{}
+		newMessage := outputJSON{}
 
 		path := strings.Trim(r.URL.Path, "/")
 		pathParts := strings.Split(path, "/")
@@ -142,7 +142,29 @@ func (s *Server) ClearBucketByLogin(w http.ResponseWriter, r *http.Request) {
 		Login:=pathParts[1]
 
 		fmt.Println("ClearBucketByLogin Login: ", Login)
+		err:=s.app.ClearBucketByLogin(ctx,Login)
+		if err != nil {
+			newMessage.Text = err.Error()
+			newMessage.Code = 1
+			w.Header().Add("ErrCustom",err.Error())
+		} else {
+			newMessage.Text = "OK!"
+			newMessage.Code = 0
+		}
 
+		jsonstring, err := json.Marshal(newMessage)
+		if err != nil {
+			apiErrHandler(err, &w)
+			return
+		}
+
+		_, err = w.Write(jsonstring)
+		if err != nil {
+			apiErrHandler(err, &w)
+			return
+		}
+
+		return
 	default:
 		apiErrHandler(ErrUnsupportedMethod, &w)
 		return
@@ -152,11 +174,11 @@ func (s *Server) ClearBucketByLogin(w http.ResponseWriter, r *http.Request) {
 func (s *Server) ClearBucketByIP(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
-	//ctx, cancel := context.WithTimeout(r.Context(), s.Config.GetDBTimeOut())
-	//defer cancel()
+	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+	defer cancel()
 	switch r.Method {
 	case http.MethodDelete:
-		//newMessage := outputJSON{}
+		newMessage := outputJSON{}
 
 		path := strings.Trim(r.URL.Path, "/")
 		pathParts := strings.Split(path, "/")
@@ -168,7 +190,29 @@ func (s *Server) ClearBucketByIP(w http.ResponseWriter, r *http.Request) {
 		IP:=pathParts[1]
 
 		fmt.Println(" ClearBucketByIP IP: ", IP)
+		err:=s.app.ClearBucketByIP(ctx,IP)
+		if err != nil {
+			newMessage.Text = err.Error()
+			newMessage.Code = 1
+			w.Header().Add("ErrCustom",err.Error())
+		} else {
+			newMessage.Text = "OK!"
+			newMessage.Code = 0
+		}
 
+		jsonstring, err := json.Marshal(newMessage)
+		if err != nil {
+			apiErrHandler(err, &w)
+			return
+		}
+
+		_, err = w.Write(jsonstring)
+		if err != nil {
+			apiErrHandler(err, &w)
+			return
+		}
+
+		return
 	default:
 		apiErrHandler(ErrUnsupportedMethod, &w)
 		return

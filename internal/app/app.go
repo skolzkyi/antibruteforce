@@ -53,6 +53,7 @@ type Storage interface {
 
 type BStorage interface {
 	Init(ctx context.Context, logger storageData.Logger, config storageData.Config) error
+	SetBucketValue(ctx context.Context, logger storageData.Logger, key string, value int) error
 	//Close(ctx context.Context, logger storageData.Logger) error
 	IncrementAndGetBucketValue(ctx context.Context, logger storageData.Logger, key string)(int64, error)
 	//GetBucketValue(ctx context.Context, logger storageData.Logger, key string, valueType string) (int,error)
@@ -147,6 +148,28 @@ func (a *App)RLTicker(ctx context.Context) {
 			}
 		}
 	}()
+}
+
+func (a *App) ClearBucketByLogin(ctx context.Context, login string)error{
+	err:=a.bucketStorage.SetBucketValue(ctx,a.logger,login,0)
+	if err != nil {
+		message := helpers.StringBuild("ClearBucketByLogin error", err.Error()," Login: ",login)
+		a.logger.Error(message)
+		return err
+	}
+	a.logger.Info(" login bucket clear, login: "+login)
+    return nil
+}
+
+func (a *App) ClearBucketByIP(ctx context.Context, IP string)error{
+	err:=a.bucketStorage.SetBucketValue(ctx,a.logger,IP,0)
+    if err != nil {
+		message := helpers.StringBuild("ClearBucketByIP error", err.Error()," IP: ",IP)
+		a.logger.Error(message)
+		return err
+	}
+	a.logger.Info(" IP bucket clear, IP: "+IP)
+    return nil
 }
 
 func (a *App) InitStorage(ctx context.Context, config storageData.Config) error {

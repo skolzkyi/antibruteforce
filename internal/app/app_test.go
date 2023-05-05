@@ -173,9 +173,41 @@ func TestSimpleIPDataValidator(t *testing.T) {
 			Mask: 0,
 		}
 		err := SimpleIPDataValidator(testData,false) 
-		require.Truef(t, errors.Is(err, ErrVoidIP), "actual error %q", err)
+		require.Truef(t, errors.Is(err, ErrVoidMask), "actual error %q", err)
 	})
 }
+
+func TestAppNegativeAddIPCrossAdding(t *testing.T) {
+	app := initAppWithMocks(t)
+	config:=ConfigTest{}
+	err:=app.InitStorage(context.Background(),&config)
+	require.NoError(t, err)
+	defer app.CloseStorage(context.Background())
+	newData:=storageData.StorageIPData{
+		IP:   "192.168.0.0",
+		Mask: 25,
+	}
+	_, err = app.AddIPToWhiteList(context.Background(), newData)
+	require.NoError(t, err) 
+	ok, err := app.IsIPInWhiteList(context.Background(), newData)
+	require.NoError(t, err) 
+	require.Truef(t, ok == true, "IP not in whitelist", ok)
+	_, err = app.AddIPToBlackList(context.Background(), newData)
+	require.Truef(t, errors.Is(err, ErrIPDataExistInWL), "actual error %q", err)
+	newData =storageData.StorageIPData{
+		IP:   "10.0.0.0",
+		Mask: 8,
+	}
+	_, err = app.AddIPToBlackList(context.Background(), newData)
+	require.NoError(t, err) 
+	ok, err = app.IsIPInBlackList(context.Background(), newData)
+	require.NoError(t, err) 
+	require.Truef(t, ok == true, "IP not in blacklist", ok)
+	_, err = app.AddIPToWhiteList(context.Background(), newData)
+	require.Truef(t, errors.Is(err, ErrIPDataExistInBL), "actual error %q", err)
+}
+
+// WHITELIST
 
 func TestAppPositiveAddIPToWhiteListAndIsIPInWhiteList(t *testing.T) {
 	app := initAppWithMocks(t)
@@ -239,6 +271,75 @@ func TestAppPositiveGetAllIPInWhiteList(t *testing.T) {
 	}
 	
 	controlDataSl,err:=app.GetAllIPInWhiteList(context.Background())
+	require.NoError(t, err) 
+	require.Equal(t,newDataSl,controlDataSl)
+}
+
+
+// BLACKLIST
+
+func TestAppPositiveAddIPToBlackListAndIsIPInBlackList(t *testing.T) {
+	app := initAppWithMocks(t)
+	config:=ConfigTest{}
+	err:=app.InitStorage(context.Background(),&config)
+	require.NoError(t, err)
+	defer app.CloseStorage(context.Background())
+	newData:=storageData.StorageIPData{
+		IP:   "192.168.0.0",
+		Mask: 25,
+	}
+	_, err = app.AddIPToBlackList(context.Background(), newData)
+	require.NoError(t, err) 
+	ok, err := app.IsIPInBlackList(context.Background(), newData)
+	require.NoError(t, err) 
+	require.Truef(t, ok == true, "IP not in blacklist", ok)
+}
+
+func TestAppPositiveRemoveIPInBlackListAndIsIPInBlackList(t *testing.T) {
+	app := initAppWithMocks(t)
+	config:=ConfigTest{}
+	err:=app.InitStorage(context.Background(),&config)
+	require.NoError(t, err)
+	defer app.CloseStorage(context.Background())
+	newData:=storageData.StorageIPData{
+		IP:   "192.168.0.0",
+		Mask: 25,
+	}
+	_, err = app.AddIPToBlackList(context.Background(), newData)
+	require.NoError(t, err) 
+	ok, err := app.IsIPInBlackList(context.Background(), newData)
+	require.NoError(t, err) 
+	require.Truef(t, ok == true, "IP not in whitelist", ok)
+	err = app.RemoveIPInBlackList(context.Background(), newData)
+	require.NoError(t, err)
+	ok, err = app.IsIPInBlackList(context.Background(), newData)
+	require.NoError(t, err) 
+	require.Truef(t, ok == false, "IP in whitelist after removing", ok)
+}
+
+func TestAppPositiveGetAllIPInBlackList(t *testing.T) {
+	app := initAppWithMocks(t)
+	config:=ConfigTest{}
+	err:=app.InitStorage(context.Background(),&config)
+	require.NoError(t, err)
+	defer app.CloseStorage(context.Background())
+	newDataSl:=make([]storageData.StorageIPData,2)
+	newDataSl[0]=storageData.StorageIPData{
+		ID:   0,
+		IP:   "192.168.0.0",
+		Mask: 25,
+	}
+	newDataSl[1]=storageData.StorageIPData{
+		ID:   1,
+		IP:   "10.0.0.0",
+		Mask: 8,
+	}
+    for _,curData:= range newDataSl {
+		_, err = app.AddIPToBlackList(context.Background(), curData)
+		require.NoError(t, err) 
+	}
+	
+	controlDataSl,err:=app.GetAllIPInBlackList(context.Background())
 	require.NoError(t, err) 
 	require.Equal(t,newDataSl,controlDataSl)
 }

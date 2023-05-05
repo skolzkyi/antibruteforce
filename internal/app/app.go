@@ -5,11 +5,16 @@ import (
 	"strconv"
 	//"time"
 	"go.uber.org/zap"
+	"errors"
 
 	helpers "github.com/skolzkyi/antibruteforce/helpers"
     storageData "github.com/skolzkyi/antibruteforce/internal/storage/storageData"
 )
 
+var (
+	ErrIPDataExistInBL      = errors.New("IPData already exists in blacklist")
+	ErrIPDataExistInWL      = errors.New("IPData already exists in whitelist")
+)
 
 
 type App struct {
@@ -78,6 +83,15 @@ func (a *App) AddIPToWhiteList(ctx context.Context, IPData storageData.StorageIP
 		a.logger.Error(message)
 		return 0,err
 	}
+	ok, err := a.storage.IsIPInBlackList(ctx, a.logger, IPData)
+	if err != nil {
+		message := helpers.StringBuild("AddIPToWhiteList validate in blacklist IPData error", err.Error())
+		a.logger.Error(message)
+		return 0,err
+	}
+	if ok {
+		return 0, ErrIPDataExistInBL 
+	}
 	id, err := a.storage.AddIPToWhiteList(ctx, a.logger, IPData)
 	if err != nil {
 		message := helpers.StringBuild("AddIPToWhiteList IPData storage error", err.Error())
@@ -132,6 +146,15 @@ func (a *App) AddIPToBlackList(ctx context.Context, IPData storageData.StorageIP
 		message := helpers.StringBuild("AddIPToBlackList validate IPData error", err.Error())
 		a.logger.Error(message)
 		return 0,err
+	}
+	ok, err := a.storage.IsIPInWhiteList(ctx, a.logger, IPData)
+	if err != nil {
+		message := helpers.StringBuild("AddIPToBlackList validate in whitelist IPData error", err.Error())
+		a.logger.Error(message)
+		return 0,err
+	}
+	if ok {
+		return 0, ErrIPDataExistInWL 
 	}
 	id, err := a.storage.AddIPToBlackList(ctx, a.logger, IPData)
 	if err != nil {

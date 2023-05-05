@@ -59,7 +59,7 @@ type Application interface {
 	RemoveIPInBlackList(ctx context.Context, IPData storageData.StorageIPData) error
 	IsIPInBlackList(ctx context.Context, IPData storageData.StorageIPData) (bool, error)
 	GetAllIPInBlackList(ctx context.Context) ([]storageData.StorageIPData, error)
-	InitBStorageAndLimits(ctx context.Context, config storageData.Config) error
+	//InitBStorageAndLimits(ctx context.Context, config storageData.Config) error
 	CloseBStorage(ctx context.Context) error 
 	CheckInputRequest(ctx context.Context, req storageData.RequestAuth) (bool,string,error)
 }
@@ -100,6 +100,11 @@ func (s *Server) Stop(ctx context.Context) error {
 	err = s.app.CloseStorage(ctx)
 	if err != nil {
 		s.logg.Error("server closeStorage error: " + err.Error())
+		return err
+	}
+	err = s.app.CloseBStorage(ctx)
+	if err != nil {
+		s.logg.Error("server CloseBStorage error: " + err.Error())
 		return err
 	}
 	s.logg.Info("server graceful shutdown")

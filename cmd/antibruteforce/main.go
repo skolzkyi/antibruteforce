@@ -9,7 +9,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
+	//"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	//nolint:gci,gofmt,gofumpt,nolintlint
@@ -30,7 +30,7 @@ func init() {
 }
 
 func main() {
-	time.Sleep(30*time.Second)
+	//time.Sleep(30*time.Second)
 	flag.Parse()
 
 	if flag.Arg(0) == "version" {
@@ -75,7 +75,7 @@ func main() {
 	*/
 	//TODO init redis
 	
-	antibruteforce := app.New(log, storage, redis)
+	antibruteforce := app.New(log, storage, redis, &config)
 
 	server := internalhttp.NewServer(log, antibruteforce, &config)
 

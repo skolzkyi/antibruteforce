@@ -51,7 +51,16 @@ services:
       - PMA_PASSWORD=123456
     networks:
     - ab_network
-
+  redis:
+    image: "redis:5.0.6"
+    restart: always
+    container_name: redis
+    ports:
+     - "6379:6379"
+    expose:
+    - "6379"
+    networks:
+    - ab_network
 networks:
   ab_network:
     driver: bridge

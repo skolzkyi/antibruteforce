@@ -6,6 +6,8 @@ import (
 	//"time"
 	"go.uber.org/zap"
 	"errors"
+	"net"
+	"strconv"
 
 	helpers "github.com/skolzkyi/antibruteforce/helpers"
     storageData "github.com/skolzkyi/antibruteforce/internal/storage/storageData"
@@ -18,9 +20,12 @@ var (
 
 
 type App struct {
-	logger 		  Logger
-	storage       Storage
-	//bucketStorage BStorage
+	logger 		  		Logger
+	storage       		Storage
+	bucketStorage 		BStorage
+	limitFactorLogin 	int
+	limitFactorPassword int
+	limitFactorIP 		int
 }
 
 type Logger interface {
@@ -30,12 +35,7 @@ type Logger interface {
 	Fatal(msg string)
 	GetZapLogger() *zap.SugaredLogger
 }
-/*
-type storageIPData struct {
-	IP                    string
-	ID                    int
-}
-*/
+
 type Storage interface {
 	Init(ctx context.Context, logger storageData.Logger, config storageData.Config) error
 	Close(ctx context.Context, logger storageData.Logger) error
@@ -51,19 +51,79 @@ type Storage interface {
 
 type BStorage interface {
 	Init(ctx context.Context, logger storageData.Logger, config storageData.Config) error
-	Close(ctx context.Context, logger storageData.Logger) error
-	IncrementBucketValue(ctx context.Context, logger storageData.Logger, key string) error
-	GetBucketValue(ctx context.Context, logger storageData.Logger, key string) (int,error)
-	FlushBStorage(ctx context.Context, logger storageData.Logger) error
+	//Close(ctx context.Context, logger storageData.Logger) error
+	IncrementAndGetBucketValue(ctx context.Context, logger storageData.Logger, key string)(int, error)
+	//GetBucketValue(ctx context.Context, logger storageData.Logger, key string, valueType string) (int,error)
+	FlushStorage(ctx context.Context, logger storageData.Logger) error
 }
 
-func New(logger Logger, storage Storage) *App {
+func New(logger Logger, storage Storage, bStorage bucketStorage) *App {
 	app := App{
 		logger:        logger,
 		storage:       storage,
-	//	bucketStorage: bStorage,
+		bucketStorage: bStorage,
 	}
 	return &app
+}
+
+func (a *App) InitBStorageAndLimits(ctx context.Context, config storageData.Config) error {
+	a.limitFactorLogin = config.GetLimitFactorLogin()
+	a.limitFactorPassword = config.GetLimitFactorPassword()
+	a.limitFactorIP = config.GetLimitFactorIP()
+	return a.bStorage.Init(ctx, a.logger, config)
+}
+
+func (a *App) CloseBStorage(ctx context.Context) error {
+	return a.bStorage.FlushStorage(ctx, a.logger)
+}
+
+func (a *App) CheckInputRequest(ctx context.Context, req storageData.RequestAuth) (bool,string,error){
+	ok, err := a.isIPInBlackListCheck(ctx, a.logger, req.IP)
+	if err != nil {
+		message := helpers.StringBuild("CheckInputRequest isIPInBlackListCheck error: ", err.Error())
+		a.logger.Error(message)
+		return false,"",err
+	}
+	if ok {
+		return false,"IP in blacklist",nil
+	}
+	ok, err = a.isIPInWhiteListCheck(ctx, a.logger, req.IP)
+	if err != nil {
+		message := helpers.StringBuild("CheckInputRequest isIPInWhiteListCheck error: ", err.Error())
+		a.logger.Error(message)
+		return false,"",err
+	}
+	if ok {
+		return true,"IP in whitelist",nil
+	}
+	countLogin,err:=IncrementAndGetBucketValue(ctx, a.logger, req.Login)
+	if err != nil {
+		message := helpers.StringBuild("CheckInputRequest IncrementAndGetBucketValue - Login error: ", err.Error(),", key: ",req.Login)
+		a.logger.Error(message)
+		return false,"",err
+	}
+	if countLogin > a.limitFactorLogin {
+		return false,"rate limit by login",nil
+	}
+	countPassword,err:=IncrementAndGetBucketValue(ctx, a.logger, req.Password)
+	if err != nil {
+		message := helpers.StringBuild("CheckInputRequest IncrementAndGetBucketValue - Password error: ", err.Error(),", key: ",req.Password)
+		a.logger.Error(message)
+		return false,err
+	}
+	if countPassword > a.limitFactorPassword {
+		return false,"rate limit by password",nil
+	}
+	countIP,err:=IncrementAndGetBucketValue(ctx, a.logger, req.IP)
+	if err != nil {
+		message := helpers.StringBuild("CheckInputRequest IncrementAndGetBucketValue - IP error: ", err.Error(),", key: ",req.IP)
+		a.logger.Error(message)
+		return false,"rate limit by IP",err
+	}
+	if countIP > a.limitFactorIP  {
+		return false,nil
+	}
+	return true,nil
 }
 
 func (a *App) InitStorage(ctx context.Context, config storageData.Config) error {
@@ -138,6 +198,28 @@ func (a *App) GetAllIPInWhiteList(ctx context.Context) ([]storageData.StorageIPD
 	return whiteList, err
 }
 
+func (a *App) isIPInWhiteListCheck(ctx context.Context, IP string) (bool, error) {
+	canIP,err := net.ParseIP(IP)
+	if err != nil {
+		return false,err
+	}
+	whiteList, err := a.storage.GetAllIPInWhiteList(ctx, a.logger)
+	if err != nil {
+		return false,err
+	}
+	for _,curWhiteIPData:= range whiteList {
+		curWhiteIPStr:=curWhiteIPData.IP+"/"+strconv.Itoa(curWhiteIPData.Mask)
+		_, subnet, err:= net.ParseCIDR(curWhiteIPStr)
+		if err != nil {
+			return false,err
+		}
+		if subnet.Contains(canIP) {
+			return true,nil
+		}
+	}
+	return false,nil 
+}
+
 // BLACKLIST 
 
 func (a *App) AddIPToBlackList(ctx context.Context, IPData storageData.StorageIPData) (int, error) {
@@ -200,4 +282,26 @@ func (a *App) IsIPInBlackList(ctx context.Context, IPData storageData.StorageIPD
 func (a *App) GetAllIPInBlackList(ctx context.Context) ([]storageData.StorageIPData, error) {
 	whiteList, err := a.storage.GetAllIPInBlackList(ctx, a.logger)
 	return whiteList, err
+}
+
+func (a *App) isIPInBlackListCheck(ctx context.Context, IP string) (bool, error) {
+	canIP,err := net.ParseIP(IP)
+	if err != nil {
+		return false,err
+	}
+	blackList, err := a.storage.GetAllIPInBlackList(ctx, a.logger)
+	if err != nil {
+		return false,err
+	}
+	for _,curBlackIPData:= range whiteList {
+		curBlackIPStr:=curBlackIPData.IP+"/"+strconv.Itoa(curBlackIPData.Mask)
+		_, subnet, err:= net.ParseCIDR(curBlackIPStr)
+		if err != nil {
+			return false,err
+		}
+		if subnet.Contains(canIP) {
+			return true,nil
+		}
+	}
+	return false,nil 
 }

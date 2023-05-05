@@ -14,19 +14,12 @@ import (
 	helpers "github.com/skolzkyi/antibruteforce/helpers"
 	storageData "github.com/skolzkyi/antibruteforce/internal/storage/storageData"
 )
-/*
-type Request struct {
-	Login    string
-	Password string
-	IP       string
+
+type AuthorizationRequestAnswer struct {
+   Message string
+   Ok      bool
 }
-*/
-/*
-type storageIPData struct {
-	IP                    string
-	ID                    int
-}
-*/
+
 type outputJSON struct {
 	Text string
 	Code int
@@ -102,6 +95,28 @@ func (s *Server) AuthorizationRequest(w http.ResponseWriter, r *http.Request) {
 		}
 
 		fmt.Println("newRequest: ", newRequest)
+
+		answer:=AuthorizationRequestAnswer{}
+
+		ok,message,errInner := s.app.CheckInputRequest(ctx, newRequest)
+		if errInner != nil {
+			answer.Message = "Inner error: "+errInner.Error()
+			answer.Ok = false
+			w.Header().Add("ErrCustom",errInner.Error())
+		}
+		answer.Message = message
+		answer.Ok = ok
+		jsonstring, err := json.Marshal(answer)
+		if err != nil {
+			apiErrHandler(err, &w)
+			return
+		}
+		_, err = w.Write(jsonstring)
+		if err != nil {
+			apiErrHandler(err, &w)
+			return
+		}
+		return
 
 	default:
 		apiErrHandler(ErrUnsupportedMethod, &w)

@@ -19,6 +19,7 @@ import (
 	internalhttp "github.com/skolzkyi/antibruteforce/internal/server/http"
 	
 	SQLstorage "github.com/skolzkyi/antibruteforce/internal/storage/sql"
+	RedisStorage "github.com/skolzkyi/antibruteforce/internal/storage/redisstorage"
 	//storageSQLMock "github.com/skolzkyi/antibruteforce/internal/storage/storageSQLMock"
 )
 
@@ -29,7 +30,7 @@ func init() {
 }
 
 func main() {
-	//time.Sleep(30*time.Second)
+	time.Sleep(30*time.Second)
 	flag.Parse()
 
 	if flag.Arg(0) == "version" {
@@ -57,6 +58,12 @@ func main() {
 		cancelStore()
 		log.Fatal("fatal error of inintialization SQL storage: " + err.Error())
 	}
+	redis = RedisStorage.New()
+	err = redis.Init(ctxStor, log, &config)
+	if err != nil {
+		cancelStore()
+		log.Fatal("fatal error of inintialization Redis storage: " + err.Error())
+	}
     
     /*
 	storage = storageSQLMock.New()
@@ -68,7 +75,7 @@ func main() {
 	*/
 	//TODO init redis
 	
-	antibruteforce := app.New(log, storage)
+	antibruteforce := app.New(log, storage, redis)
 
 	server := internalhttp.NewServer(log, antibruteforce, &config)
 

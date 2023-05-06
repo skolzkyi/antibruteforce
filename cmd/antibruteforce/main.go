@@ -60,6 +60,7 @@ func main() {
 	}
 	redis := RedisStorage.New()
 	err = redis.Init(ctxStor, log, &config)
+	//err = redis.InitAsMock(ctxStor, log)
 	if err != nil {
 		cancelStore()
 		log.Fatal("fatal error of inintialization Redis storage: " + err.Error())

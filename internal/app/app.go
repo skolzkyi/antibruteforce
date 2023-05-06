@@ -54,7 +54,7 @@ type Storage interface {
 type BStorage interface {
 	Init(ctx context.Context, logger storageData.Logger, config storageData.Config) error
 	SetBucketValue(ctx context.Context, logger storageData.Logger, key string, value int) error
-	//Close(ctx context.Context, logger storageData.Logger) error
+	Close(ctx context.Context, logger storageData.Logger) error
 	IncrementAndGetBucketValue(ctx context.Context, logger storageData.Logger, key string)(int64, error)
 	//GetBucketValue(ctx context.Context, logger storageData.Logger, key string, valueType string) (int,error)
 	FlushStorage(ctx context.Context, logger storageData.Logger) error
@@ -78,7 +78,7 @@ func (a *App) InitBStorageAndLimits(ctx context.Context, config storageData.Conf
 }
 
 func (a *App) CloseBStorage(ctx context.Context) error {
-	return a.bucketStorage.FlushStorage(ctx, a.logger)
+	return a.bucketStorage.Close(ctx, a.logger)
 }
 
 func (a *App) CheckInputRequest(ctx context.Context, req storageData.RequestAuth) (bool,string,error){

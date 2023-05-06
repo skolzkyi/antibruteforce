@@ -8,7 +8,7 @@ import (
 	"io"
 	"net/http"
 	//"strconv"
-	"strings"
+	//"strings"
 	"time"
 
 	helpers "github.com/skolzkyi/antibruteforce/helpers"
@@ -39,8 +39,8 @@ type IPListAnswer struct {
 	Message outputJSON
 }
 
-type InputDate struct {
-	Date string
+type InputTag struct {
+	Tag string
 }
 
 var (
@@ -69,7 +69,7 @@ func apiErrHandler(err error, w *http.ResponseWriter) {
 }
 
 func (s *Server) helloWorld(w http.ResponseWriter, _ *http.Request) {
-	w.Write([]byte("Hello world!"))
+	w.Write([]byte("test"))
 }
 
 func (s *Server) AuthorizationRequest(w http.ResponseWriter, r *http.Request) {
@@ -131,18 +131,21 @@ func (s *Server) ClearBucketByLogin(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodDelete:
 		newMessage := outputJSON{}
-
-		path := strings.Trim(r.URL.Path, "/")
-		pathParts := strings.Split(path, "/")
-		if len(pathParts) < 2 {
-			apiErrHandler(ErrNoIDInIPHandler, &w)
+		inputTag:=InputTag{}
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			apiErrHandler(err, &w)
 			return
 		}
 
-		Login:=pathParts[1]
-
-		fmt.Println("ClearBucketByLogin Login: ", Login)
-		err:=s.app.ClearBucketByLogin(ctx,Login)
+		err = json.Unmarshal(body, &inputTag)
+		if err != nil {
+			apiErrHandler(err, &w)
+			return
+		}
+        
+		fmt.Println("ClearBucketByLogin Login: ", inputTag.Tag)
+		err = s.app.ClearBucketByLogin(ctx,inputTag.Tag)
 		if err != nil {
 			newMessage.Text = err.Error()
 			newMessage.Code = 1
@@ -179,18 +182,21 @@ func (s *Server) ClearBucketByIP(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodDelete:
 		newMessage := outputJSON{}
-
-		path := strings.Trim(r.URL.Path, "/")
-		pathParts := strings.Split(path, "/")
-		if len(pathParts) < 2 {
-			apiErrHandler(ErrNoIDInIPHandler, &w)
+		inputTag:=InputTag{}
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			apiErrHandler(err, &w)
 			return
 		}
 
-		IP:=pathParts[1]
-
-		fmt.Println(" ClearBucketByIP IP: ", IP)
-		err:=s.app.ClearBucketByIP(ctx,IP)
+		err = json.Unmarshal(body, &inputTag)
+		if err != nil {
+			apiErrHandler(err, &w)
+			return
+		}
+        
+		fmt.Println(" ClearBucketByIP IP: ", inputTag.Tag)
+		err =s.app.ClearBucketByIP(ctx,inputTag.Tag)
 		if err != nil {
 			newMessage.Text = err.Error()
 			newMessage.Code = 1

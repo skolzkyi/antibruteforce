@@ -5,6 +5,7 @@ import (
 	"strings"
 	"strconv"
 	//"time"
+	"fmt"
 
 	storageData "github.com/skolzkyi/antibruteforce/internal/storage/storageData"
 )
@@ -12,7 +13,7 @@ import (
 var (
 	ErrVoidLogin          	= errors.New("login is void")
 	ErrVoidPassword         = errors.New("password is void")
-	ErrVoidIP       		= errors.New("IP is void")
+	ErrVoidIP               = errors.New("IP is void")
 
 	ErrBadIP       		    = errors.New("IP structure is bad")
 
@@ -22,7 +23,7 @@ var (
 
 func SimpleRequestValidator(login string, password string, IP string) (storageData.RequestAuth, error) { //nolint:lll
 	request := storageData.RequestAuth{Login: login, Password: password, IP: IP} //nolint:lll
-	err:=checkIP(IP,1,254)
+	err:=checkIP(IP,0,255)
 	switch {
 	case err !=nil:
 		return storageData.RequestAuth{}, err
@@ -30,8 +31,6 @@ func SimpleRequestValidator(login string, password string, IP string) (storageDa
 		return storageData.RequestAuth{}, ErrVoidLogin 
 	case request.Password == "":
 		return storageData.RequestAuth{}, ErrVoidPassword 
-	case request.IP == "":
-		return storageData.RequestAuth{}, ErrVoidIP
 	default:
 	}
 
@@ -40,7 +39,10 @@ func SimpleRequestValidator(login string, password string, IP string) (storageDa
 
 
 func SimpleIPDataValidator(IPData storageData.StorageIPData, isAllRequest bool)  error { //nolint:lll
-	err:=checkIP(IPData.IP,0,255)
+	var err error
+	if !isAllRequest {
+		err=checkIP(IPData.IP,0,255)
+	}
 	switch {
 	case err !=nil:
 		return err
@@ -59,6 +61,7 @@ func SimpleIPDataValidator(IPData storageData.StorageIPData, isAllRequest bool) 
 func checkIP(IP string,low int, high int) error {
   oktets:=strings.Split(IP, ".")
   if len(oktets) != 4 {
+	fmt.Println("IP: ",IP," oktets: ", len(oktets))
 	return ErrBadIP
   }
   for _,curOktet:=range oktets {
@@ -67,6 +70,7 @@ func checkIP(IP string,low int, high int) error {
 		return err
 	 }
      if intOktet < low || intOktet > high {
+		fmt.Println("IP: ",IP," bad oktet: ", curOktet)
 		return ErrBadIP 
 	 }
   }

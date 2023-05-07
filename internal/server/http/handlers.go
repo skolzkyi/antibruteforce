@@ -25,15 +25,7 @@ type outputJSON struct {
 	Code int
 }
 
-type EventRawData struct {
-	EventMessageTimeDelta int64
-	Title                 string
-	UserID                string
-	Description           string
-	DateStart             string
-	DateStop              string
-	ID                    int
-}
+
 type IPListAnswer struct {
 	IPList  []storageData.StorageIPData
 	Message outputJSON

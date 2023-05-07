@@ -1,4 +1,5 @@
 BIN := "./bin/antibruteforce"
+BIN_CLI := "./bin/cli"
 DOCKER_IMG="antibruteforce:develop"
 DSN="imapp:LightInDark@/OTUSAntibruteforce?parseTime=true"
 
@@ -16,9 +17,11 @@ migrate-goose:
 
 build:
 	go build -v -o $(BIN) -ldflags "$(LDFLAGS)" ./cmd/antibruteforce
+	go build -v -o $(BIN_CLI) -ldflags "$(LDFLAGS)" ./cmd/cli
 
 run: build
-	$(BIN) -config ./configs/config.env > antibruteforceCLog.txt 
+	$(BIN) -config ./configs/config.env > antibruteforceLog.txt 
+	$(BIN_CLI) -config ./configs/config_cli.env > antibruteforceCLILog.txt 
 
 build-img:
 	docker build \
@@ -45,7 +48,11 @@ lint: install-lint-deps
 	golangci-lint run ./...
 
 up:
-	docker-compose -f ./deployments/docker-compose_onlyservice.yaml up --build > deployLog.txt
+	go build -v -o $(BIN_CLI) -ldflags "$(LDFLAGS)" ./cmd/cli && \
+	docker-compose -f ./deployments/docker-compose_onlyservice.yaml up --build 
+x:
+	gnome-terminal --chmod +x $(BIN_CLI) -config ./configs/config_cli.env 
+	
 
 down:
 	docker-compose -f ./deployments/docker-compose_onlyservice.yaml down

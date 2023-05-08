@@ -100,9 +100,9 @@ func (a *App) CheckInputRequest(ctx context.Context, req storageData.RequestAuth
 	if ok {
 		return true,"IP in whitelist",nil
 	}
-	countLogin,err:=a.bucketStorage.IncrementAndGetBucketValue(ctx, a.logger, req.Login)
+	countLogin,err:=a.bucketStorage.IncrementAndGetBucketValue(ctx, a.logger, "l_"+req.Login)
 	if err != nil {
-		message := helpers.StringBuild("CheckInputRequest IncrementAndGetBucketValue - Login error: ", err.Error(),", key: ",req.Login)
+		message := helpers.StringBuild("CheckInputRequest IncrementAndGetBucketValue - Login error: ", err.Error(),", key: ","l_"+req.Login)
 		a.logger.Error(message)
 		return false,"",err
 	}
@@ -110,9 +110,9 @@ func (a *App) CheckInputRequest(ctx context.Context, req storageData.RequestAuth
 	if countLogin > int64(a.limitFactorLogin) {
 		return false,"rate limit by login",nil
 	}
-	countPassword,err:=a.bucketStorage.IncrementAndGetBucketValue(ctx, a.logger, req.Password)
+	countPassword,err:=a.bucketStorage.IncrementAndGetBucketValue(ctx, a.logger, "p_"+req.Password)
 	if err != nil {
-		message := helpers.StringBuild("CheckInputRequest IncrementAndGetBucketValue - Password error: ", err.Error(),", key: ",req.Password)
+		message := helpers.StringBuild("CheckInputRequest IncrementAndGetBucketValue - Password error: ", err.Error(),", key: ","p_"+req.Password)
 		a.logger.Error(message)
 		return false,"",err
 	}
@@ -120,9 +120,9 @@ func (a *App) CheckInputRequest(ctx context.Context, req storageData.RequestAuth
 		return false,"rate limit by password",nil
 	}
 	fmt.Println("countPassword: ",strconv.Itoa(int(countPassword))," a.limitFactorPassword: ",a.limitFactorPassword)
-	countIP,err:=a.bucketStorage.IncrementAndGetBucketValue(ctx, a.logger, req.IP)
+	countIP,err:=a.bucketStorage.IncrementAndGetBucketValue(ctx, a.logger, "ip_"+req.IP)
 	if err != nil {
-		message := helpers.StringBuild("CheckInputRequest IncrementAndGetBucketValue - IP error: ", err.Error(),", key: ",req.IP)
+		message := helpers.StringBuild("CheckInputRequest IncrementAndGetBucketValue - IP error: ", err.Error(),", key: ","ip_"+req.IP)
 		a.logger.Error(message)
 		return false,"",err
 	}
@@ -151,7 +151,7 @@ func (a *App)RLTicker(ctx context.Context) {
 }
 
 func (a *App) ClearBucketByLogin(ctx context.Context, login string)error{
-	err:=a.bucketStorage.SetBucketValue(ctx,a.logger,login,0)
+	err:=a.bucketStorage.SetBucketValue(ctx,a.logger,"l_"+login,0)
 	if err != nil {
 		message := helpers.StringBuild("ClearBucketByLogin error", err.Error()," Login: ",login)
 		a.logger.Error(message)
@@ -162,7 +162,7 @@ func (a *App) ClearBucketByLogin(ctx context.Context, login string)error{
 }
 
 func (a *App) ClearBucketByIP(ctx context.Context, IP string)error{
-	err:=a.bucketStorage.SetBucketValue(ctx,a.logger,IP,0)
+	err:=a.bucketStorage.SetBucketValue(ctx,a.logger,"ip_"+IP,0)
     if err != nil {
 		message := helpers.StringBuild("ClearBucketByIP error", err.Error()," IP: ",IP)
 		a.logger.Error(message)

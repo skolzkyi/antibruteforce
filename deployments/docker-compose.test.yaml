@@ -11,16 +11,11 @@ services:
     depends_on:
        mysql-db:
         condition: service_healthy
-       kafka:
+       redis:
         condition: service_started
-       calendar:
-        condition: service_started
-       sheduler:
-        condition: service_started
-       sender:
+       antibruteforce:
         condition: service_started
     volumes:
       - "./configs:/app/configs"
     networks:
-    - ofl_network
-  
+    - ab_network

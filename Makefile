@@ -49,13 +49,13 @@ lint: install-lint-deps
 
 up:
 	go build -v -o $(BIN_CLI) -ldflags "$(LDFLAGS)" ./cmd/cli && \
-	docker-compose -f ./deployments/docker-compose_onlyservice.yaml up --build 
+	docker-compose -f ./deployments/docker-compose.yaml up --build 
 x:
 	gnome-terminal --chmod +x $(BIN_CLI) -config ./configs/config_cli.env 
 	
 
 down:
-	docker-compose -f ./deployments/docker-compose_onlyservice.yaml down
+	docker-compose -f ./deployments/docker-compose.yaml down
 
 integration-tests:
 	docker-compose -f ./deployments/docker-compose.yaml -f ./deployments/docker-compose.test.yaml up --build --exit-code-from integration_tests && \

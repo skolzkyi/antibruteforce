@@ -1,0 +1,269 @@
+//go:build integration
+// +build integration
+
+package integrationTests
+
+import (
+	"testing"
+	//"time"
+	"net/http"
+	"context"
+	"os/signal"
+	"syscall"
+	"flag"
+	"fmt"
+	"os"
+	"bytes"
+	"io"
+	"strconv"
+	"errors"
+
+	"github.com/stretchr/testify/require"
+	"encoding/json"
+	"github.com/skolzkyi/antibruteforce/internal/logger"
+	storageData "github.com/skolzkyi/antibruteforce/internal/storage/storageData"
+	
+	helpers "github.com/skolzkyi/antibruteforce/helpers"
+	"database/sql"
+	_ "github.com/go-sql-driver/mysql" // for driver
+	redis "github.com/redis/go-redis/v9"
+)
+
+var configFilePath string
+var mySQL_DB *sql.DB
+var rdb  *redis.Client
+var config Config
+var log *logger.LogWrap
+
+type AuthorizationRequestAnswer struct {
+	Message string
+	Ok      bool
+ }
+ 
+type outputJSON struct {
+	Text string
+	Code int
+}
+ 
+ 
+type IPListAnswer struct {
+	IPList  []storageData.StorageIPData
+	Message outputJSON
+}
+ 
+type InputTag struct {
+	 Tag string
+}
+
+
+func init() {
+	flag.StringVar(&configFilePath, "config", "./configs/dc/", "Path to config.env")
+}
+
+
+func TestMain(m *testing.M){
+	
+	flag.Parse()
+
+	ctx, cancel := signal.NotifyContext(context.Background(),
+		syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
+	defer cancel()
+
+	config = NewConfig()
+	err := config.Init(configFilePath)
+	if err != nil {
+		fmt.Println(err)
+	}
+	//fmt.Println("config: ", config)
+	log, err = logger.New(config.Logger.Level)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	for {
+		select {
+		case <-ctx.Done():
+			log.Info("Integration tests down with error")
+			os.Exit(1) //nolint:gocritic
+		default:
+			mySQL_DB,err = InitAndConnectDB(ctx, log, &config)
+			if err != nil {
+				log.Error("SQL InitAndConnectDB error: " + err.Error())
+				cancel()
+			}
+			rdb, err = InitAndConnectRedis(ctx, log, &config)
+			/*
+			err = createTestEventPool(mySQL_DB)
+			if err != nil {
+				log.Error("SQL DB createTestEventPool error: " + err.Error())
+				cancel()
+			}
+			*/
+			log.Info("Integration tests up")
+  			exitCode := m.Run()
+			log.Info("exitCode:"+strconv.Itoa(exitCode))
+			for{} //debug
+			err = cleanDatabaseAndRedis(ctx)
+			if err != nil {
+    			cancel()
+ 			}
+			err = closeDatabaseAndRedis(ctx)
+			if err != nil {
+    			cancel()
+ 			}
+			 log.Info("Integration tests down succesful")
+  			os.Exit(exitCode)//nolint:gocritic
+		}
+	}
+}
+
+func TestAddToWhiteList(t *testing.T){
+	t.Run("AddToWhiteList_Positive", func(t *testing.T) {
+		url := helpers.StringBuild("http://", config.GetServerURL(), "/whitelist/")
+	
+		jsonStr := []byte(`{"IP":"192.168.0.0","Mask":24}`)
+		resp, err := http.Post(url, "application/json", bytes.NewBuffer(jsonStr))
+		require.NoError(t, err)
+		defer resp.Body.Close()
+
+		respBody, err := io.ReadAll(resp.Body)
+		require.NoError(t, err)
+		
+		answer :=outputJSON{}
+		err = json.Unmarshal(respBody, &answer)
+		require.NoError(t, err)
+    	require.Equal(t, answer.Text, "OK!")
+
+		ctx, cancel := context.WithTimeout(context.Background(), config.GetDBTimeOut())
+		defer cancel()
+
+		stmt := `SELECT IP,mask FROM whitelist WHERE IP = "192.168.0.0" AND mask=24` 
+		row := mySQL_DB.QueryRowContext(ctx, stmt)
+
+		var IP string
+		var mask int
+
+		err = row.Scan(&IP, &mask)
+		require.NoError(t, err)
+
+		require.Equal(t, IP, "192.168.0.0")
+		require.Equal(t, mask, 24)
+		
+		err = cleanDatabaseAndRedis(ctx)
+		require.NoError(t, err)
+	})
+	t.Run("AddToWhiteList_PositiveListCrossCheck", func(t *testing.T) {
+		ctx, cancel := context.WithTimeout(context.Background(), config.GetDBTimeOut())
+		defer cancel()
+		stmt := `INSERT INTO blacklist(IP,mask) VALUES ("192.168.0.0",24)`                         
+		_, err := mySQL_DB.ExecContext(ctx, stmt) 
+		require.NoError(t, err)
+
+		url := helpers.StringBuild("http://", config.GetServerURL(), "/whitelist/")
+	
+		jsonStr := []byte(`{"IP":"192.168.0.0","Mask":24}`)
+		resp, err := http.Post(url, "application/json", bytes.NewBuffer(jsonStr))
+		require.NoError(t, err)
+		defer resp.Body.Close()
+
+		respBody, err := io.ReadAll(resp.Body)
+		require.NoError(t, err)
+		
+		answer :=outputJSON{}
+		err = json.Unmarshal(respBody, &answer)
+		require.NoError(t, err)
+    	require.Equal(t, answer.Text, "IPData already exists in blacklist")
+
+		stmt = `SELECT IP,mask FROM whitelist WHERE IP = "192.168.0.0" AND mask=24` 
+		row := mySQL_DB.QueryRowContext(ctx, stmt)
+
+		var IP string
+		var mask int
+
+		err = row.Scan(&IP, &mask)
+		require.Truef(t, errors.Is(err, sql.ErrNoRows), "actual error %q", err)
+		
+		err = cleanDatabaseAndRedis(ctx)
+		require.NoError(t, err)
+	})
+}
+
+func  InitAndConnectRedis(ctx context.Context, logger storageData.Logger, config storageData.Config) (*redis.Client, error){
+	select {
+	case <-ctx.Done():
+		return nil,storageData.ErrStorageTimeout
+	default:
+		defer recover()
+		var err error
+		rdb = redis.NewClient(&redis.Options{
+			Addr:     config.GetRedisAddress()+":"+config.GetRedisPort(),
+			Password: "", // no password set
+			DB:       0,  // use default DB
+		})
+		_, err = rdb.Ping(ctx).Result()
+		if err != nil {
+			logger.Error("Redis DB ping error: " + err.Error())
+			return nil,err
+		}
+		rdb.FlushDB(ctx)
+		return rdb, nil
+	}
+}
+
+func  InitAndConnectDB(ctx context.Context, logger storageData.Logger, config storageData.Config) (*sql.DB, error){
+	select {
+	case <-ctx.Done():
+		return nil,storageData.ErrStorageTimeout
+	default:
+		defer recover()
+		var err error
+		dsn := helpers.StringBuild(config.GetDBUser(), ":", config.GetDBPassword(), "@tcp(",config.GetDBAddress(),":",config.GetDBPort(),")/", config.GetDBName(), "?parseTime=true") //nolint:lll
+		
+		
+		mySQL_DBinn, err := sql.Open("mysql", dsn)
+		if err != nil {
+			logger.Error("SQL open error: " + err.Error())
+			return nil, err
+		}
+		
+		mySQL_DBinn.SetConnMaxLifetime(config.GetDBConnMaxLifetime())
+		mySQL_DBinn.SetMaxOpenConns(config.GetDBMaxOpenConns())
+		mySQL_DBinn.SetMaxIdleConns(config.GetDBMaxIdleConns())
+		
+		err = mySQL_DBinn.PingContext(ctx)
+		if err != nil {
+			logger.Error("SQL DB ping error: " + err.Error())
+			return nil, err
+		}
+		
+		return mySQL_DBinn, nil
+	}
+}
+
+func cleanDatabaseAndRedis(ctx context.Context) error {
+	rdb.FlushDB(ctx)
+
+	stmt := "TRUNCATE TABLE OTUSAntibruteforce.whitelist"
+
+	_, err := mySQL_DB.ExecContext(ctx, stmt)
+	if err != nil {
+		return err
+	}
+
+	stmt = "TRUNCATE TABLE OTUSAntibruteforce.blacklist"
+
+	_, err = mySQL_DB.ExecContext(ctx, stmt)
+	
+	return err
+}
+
+func closeDatabaseAndRedis(ctx context.Context) error {
+    err:=rdb.Close()
+	if err != nil {
+		return err
+	}
+
+	err = mySQL_DB.Close()
+	
+	return err
+}

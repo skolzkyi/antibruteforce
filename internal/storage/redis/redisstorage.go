@@ -21,7 +21,7 @@ func New() *RedisStorage {
 
 func(rs *RedisStorage)Init(ctx context.Context, logger storageData.Logger, config storageData.Config) error {
     rs.rdb = redis.NewClient(&redis.Options{
-        Addr:     config.GetResisAddress()+":"+config.GetRedisPort(),
+        Addr:     config.GetRedisAddress()+":"+config.GetRedisPort(),
         Password: "", // no password set
         DB:       0,  // use default DB
     })

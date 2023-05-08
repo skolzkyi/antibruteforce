@@ -82,7 +82,7 @@ func (config *ConfigTest) GetDBPort() string {
 	return "3306"
 }
 
-func (config *ConfigTest) GetResisAddress() string {
+func (config *ConfigTest) GetRedisAddress() string {
 	return "127.0.0.1"
 }
 

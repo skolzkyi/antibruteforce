@@ -32,7 +32,7 @@ type Config interface {
 	GetDBTimeOut() time.Duration
 	GetDBAddress() string
 	GetDBPort() string
-	GetResisAddress() string 
+	GetRedisAddress() string 
 	GetRedisPort() string 
 	GetLimitFactorLogin() int 
 	GetLimitFactorPassword() int

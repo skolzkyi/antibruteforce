@@ -13,7 +13,7 @@ import (
 	"bufio"
 
 	//helpers "github.com/skolzkyi/antibruteforce/helpers"
-	"github.com/skolzkyi/antibruteforce/internal/logger"
+	"github.com/skolzkyi/antibruteforce/internal/logger_cli"
 	
 )
 
@@ -44,8 +44,8 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Println("config: ", config)
-	log, err := logger.New(config.Logger.Level)
+	//fmt.Println("config: ", config)
+	log, err := logger_cli.New(config.Logger.Level)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -58,7 +58,7 @@ func main() {
 	inData.Init()
 
 	comContr:=CommandControllerNew()
-	comContr.Init(config.GetAddress() + ":" + config.GetPort())
+	comContr.Init(config.GetAddress() + ":" + config.GetPort(),log)
 
 	log.Info("antibruteforceAddr: " + config.GetAddress() + ":" + config.GetPort())
 	log.Info("antibruteforce-cli up")
@@ -69,7 +69,6 @@ func main() {
 		select {
 		case <-ctx.Done():
 			log.Info("antibruteforce-cli  down")
-			
 			os.Exit(1) //nolint:gocritic
 		default:
 			inData.scanner.Scan()
@@ -79,7 +78,9 @@ func main() {
 			}
 			if rawCommand=="exit" {
 				fmt.Println("bye")
-				cancel()
+				log.Info("antibruteforce-cli  down")
+				os.Exit(1) //nolint:gocritic
+				//cancel()
 			}
 			output:=comContr.processCommand(rawCommand)
 			fmt.Println(output)

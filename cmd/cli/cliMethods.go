@@ -18,7 +18,7 @@ import (
 
 	helpers "github.com/skolzkyi/antibruteforce/helpers"
 	storageData "github.com/skolzkyi/antibruteforce/internal/storage/storageData"
-	//"github.com/skolzkyi/antibruteforce/internal/logger"
+	logger_cli "github.com/skolzkyi/antibruteforce/internal/logger_cli"
 	
 )
 
@@ -44,6 +44,7 @@ type InputTag struct {
 
 type CommandController struct {
 	address string
+	logger *logger_cli.LogWrap
 }
 
 var(
@@ -56,11 +57,13 @@ func CommandControllerNew() *CommandController{
 	return &CommandController{}
 }
 
-func (cc *CommandController)Init(address string) {
+func (cc *CommandController)Init(address string, logger *logger_cli.LogWrap) {
 	cc.address=address
+	cc.logger = logger
 }
 
 func(cc *CommandController)processCommand(rawCommand string) string{
+	cc.logger.Info("command: " + rawCommand)
 	commandData := strings.Split(rawCommand, " ")
 	for i:=range commandData {
 		commandData[i] = strings.ToLower(strings.TrimSpace(commandData[i]))
@@ -93,7 +96,9 @@ func(cc *CommandController)processCommand(rawCommand string) string{
 			return cc.clearBucketByIP(commandData)
 		default:
 	}
-	return "error: " + ErrUnSupCommand.Error()
+	mes:= "error: " + ErrUnSupCommand.Error()
+	cc.logger.Info(mes)
+	return mes
 }
 func(cc *CommandController)help() string {
 	return `
@@ -114,12 +119,16 @@ long: ClearBucketByIP [IP], short: cbip [IP] - cleared IP bucket in bucket stora
 
 func(cc *CommandController) addToWhiteList(arg []string) string {
 	if len(arg) != 2 {
-		return "error: " + ErrBadArgCount.Error()
+		errStr := "error: " + ErrBadArgCount.Error()
+		cc.logger.Error(errStr)
+		return  errStr
 	}
 	subArgs:=strings.Split(arg[1], "/")
 
 	if len(subArgs) != 2 {
-		return "error: " + ErrBadArgument.Error()
+		errStr := "error: " + ErrBadArgument.Error()
+		cc.logger.Error(errStr)
+		return errStr
 	}
 
 	url := helpers.StringBuild("http://", cc.address, "/whitelist/")
@@ -127,35 +136,50 @@ func(cc *CommandController) addToWhiteList(arg []string) string {
 	jsonStr := []byte(`{"IP":"`+subArgs[0]+`","Mask":`+subArgs[1]+`}`)
 	resp, err := http.Post(url, "application/json", bytes.NewBuffer(jsonStr))
 	if err!=nil {
-		return "error: " + err.Error()
+		errStr := "error: " + err.Error()
+		cc.logger.Error(errStr)
+		return errStr
 	}	
 	defer resp.Body.Close()
 
 	respBody, err := io.ReadAll(resp.Body)
 	if err!=nil {
-		return "error: " + err.Error()
+		errStr := "error: " + err.Error()
+		cc.logger.Error(errStr)
+		return errStr
 	}
 		
 	answer :=outputJSON{}
 	err = json.Unmarshal(respBody, &answer)
 	if err!=nil {
-		return "error: " + err.Error()
+		errStr := "error: " + err.Error()
+		cc.logger.Error(errStr)
+		return errStr
 	}
     if answer.Text!="OK!"{
-		return "error: " + answer.Text
+		errStr := "error: " + answer.Text
+		cc.logger.Error(errStr)
+		return errStr
 	}
 
-	return "subnet add to whitelist succesful"
+	mes:= "subnet add to whitelist succesful"
+	cc.logger.Info(mes)
+
+	return mes
 }
 
 func(cc *CommandController)removeFromWhiteList(arg []string) string {
 	if len(arg) != 2 {
-		return "error: " + ErrBadArgCount.Error()
+		errStr := "error: " + ErrBadArgCount.Error()
+		cc.logger.Error(errStr)
+		return  errStr
 	}
 	subArgs:=strings.Split(arg[1], "/")
 
 	if len(subArgs) != 2 {
-		return "error: " + ErrBadArgument.Error()
+		errStr := "error: " + ErrBadArgument.Error()
+		cc.logger.Error(errStr)
+		return errStr
 	}
 
 	url := helpers.StringBuild("http://", cc.address, "/whitelist/")
@@ -163,42 +187,59 @@ func(cc *CommandController)removeFromWhiteList(arg []string) string {
 	jsonStr := []byte(`{"IP":"`+subArgs[0]+`","Mask":`+subArgs[1]+`}`)
 	req, err := http.NewRequest("DELETE", url, bytes.NewBuffer(jsonStr))
 	if err!=nil {
-		return "error: " + err.Error()
+		errStr := "error: " + err.Error()
+		cc.logger.Error(errStr)
+		return errStr
 	}
 	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err!=nil {
-		return "error: " + err.Error()
+		errStr := "error: " + err.Error()
+		cc.logger.Error(errStr)
+		return errStr
 	}
 	defer resp.Body.Close()
 
 	respBody, err := io.ReadAll(resp.Body)
 	if err!=nil {
-		return "error: " + err.Error()
+		errStr := "error: " + err.Error()
+		cc.logger.Error(errStr)
+		return errStr
 	}
 		
 	answer :=outputJSON{}
 	err = json.Unmarshal(respBody, &answer)
 	if err!=nil {
-		return "error: " + err.Error()
+		errStr := "error: " + err.Error()
+		cc.logger.Error(errStr)
+		return errStr
 	}
     if answer.Text!="OK!"{
-		return "error: " + answer.Text
+		errStr := "error: " + answer.Text
+		cc.logger.Error(errStr)
+		return errStr
 	}
 
-	return "subnet remove from whitelist succesful"
+	mes:= "subnet remove from whitelist succesful"
+	cc.logger.Info(mes)
+
+	return mes
 }
 
 func(cc *CommandController)isInWhiteList(arg []string) string {
 	if len(arg) != 2 {
-		return "error: " + ErrBadArgCount.Error()
+		errStr := "error: " + ErrBadArgCount.Error()
+		cc.logger.Error(errStr)
+		return  errStr
 	}
 	subArgs:=strings.Split(arg[1], "/")
 
 	if len(subArgs) != 2 {
-		return "error: " + ErrBadArgument.Error()
+		errStr := "error: " + ErrBadArgument.Error()
+		cc.logger.Error(errStr)
+		return errStr
 	}
 
 	url := helpers.StringBuild("http://", cc.address, "/whitelist/")
@@ -213,25 +254,36 @@ func(cc *CommandController)isInWhiteList(arg []string) string {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err!=nil {
-		return "error: " + err.Error()
+		errStr := "error: " + err.Error()
+		cc.logger.Error(errStr)
+		return errStr
 	}
 	defer resp.Body.Close()
 
 	respBody, err := io.ReadAll(resp.Body)
 	if err!=nil {
-		return "error: " + err.Error()
+		errStr := "error: " + err.Error()
+		cc.logger.Error(errStr)
+		return errStr
 	}
 	//fmt.Println("iwl body: ", string(respBody))
 	answer :=IPListAnswer{}
 	err = json.Unmarshal(respBody, &answer)
 	if err!=nil {
-		return "error: " + err.Error()
+		errStr := "error: " + err.Error()
+		cc.logger.Error(errStr)
+		return errStr
 	}
     if answer.Message.Code!=0{
-		return "error: " + answer.Message.Text
+		errStr := "error: " + answer.Message.Text
+		cc.logger.Error(errStr)
+		return errStr
 	}
 
-	return "subnet in whitelist: " + answer.Message.Text
+	mes:= "subnet in whitelist: " + answer.Message.Text
+	cc.logger.Info(mes)
+
+	return mes
 }
 
 func(cc *CommandController)allInWhiteList() string {
@@ -247,39 +299,54 @@ func(cc *CommandController)allInWhiteList() string {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err!=nil {
-		return "error: " + err.Error()
+		errStr := "error: " + err.Error()
+		cc.logger.Error(errStr)
+		return errStr
 	}
 	defer resp.Body.Close()
 
 	respBody, err := io.ReadAll(resp.Body)
 	if err!=nil {
-		return "error: " + err.Error()
+		errStr := "error: " + err.Error()
+		cc.logger.Error(errStr)
+		return errStr
 	}
 	//fmt.Println("iwl body: ", string(respBody))
 	answer :=IPListAnswer{}
 	err = json.Unmarshal(respBody, &answer)
 	if err!=nil {
-		return "error: " + err.Error()
+		errStr := "error: " + err.Error()
+		cc.logger.Error(errStr)
+		return errStr
 	}
     if answer.Message.Code!=0{
-		return "error: " + answer.Message.Text
+		errStr := "error: " + answer.Message.Text
+		cc.logger.Error(errStr)
+		return errStr
 	}
 	result := ""
 	for _,curIPSubNet:=range answer.IPList {
 		result = helpers.StringBuild(result,curIPSubNet.IP,"/",strconv.Itoa(curIPSubNet.Mask),"\n")
 	}
 
-	return "whitelist:\n" + result
+	mes:= "whitelist:\n" + result
+	cc.logger.Info(mes)
+
+	return mes
 }
 
 func(cc *CommandController) addToBlackList(arg []string) string {
 	if len(arg) != 2 {
-		return "error: " + ErrBadArgCount.Error()
+		errStr := "error: " + ErrBadArgCount.Error()
+		cc.logger.Error(errStr)
+		return  errStr
 	}
 	subArgs:=strings.Split(arg[1], "/")
 
 	if len(subArgs) != 2 {
-		return "error: " + ErrBadArgument.Error()
+		errStr := "error: " + ErrBadArgument.Error()
+		cc.logger.Error(errStr)
+		return errStr
 	}
 
 	url := helpers.StringBuild("http://", cc.address, "/blacklist/")
@@ -287,35 +354,50 @@ func(cc *CommandController) addToBlackList(arg []string) string {
 	jsonStr := []byte(`{"IP":"`+subArgs[0]+`","Mask":`+subArgs[1]+`}`)
 	resp, err := http.Post(url, "application/json", bytes.NewBuffer(jsonStr))
 	if err!=nil {
-		return "error: " + err.Error()
+		errStr := "error: " + err.Error()
+		cc.logger.Error(errStr)
+		return errStr
 	}	
 	defer resp.Body.Close()
 
 	respBody, err := io.ReadAll(resp.Body)
 	if err!=nil {
-		return "error: " + err.Error()
+		errStr := "error: " + err.Error()
+		cc.logger.Error(errStr)
+		return errStr
 	}
 		
 	answer :=outputJSON{}
 	err = json.Unmarshal(respBody, &answer)
 	if err!=nil {
-		return "error: " + err.Error()
+		errStr := "error: " + err.Error()
+		cc.logger.Error(errStr)
+		return errStr
 	}
     if answer.Text!="OK!"{
-		return "error: " + answer.Text
+		errStr := "error: " + answer.Text
+		cc.logger.Error(errStr)
+		return errStr
 	}
 
-	return "subnet add to blacklist succesful"
+	mes:= "subnet add to blacklist succesful"
+	cc.logger.Info(mes)
+
+	return mes
 }
 
 func(cc *CommandController)removeFromBlackList(arg []string) string {
 	if len(arg) != 2 {
-		return "error: " + ErrBadArgCount.Error()
+		errStr := "error: " + ErrBadArgCount.Error()
+		cc.logger.Error(errStr)
+		return  errStr
 	}
 	subArgs:=strings.Split(arg[1], "/")
 
 	if len(subArgs) != 2 {
-		return "error: " + ErrBadArgument.Error()
+		errStr := "error: " + ErrBadArgument.Error()
+		cc.logger.Error(errStr)
+		return errStr
 	}
 
 	url := helpers.StringBuild("http://", cc.address, "/blacklist/")
@@ -323,42 +405,59 @@ func(cc *CommandController)removeFromBlackList(arg []string) string {
 	jsonStr := []byte(`{"IP":"`+subArgs[0]+`","Mask":`+subArgs[1]+`}`)
 	req, err := http.NewRequest("DELETE", url, bytes.NewBuffer(jsonStr))
 	if err!=nil {
-		return "error: " + err.Error()
+		errStr := "error: " + err.Error()
+		cc.logger.Error(errStr)
+		return errStr
 	}
 	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err!=nil {
-		return "error: " + err.Error()
+		errStr := "error: " + err.Error()
+		cc.logger.Error(errStr)
+		return errStr
 	}
 	defer resp.Body.Close()
 
 	respBody, err := io.ReadAll(resp.Body)
 	if err!=nil {
-		return "error: " + err.Error()
+		errStr := "error: " + err.Error()
+		cc.logger.Error(errStr)
+		return errStr
 	}
 		
 	answer :=outputJSON{}
 	err = json.Unmarshal(respBody, &answer)
 	if err!=nil {
-		return "error: " + err.Error()
+		errStr := "error: " + err.Error()
+		cc.logger.Error(errStr)
+		return errStr
 	}
     if answer.Text!="OK!"{
-		return "error: " + answer.Text
+		errStr := "error: " + answer.Text
+		cc.logger.Error(errStr)
+		return errStr
 	}
 
-	return "subnet remove from blacklist succesful"
+	mes:= "subnet remove from blacklist succesful"
+	cc.logger.Info(mes)
+
+	return mes
 }
 
 func(cc *CommandController)isInBlackList(arg []string) string {
 	if len(arg) != 2 {
-		return "error: " + ErrBadArgCount.Error()
+		errStr := "error: " + ErrBadArgCount.Error()
+		cc.logger.Error(errStr)
+		return  errStr
 	}
 	subArgs:=strings.Split(arg[1], "/")
 
 	if len(subArgs) != 2 {
-		return "error: " + ErrBadArgument.Error()
+		errStr := "error: " + ErrBadArgument.Error()
+		cc.logger.Error(errStr)
+		return errStr
 	}
 
 	url := helpers.StringBuild("http://", cc.address, "/blacklist/")
@@ -373,25 +472,36 @@ func(cc *CommandController)isInBlackList(arg []string) string {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err!=nil {
-		return "error: " + err.Error()
+		errStr := "error: " + err.Error()
+		cc.logger.Error(errStr)
+		return errStr
 	}
 	defer resp.Body.Close()
 
 	respBody, err := io.ReadAll(resp.Body)
 	if err!=nil {
-		return "error: " + err.Error()
+		errStr := "error: " + err.Error()
+		cc.logger.Error(errStr)
+		return errStr
 	}
 	//fmt.Println("iwl body: ", string(respBody))
 	answer :=IPListAnswer{}
 	err = json.Unmarshal(respBody, &answer)
 	if err!=nil {
-		return "error: " + err.Error()
+		errStr := "error: " + err.Error()
+		cc.logger.Error(errStr)
+		return errStr
 	}
     if answer.Message.Code!=0{
-		return "error: " + answer.Message.Text
+		errStr := "error: " + answer.Message.Text
+		cc.logger.Error(errStr)
+		return errStr
 	}
 
-	return "subnet in blacklist: " + answer.Message.Text
+	mes:= "subnet in blacklist: " + answer.Message.Text
+	cc.logger.Info(mes)
+
+	return mes
 }
 
 func(cc *CommandController)allInBlackList() string {
@@ -400,41 +510,56 @@ func(cc *CommandController)allInBlackList() string {
 	jsonStr := []byte(`{"IP":"ALL","Mask":0}`)
 	req, err := http.NewRequest("GET", url, bytes.NewBuffer(jsonStr))
 	if err!=nil {
-		return "error: " + err.Error()
+		errStr := "error: " + err.Error()
+		cc.logger.Error(errStr)
+		return errStr
 	}
 	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err!=nil {
-		return "error: " + err.Error()
+		errStr := "error: " + err.Error()
+		cc.logger.Error(errStr)
+		return errStr
 	}
 	defer resp.Body.Close()
 
 	respBody, err := io.ReadAll(resp.Body)
 	if err!=nil {
-		return "error: " + err.Error()
+		errStr := "error: " + err.Error()
+		cc.logger.Error(errStr)
+		return errStr
 	}
 	//fmt.Println("iwl body: ", string(respBody))
 	answer :=IPListAnswer{}
 	err = json.Unmarshal(respBody, &answer)
 	if err!=nil {
-		return "error: " + err.Error()
+		errStr := "error: " + err.Error()
+		cc.logger.Error(errStr)
+		return errStr
 	}
     if answer.Message.Code!=0{
-		return "error: " + answer.Message.Text
+		errStr := "error: " + answer.Message.Text
+		cc.logger.Error(errStr)
+		return errStr
 	}
 	result := ""
 	for _,curIPSubNet:=range answer.IPList {
 		result = helpers.StringBuild(result,curIPSubNet.IP,"/",strconv.Itoa(curIPSubNet.Mask),"\n")
 	}
 
-	return "blacklist:\n" + result
+	mes:= "blacklist:\n" + result
+	cc.logger.Info(mes)
+
+	return mes
 }
 
 func(cc *CommandController)request(arg []string) string {
 	if len(arg) != 4 {
-		return "error: " + ErrBadArgCount.Error()
+		errStr := "error: " + ErrBadArgCount.Error()
+		cc.logger.Error(errStr)
+		return  errStr
 	}
 	
 	url := helpers.StringBuild("http://", cc.address, "/request/")
@@ -446,26 +571,34 @@ func(cc *CommandController)request(arg []string) string {
 	}`)
 	req, err := http.NewRequest("GET", url, bytes.NewBuffer(jsonStr))
 	if err!=nil {
-		return "error: " + err.Error()
+		errStr := "error: " + err.Error()
+		cc.logger.Error(errStr)
+		return errStr
 	}
 	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err!=nil {
-		return "error: " + err.Error()
+		errStr := "error: " + err.Error()
+		cc.logger.Error(errStr)
+		return errStr
 	}
 	defer resp.Body.Close()
 
 	respBody, err := io.ReadAll(resp.Body)
 	if err!=nil {
-		return "error: " + err.Error()
+		errStr := "error: " + err.Error()
+		cc.logger.Error(errStr)
+		return errStr
 	}
 	//fmt.Println("iwl body: ", string(respBody))
 	answer :=AuthorizationRequestAnswer{}
 	err = json.Unmarshal(respBody, &answer)
 	if err!=nil {
-		return "error: " + err.Error()
+		errStr := "error: " + err.Error()
+		cc.logger.Error(errStr)
+		return errStr
 	}
 	var txtAnswer string
 	if answer.Ok {
@@ -474,12 +607,17 @@ func(cc *CommandController)request(arg []string) string {
 		txtAnswer="YES"
 	}
 
-	return "is bruteforce: " + txtAnswer + "; notification: " + answer.Message
+	mes:= "is bruteforce: " + txtAnswer + "; notification: " + answer.Message
+	cc.logger.Info(mes)
+
+	return mes
 }
 // req u0 p1 10.0.0.0
 func(cc *CommandController)clearBucketByLogin(arg []string) string {
 	if len(arg) != 2 {
-		return "error: " + ErrBadArgCount.Error()
+		errStr := "error: " + ErrBadArgCount.Error()
+		cc.logger.Error(errStr)
+		return  errStr
 	}
 	
 	url := helpers.StringBuild("http://", cc.address, "/clearbucketbylogin/")
@@ -487,37 +625,52 @@ func(cc *CommandController)clearBucketByLogin(arg []string) string {
 	jsonStr := []byte(`{"Tag":"`+arg[1]+`"}`)
 	req, err := http.NewRequest("DELETE", url, bytes.NewBuffer(jsonStr))
 	if err!=nil {
-		return "error: " + err.Error()
+		errStr := "error: " + err.Error()
+		cc.logger.Error(errStr)
+		return errStr
 	}
 	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err!=nil {
-		return "error: " + err.Error()
+		errStr := "error: " + err.Error()
+		cc.logger.Error(errStr)
+		return errStr
 	}
 	defer resp.Body.Close()
 
 	respBody, err := io.ReadAll(resp.Body)
 	if err!=nil {
-		return "error: " + err.Error()
+		errStr := "error: " + err.Error()
+		cc.logger.Error(errStr)
+		return errStr
 	}
 		
 	answer :=outputJSON{}
 	err = json.Unmarshal(respBody, &answer)
 	if err!=nil {
-		return "error: " + err.Error()
+		errStr := "error: " + err.Error()
+		cc.logger.Error(errStr)
+		return errStr
 	}
     if answer.Text!="OK!"{
-		return "error: " + answer.Text
+		errStr := "error: " + answer.Text
+		cc.logger.Error(errStr)
+		return errStr
 	}
 
-	return `Login bucket "`+arg[1]+`" cleared`
+	mes:= `Login bucket "`+arg[1]+`" cleared`
+	cc.logger.Info(mes)
+
+	return mes
 }
 
 func(cc *CommandController)clearBucketByIP(arg []string) string {
 	if len(arg) != 2 {
-		return "error: " + ErrBadArgCount.Error()
+		errStr := "error: " + ErrBadArgCount.Error()
+		cc.logger.Error(errStr)
+		return  errStr
 	}
 	
 	url := helpers.StringBuild("http://", cc.address, "/clearbucketbyip/")
@@ -525,30 +678,43 @@ func(cc *CommandController)clearBucketByIP(arg []string) string {
 	jsonStr := []byte(`{"Tag":"`+arg[1]+`"}`)
 	req, err := http.NewRequest("DELETE", url, bytes.NewBuffer(jsonStr))
 	if err!=nil {
-		return "error: " + err.Error()
+		errStr := "error: " + err.Error()
+		cc.logger.Error(errStr)
+		return errStr
 	}
 	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err!=nil {
-		return "error: " + err.Error()
+		errStr := "error: " + err.Error()
+		cc.logger.Error(errStr)
+		return errStr
 	}
 	defer resp.Body.Close()
 
 	respBody, err := io.ReadAll(resp.Body)
 	if err!=nil {
-		return "error: " + err.Error()
+		errStr := "error: " + err.Error()
+		cc.logger.Error(errStr)
+		return errStr
 	}
 		
 	answer :=outputJSON{}
 	err = json.Unmarshal(respBody, &answer)
 	if err!=nil {
-		return "error: " + err.Error()
+		errStr := "error: " + err.Error()
+		cc.logger.Error(errStr)
+		return errStr
 	}
     if answer.Text!="OK!"{
-		return "error: " + answer.Text
+		errStr := "error: " + answer.Text
+		cc.logger.Error(errStr)
+		return errStr
 	}
 
-	return `IP bucket "`+arg[1]+`" cleared`
+	mes:= `IP bucket "`+arg[1]+`" cleared`
+	cc.logger.Info(mes)
+
+	return mes
 }

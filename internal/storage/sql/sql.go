@@ -97,11 +97,23 @@ func(s *Storage)AddIPToWhiteList(ctx context.Context, logger storageData.Logger,
 func (s *Storage) RemoveIPInWhiteList(ctx context.Context, logger storageData.Logger, ipdata storageData.StorageIPData) error {
 	stmt := "DELETE from whitelist WHERE IP=? AND mask=?"
 
-	_, err := s.DB.ExecContext(ctx, stmt, ipdata.IP, ipdata.Mask)
+	result, err := s.DB.ExecContext(ctx, stmt, ipdata.IP, ipdata.Mask)
 	if err != nil {
 		logger.Error("SQL DB exec stmt RemoveIPInWhiteList error: " + err.Error() + " stmt: " + stmt)
 		return err
 	}
+	
+	count,err:=result.RowsAffected()
+	if err != nil {
+		logger.Error("SQL DB type RemoveIPInWhiteList error: " + err.Error() + " stmt: " + stmt)
+		return err
+	}
+	
+	if count == int64(0) {
+		logger.Error("SQL DB exec stmt RemoveIPInWhiteList error: " + storageData.ErrNoRecord.Error() + " stmt: " + stmt)
+		return storageData.ErrNoRecord 
+	}  
+	
 	return nil
 }
 
@@ -178,11 +190,22 @@ func(s *Storage)AddIPToBlackList(ctx context.Context, logger storageData.Logger,
 func (s *Storage) RemoveIPInBlackList(ctx context.Context, logger storageData.Logger, ipdata storageData.StorageIPData) error {
 	stmt := "DELETE from blacklist WHERE IP=? AND mask=?"
 
-	_, err := s.DB.ExecContext(ctx, stmt, ipdata.IP, ipdata.Mask)
+	result, err := s.DB.ExecContext(ctx, stmt, ipdata.IP, ipdata.Mask)
 	if err != nil {
 		logger.Error("SQL DB exec stmt RemoveIPInBlackList error: " + err.Error() + " stmt: " + stmt)
 		return err
 	}
+	count,err:=result.RowsAffected()
+	if err != nil {
+		logger.Error("SQL DB type RemoveIPInWhiteList error: " + err.Error() + " stmt: " + stmt)
+		return err
+	}
+	
+	if count == int64(0) {
+		logger.Error("SQL DB exec stmt RemoveIPInWhiteList error: " + storageData.ErrNoRecord.Error() + " stmt: " + stmt)
+		return storageData.ErrNoRecord 
+	}  
+
 	return nil
 }
 

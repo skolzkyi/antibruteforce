@@ -260,7 +260,7 @@ func TestRemoveFromWhiteList(t *testing.T){
 		answer :=outputJSON{}
 		err = json.Unmarshal(respBody, &answer)
 		require.NoError(t, err)
-    	require.Equal(t, answer.Text, sql.ErrNoRows.Error())
+    	require.Equal(t, answer.Text, storageData.ErrNoRecord.Error())
 		err = cleanDatabaseAndRedis(ctx)
 		require.NoError(t, err)
 	})
@@ -351,6 +351,272 @@ func TestGetAllIPInWhiteList(t *testing.T){
 		require.NoError(t, err)
 
 		url := helpers.StringBuild("http://", config.GetServerURL(), "/whitelist/")
+	
+		jsonStr := []byte(`{"IP":"ALL","Mask":0}`)
+		
+		req, err := http.NewRequest("GET", url, bytes.NewBuffer(jsonStr))
+		require.NoError(t, err)
+		req.Header.Set("Content-Type", "application/json")
+
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		require.NoError(t, err)
+		defer resp.Body.Close()
+
+		respBody, err := io.ReadAll(resp.Body)
+		require.NoError(t, err)
+		
+		answer :=IPListAnswer{}
+		err = json.Unmarshal(respBody, &answer)
+		require.NoError(t, err)
+
+    	result := make([]string,0)
+		for _,curIPSubNet:=range answer.IPList {
+			result = append(result, helpers.StringBuild(curIPSubNet.IP,"/",strconv.Itoa(curIPSubNet.Mask)))
+		}
+		require.Equal(t, len(result), 2)
+		require.Equal(t, result[0], "192.168.0.0/24")
+		require.Equal(t, result[1], "172.92.16.0/22")
+		
+		err = cleanDatabaseAndRedis(ctx)
+		require.NoError(t, err)
+	})
+}
+
+func TestAddToBlackList(t *testing.T){
+	t.Run("AddToBlackList_Positive", func(t *testing.T) {
+		url := helpers.StringBuild("http://", config.GetServerURL(), "/blacklist/")
+	
+		jsonStr := []byte(`{"IP":"192.168.0.0","Mask":24}`)
+		resp, err := http.Post(url, "application/json", bytes.NewBuffer(jsonStr))
+		require.NoError(t, err)
+		defer resp.Body.Close()
+
+		respBody, err := io.ReadAll(resp.Body)
+		require.NoError(t, err)
+		
+		answer :=outputJSON{}
+		err = json.Unmarshal(respBody, &answer)
+		require.NoError(t, err)
+    	require.Equal(t, answer.Text, "OK!")
+
+		ctx, cancel := context.WithTimeout(context.Background(), config.GetDBTimeOut())
+		defer cancel()
+
+		stmt := `SELECT IP,mask FROM blacklist WHERE IP = "192.168.0.0" AND mask=24` 
+		row := mySQL_DB.QueryRowContext(ctx, stmt)
+
+		var IP string
+		var mask int
+
+		err = row.Scan(&IP, &mask)
+		require.NoError(t, err)
+
+		require.Equal(t, IP, "192.168.0.0")
+		require.Equal(t, mask, 24)
+		
+		err = cleanDatabaseAndRedis(ctx)
+		require.NoError(t, err)
+	})
+	t.Run("AddToBlackList_NegativeListCrossCheck", func(t *testing.T) {
+		ctx, cancel := context.WithTimeout(context.Background(), config.GetDBTimeOut())
+		defer cancel()
+		stmt := `INSERT INTO whitelist(IP,mask) VALUES ("192.168.0.0",24)`                         
+		_, err := mySQL_DB.ExecContext(ctx, stmt) 
+		require.NoError(t, err)
+
+		url := helpers.StringBuild("http://", config.GetServerURL(), "/blacklist/")
+	
+		jsonStr := []byte(`{"IP":"192.168.0.0","Mask":24}`)
+		resp, err := http.Post(url, "application/json", bytes.NewBuffer(jsonStr))
+		require.NoError(t, err)
+		defer resp.Body.Close()
+
+		respBody, err := io.ReadAll(resp.Body)
+		require.NoError(t, err)
+		
+		answer :=outputJSON{}
+		err = json.Unmarshal(respBody, &answer)
+		require.NoError(t, err)
+    	require.Equal(t, answer.Text, "IPData already exists in whitelist")
+
+		stmt = `SELECT IP,mask FROM blacklist WHERE IP = "192.168.0.0" AND mask=24` 
+		row := mySQL_DB.QueryRowContext(ctx, stmt)
+
+		var IP string
+		var mask int
+
+		err = row.Scan(&IP, &mask)
+		require.Truef(t, errors.Is(err, sql.ErrNoRows), "actual error %q", err)
+		
+		err = cleanDatabaseAndRedis(ctx)
+		require.NoError(t, err)
+	})
+}
+
+func TestRemoveFromBlackList(t *testing.T){
+	t.Run("RemoveFromBlackList_Positive", func(t *testing.T) {
+		ctx, cancel := context.WithTimeout(context.Background(), config.GetDBTimeOut())
+		defer cancel()
+		stmt := `INSERT INTO blacklist(IP,mask) VALUES ("192.168.0.0",24)`                         
+		_, err := mySQL_DB.ExecContext(ctx, stmt) 
+		require.NoError(t, err)
+
+		stmt = `SELECT IP,mask FROM blacklist WHERE IP = "192.168.0.0" AND mask=24` 
+		row := mySQL_DB.QueryRowContext(ctx, stmt)
+
+		var IP string
+		var mask int
+
+		err = row.Scan(&IP, &mask)
+		require.NoError(t, err)
+
+		require.Equal(t, IP, "192.168.0.0")
+		require.Equal(t, mask, 24)
+
+		url := helpers.StringBuild("http://", config.GetServerURL(), "/blacklist/")
+	
+		jsonStr := []byte(`{"IP":"192.168.0.0","Mask":24}`)
+		
+		req, err := http.NewRequest("DELETE", url, bytes.NewBuffer(jsonStr))
+		require.NoError(t, err)
+		req.Header.Set("Content-Type", "application/json")
+
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		require.NoError(t, err)
+		defer resp.Body.Close()
+
+		respBody, err := io.ReadAll(resp.Body)
+		require.NoError(t, err)
+		
+		answer :=outputJSON{}
+		err = json.Unmarshal(respBody, &answer)
+		require.NoError(t, err)
+    	require.Equal(t, answer.Text, "OK!")
+
+		stmt = `SELECT IP,mask FROM blacklist WHERE IP = "192.168.0.0" AND mask=24` 
+		row = mySQL_DB.QueryRowContext(ctx, stmt)
+
+		err = row.Scan(&IP, &mask)
+		require.Truef(t, errors.Is(err, sql.ErrNoRows), "actual error %q", err)
+		
+		err = cleanDatabaseAndRedis(ctx)
+		require.NoError(t, err)
+	})
+	t.Run("RemoveFromBlackList_NegativeNotInBase", func(t *testing.T) {
+		ctx, cancel := context.WithTimeout(context.Background(), config.GetDBTimeOut())
+		defer cancel()
+		url := helpers.StringBuild("http://", config.GetServerURL(), "/blacklist/")
+	
+		jsonStr := []byte(`{"IP":"192.68.0.0","Mask":24}`)
+		
+		req, err := http.NewRequest("DELETE", url, bytes.NewBuffer(jsonStr))
+		require.NoError(t, err)
+		req.Header.Set("Content-Type", "application/json")
+
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		require.NoError(t, err)
+		defer resp.Body.Close()
+
+		respBody, err := io.ReadAll(resp.Body)
+		require.NoError(t, err)
+		
+		answer :=outputJSON{}
+		err = json.Unmarshal(respBody, &answer)
+		require.NoError(t, err)
+    	require.Equal(t, answer.Text, storageData.ErrNoRecord.Error())
+		err = cleanDatabaseAndRedis(ctx)
+		require.NoError(t, err)
+	})
+}
+
+func TestIsIPInBlackList(t *testing.T){
+	t.Run("IsIPInBlackList_Positive", func(t *testing.T) {
+		ctx, cancel := context.WithTimeout(context.Background(), config.GetDBTimeOut())
+		defer cancel()
+		stmt := `INSERT INTO blacklist(IP,mask) VALUES ("192.168.0.0",24)`                         
+		_, err := mySQL_DB.ExecContext(ctx, stmt) 
+		require.NoError(t, err)
+
+		stmt = `SELECT IP,mask FROM blacklist WHERE IP = "192.168.0.0" AND mask=24` 
+		row := mySQL_DB.QueryRowContext(ctx, stmt)
+
+		var IP string
+		var mask int
+
+		err = row.Scan(&IP, &mask)
+		require.NoError(t, err)
+
+		require.Equal(t, IP, "192.168.0.0")
+		require.Equal(t, mask, 24)
+
+		url := helpers.StringBuild("http://", config.GetServerURL(), "/blacklist/")
+	
+		jsonStr := []byte(`{"IP":"192.168.0.0","Mask":24}`)
+		
+		req, err := http.NewRequest("GET", url, bytes.NewBuffer(jsonStr))
+		require.NoError(t, err)
+		req.Header.Set("Content-Type", "application/json")
+
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		require.NoError(t, err)
+		defer resp.Body.Close()
+
+		respBody, err := io.ReadAll(resp.Body)
+		require.NoError(t, err)
+		
+		answer :=IPListAnswer{}
+		err = json.Unmarshal(respBody, &answer)
+		require.NoError(t, err)
+    	require.Equal(t, answer.Message.Text, "YES")
+		
+		err = cleanDatabaseAndRedis(ctx)
+		require.NoError(t, err)
+	})
+	t.Run("IsIPInBlackList_NegativeNotInBase", func(t *testing.T) {
+		ctx, cancel := context.WithTimeout(context.Background(), config.GetDBTimeOut())
+		defer cancel()
+		url := helpers.StringBuild("http://", config.GetServerURL(), "/blacklist/")
+	
+		jsonStr := []byte(`{"IP":"192.168.0.0","Mask":24}`)
+		
+		req, err := http.NewRequest("GET", url, bytes.NewBuffer(jsonStr))
+		require.NoError(t, err)
+		req.Header.Set("Content-Type", "application/json")
+
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		require.NoError(t, err)
+		defer resp.Body.Close()
+
+		respBody, err := io.ReadAll(resp.Body)
+		require.NoError(t, err)
+		
+		answer :=IPListAnswer{}
+		err = json.Unmarshal(respBody, &answer)
+		require.NoError(t, err)
+    	require.Equal(t, answer.Message.Text, "NO")
+		err = cleanDatabaseAndRedis(ctx)
+		require.NoError(t, err)
+	})
+}
+
+func TestGetAllIPInBlackList(t *testing.T){
+	t.Run("GetAllIPInBlackList_Positive", func(t *testing.T) {
+		ctx, cancel := context.WithTimeout(context.Background(), config.GetDBTimeOut())
+		defer cancel()
+		stmt := `INSERT INTO blacklist(IP,mask) VALUES ("192.168.0.0",24)`                         
+		_, err := mySQL_DB.ExecContext(ctx, stmt) 
+		require.NoError(t, err)
+
+		stmt = `INSERT INTO blacklist(IP,mask) VALUES ("172.92.16.0",22)`                         
+		_, err = mySQL_DB.ExecContext(ctx, stmt) 
+		require.NoError(t, err)
+
+		url := helpers.StringBuild("http://", config.GetServerURL(), "/blacklist/")
 	
 		jsonStr := []byte(`{"IP":"ALL","Mask":0}`)
 		

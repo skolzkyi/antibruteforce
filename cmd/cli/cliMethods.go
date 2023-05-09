@@ -612,7 +612,7 @@ func(cc *CommandController)request(arg []string) string {
 
 	return mes
 }
-// req u0 p1 10.0.0.0
+
 func(cc *CommandController)clearBucketByLogin(arg []string) string {
 	if len(arg) != 2 {
 		errStr := "error: " + ErrBadArgCount.Error()

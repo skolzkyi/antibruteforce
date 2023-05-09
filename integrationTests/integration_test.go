@@ -649,6 +649,130 @@ func TestGetAllIPInBlackList(t *testing.T){
 	})
 }
 
+func TestClearBucketByLogin(t *testing.T){
+	t.Run("ClearBucketByLogin_Positive", func(t *testing.T) {
+		ctx, cancel := context.WithTimeout(context.Background(), config.GetDBTimeOut())
+		defer cancel()
+		err := rdb.Set(ctx, "l_user0", "10", 0).Err()
+		require.NoError(t, err)
+		val, err := rdb.Get(ctx, "l_user0").Result()
+		require.NoError(t, err)
+		require.Equal(t, val, "10")
+		url := helpers.StringBuild("http://", config.GetServerURL(), "/clearbucketbylogin/")
+	
+		jsonStr := []byte(`{"Tag":"user0"}`)
+		req, err := http.NewRequest("DELETE", url, bytes.NewBuffer(jsonStr))
+		require.NoError(t, err)
+		req.Header.Set("Content-Type", "application/json")
+
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		require.NoError(t, err)
+		defer resp.Body.Close()
+
+		respBody, err := io.ReadAll(resp.Body)
+		require.NoError(t, err)
+		
+		answer :=outputJSON{}
+		err = json.Unmarshal(respBody, &answer)
+		require.NoError(t, err)
+    	require.Equal(t, answer.Text, "OK!")
+		
+		val, err = rdb.Get(ctx, "l_user0").Result()
+		require.NoError(t, err)
+		require.Equal(t, val, "0")
+
+		err = cleanDatabaseAndRedis(ctx)
+		require.NoError(t, err)
+	})
+}
+
+func TestClearBucketByIP(t *testing.T){
+	t.Run("ClearBucketByIP_Positive", func(t *testing.T) {
+		ctx, cancel := context.WithTimeout(context.Background(), config.GetDBTimeOut())
+		defer cancel()
+		err := rdb.Set(ctx, "ip_192.168.1.5", "10", 0).Err()
+		require.NoError(t, err)
+		val, err := rdb.Get(ctx, "ip_192.168.1.5").Result()
+		require.NoError(t, err)
+		require.Equal(t, val, "10")
+		url := helpers.StringBuild("http://", config.GetServerURL(), "/clearbucketbyip/")
+	
+		jsonStr := []byte(`{"Tag":"192.168.1.5"}`)
+		req, err := http.NewRequest("DELETE", url, bytes.NewBuffer(jsonStr))
+		require.NoError(t, err)
+		req.Header.Set("Content-Type", "application/json")
+
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		require.NoError(t, err)
+		defer resp.Body.Close()
+
+		respBody, err := io.ReadAll(resp.Body)
+		require.NoError(t, err)
+		
+		answer :=outputJSON{}
+		err = json.Unmarshal(respBody, &answer)
+		require.NoError(t, err)
+    	require.Equal(t, answer.Text, "OK!")
+		
+		val, err = rdb.Get(ctx, "ip_192.168.1.5").Result()
+		require.NoError(t, err)
+		require.Equal(t, val, "0")
+
+		err = cleanDatabaseAndRedis(ctx)
+		require.NoError(t, err)
+	})
+}
+
+func TestAuthorizationRequest(t *testing.T){
+	t.Run("AuthorizationRequestSimple_Positive", func(t *testing.T) {
+		ctx, cancel := context.WithTimeout(context.Background(), config.GetDBTimeOut())
+		defer cancel()
+
+		url := helpers.StringBuild("http://", config.GetServerURL(), "/request/")
+	
+		jsonStr := []byte(`{
+			"Login":"user0",
+			"Password":"CharlyDonTSerf",
+			"IP":"192.168.16.56"
+		}`)
+		
+		req, err := http.NewRequest("GET", url, bytes.NewBuffer(jsonStr))
+		require.NoError(t, err)
+		req.Header.Set("Content-Type", "application/json")
+
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		require.NoError(t, err)
+		defer resp.Body.Close()
+
+		respBody, err := io.ReadAll(resp.Body)
+		require.NoError(t, err)
+		
+		answer :=AuthorizationRequestAnswer{}
+		err = json.Unmarshal(respBody, &answer)
+		require.NoError(t, err)
+		require.Equal(t, answer.Ok, true)
+		require.Equal(t, answer.Message, "clear check")
+	
+		val, err := rdb.Get(ctx, "l_user0").Result()
+		require.NoError(t, err)
+		require.Equal(t, val, "1")
+
+		val, err = rdb.Get(ctx, "p_CharlyDonTSerf").Result()
+		require.NoError(t, err)
+		require.Equal(t, val, "1")
+
+		val, err = rdb.Get(ctx, "ip_192.168.16.56").Result()
+		require.NoError(t, err)
+		require.Equal(t, val, "1")
+
+		err = cleanDatabaseAndRedis(ctx)
+		require.NoError(t, err)
+	})
+}
+
 func  InitAndConnectRedis(ctx context.Context, logger storageData.Logger, config storageData.Config) (*redis.Client, error){
 	select {
 	case <-ctx.Done():

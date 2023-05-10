@@ -48,12 +48,9 @@ install-lint-deps:
 lint: install-lint-deps
 	golangci-lint run ./...
 
-up:
-	go build -v -o $(BIN_CLI) -ldflags "$(LDFLAGS)" ./cmd/cli && \
-	gnome-terminal -- bash -c 'exec ./bin/cli -config ./configs/config_cli.env; bash' &&\
+up: build
 	docker-compose -f ./deployments/docker-compose.yaml up --build > deployLog.txt 
 	
-
 x:
 	gnome-terminal --chmod +x $(BIN_CLI) -config ./configs/config_cli.env &
 	exec chmod 777 $(BIN_CLI)

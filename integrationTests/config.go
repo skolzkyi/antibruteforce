@@ -3,7 +3,6 @@ package integrationTests
 import (
 	"errors"
 	"time"
-	
 
 	"github.com/spf13/viper"
 )
@@ -13,22 +12,21 @@ type Config struct {
 	ServerShutdownTimeout time.Duration `mapstructure:"SERVER_SHUTDOWN_TIMEOUT"`
 	dbConnMaxLifetime     time.Duration `mapstructure:"DB_CONN_MAX_LIFETIME"`
 	dbTimeOut             time.Duration `mapstructure:"DB_TIMEOUT"`
-	limitTimeCheck  	  time.Duration `mapstructure:"LIMIT_TIMECHECK"`
+	limitTimeCheck        time.Duration `mapstructure:"LIMIT_TIMECHECK"`
 	address               string        `mapstructure:"ADDRESS"`
 	port                  string        `mapstructure:"PORT"`
-	redisAddress 		  string `mapstructure:"REDIS_ADDRESS"`
-	redisPort 			  string `mapstructure:"REDIS_PORT"`
-	dbAddress 			  string `mapstructure:"DB_ADDRESS"`
-	dbPort				  string `mapstructure:"DB_PORT"`
-	dbName                string `mapstructure:"MYSQL_DATABASE"`
-	dbUser                string `mapstructure:"MYSQL_USER"`
-	dbPassword            string `mapstructure:"MYSQL_PASSWORD"`
-	limitFactorLogin 	  int 	 `mapstructure:"LIMITFACTOR_LOGIN"`
-	limitFactorPassword   int    `mapstructure:"LIMITFACTOR_PASSWORD"`
-	limitFactorIP 	      int    `mapstructure:"LIMITFACTOR_IP"`
-	dbMaxOpenConns        int    `mapstructure:"DB_MAX_OPEN_CONNS"`
-	dbMaxIdleConns        int    `mapstructure:"DB_MAX_IDLE_CONNS"`
-	
+	redisAddress          string        `mapstructure:"REDIS_ADDRESS"`
+	redisPort             string        `mapstructure:"REDIS_PORT"`
+	dbAddress             string        `mapstructure:"DB_ADDRESS"`
+	dbPort                string        `mapstructure:"DB_PORT"`
+	dbName                string        `mapstructure:"MYSQL_DATABASE"`
+	dbUser                string        `mapstructure:"MYSQL_USER"`
+	dbPassword            string        `mapstructure:"MYSQL_PASSWORD"`
+	limitFactorLogin      int           `mapstructure:"LIMITFACTOR_LOGIN"`
+	limitFactorPassword   int           `mapstructure:"LIMITFACTOR_PASSWORD"`
+	limitFactorIP         int           `mapstructure:"LIMITFACTOR_IP"`
+	dbMaxOpenConns        int           `mapstructure:"DB_MAX_OPEN_CONNS"`
+	dbMaxIdleConns        int           `mapstructure:"DB_MAX_IDLE_CONNS"`
 }
 
 type LoggerConf struct {
@@ -163,7 +161,7 @@ func (config *Config) GetRedisPort() string {
 }
 
 func (config *Config) GetLimitFactorLogin() int {
-	return config.limitFactorLogin 
+	return config.limitFactorLogin
 }
 
 func (config *Config) GetLimitFactorPassword() int {
@@ -175,5 +173,5 @@ func (config *Config) GetLimitFactorIP() int {
 }
 
 func (config *Config) GetLimitTimeCheck() time.Duration {
-	return config.limitTimeCheck 
+	return config.limitTimeCheck
 }

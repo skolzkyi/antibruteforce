@@ -16,15 +16,14 @@ import (
 )
 
 type AuthorizationRequestAnswer struct {
-   Message string
-   Ok      bool
+	Message string
+	Ok      bool
 }
 
 type outputJSON struct {
 	Text string
 	Code int
 }
-
 
 type IPListAnswer struct {
 	IPList  []storageData.StorageIPData
@@ -36,10 +35,10 @@ type InputTag struct {
 }
 
 var (
-	ErrInJSONBadParse     = errors.New("error parsing input json")
-	ErrOutJSONBadParse    = errors.New("error parsing output json")
-	ErrUnsupportedMethod  = errors.New("unsupported method")
-	ErrNoIDInIPHandler = errors.New("no ID in IP handler")
+	ErrInJSONBadParse    = errors.New("error parsing input json")
+	ErrOutJSONBadParse   = errors.New("error parsing output json")
+	ErrUnsupportedMethod = errors.New("unsupported method")
+	ErrNoIDInIPHandler   = errors.New("no ID in IP handler")
 )
 
 func apiErrHandler(err error, w *http.ResponseWriter) {
@@ -68,10 +67,10 @@ func (s *Server) AuthorizationRequest(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
 	defer cancel()
-	
+
 	switch r.Method {
 	case http.MethodGet:
-		newRequest:=storageData.RequestAuth{}
+		newRequest := storageData.RequestAuth{}
 
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
@@ -87,13 +86,13 @@ func (s *Server) AuthorizationRequest(w http.ResponseWriter, r *http.Request) {
 
 		fmt.Println("newRequest: ", newRequest)
 
-		answer:=AuthorizationRequestAnswer{}
+		answer := AuthorizationRequestAnswer{}
 
-		ok,message,errInner := s.app.CheckInputRequest(ctx, newRequest)
+		ok, message, errInner := s.app.CheckInputRequest(ctx, newRequest)
 		if errInner != nil {
-			answer.Message = "Inner error: "+errInner.Error()
+			answer.Message = "Inner error: " + errInner.Error()
 			answer.Ok = false
-			w.Header().Add("ErrCustom",errInner.Error())
+			w.Header().Add("ErrCustom", errInner.Error())
 		}
 		answer.Message = message
 		answer.Ok = ok
@@ -123,7 +122,7 @@ func (s *Server) ClearBucketByLogin(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodDelete:
 		newMessage := outputJSON{}
-		inputTag:=InputTag{}
+		inputTag := InputTag{}
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			apiErrHandler(err, &w)
@@ -135,13 +134,13 @@ func (s *Server) ClearBucketByLogin(w http.ResponseWriter, r *http.Request) {
 			apiErrHandler(err, &w)
 			return
 		}
-        
+
 		fmt.Println("ClearBucketByLogin Login: ", inputTag.Tag)
-		err = s.app.ClearBucketByLogin(ctx,inputTag.Tag)
+		err = s.app.ClearBucketByLogin(ctx, inputTag.Tag)
 		if err != nil {
 			newMessage.Text = err.Error()
 			newMessage.Code = 1
-			w.Header().Add("ErrCustom",err.Error())
+			w.Header().Add("ErrCustom", err.Error())
 		} else {
 			newMessage.Text = "OK!"
 			newMessage.Code = 0
@@ -174,7 +173,7 @@ func (s *Server) ClearBucketByIP(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodDelete:
 		newMessage := outputJSON{}
-		inputTag:=InputTag{}
+		inputTag := InputTag{}
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			apiErrHandler(err, &w)
@@ -186,13 +185,13 @@ func (s *Server) ClearBucketByIP(w http.ResponseWriter, r *http.Request) {
 			apiErrHandler(err, &w)
 			return
 		}
-        
+
 		fmt.Println(" ClearBucketByIP IP: ", inputTag.Tag)
-		err =s.app.ClearBucketByIP(ctx,inputTag.Tag)
+		err = s.app.ClearBucketByIP(ctx, inputTag.Tag)
 		if err != nil {
 			newMessage.Text = err.Error()
 			newMessage.Code = 1
-			w.Header().Add("ErrCustom",err.Error())
+			w.Header().Add("ErrCustom", err.Error())
 		} else {
 			newMessage.Text = "OK!"
 			newMessage.Code = 0
@@ -225,9 +224,9 @@ func (s *Server) WhiteList_REST(w http.ResponseWriter, r *http.Request) { //noli
 	switch r.Method {
 	case http.MethodGet:
 		fmt.Println("Get")
-		
+
 		IPListAnsw := IPListAnswer{}
-		newData:=storageData.StorageIPData{}
+		newData := storageData.StorageIPData{}
 		newMessage := outputJSON{}
 
 		body, err := io.ReadAll(r.Body)
@@ -241,14 +240,14 @@ func (s *Server) WhiteList_REST(w http.ResponseWriter, r *http.Request) { //noli
 			apiErrHandler(err, &w)
 			return
 		}
-		
+
 		fmt.Println("newData: ", newData)
-		if newData.IP=="ALL" {
-			IPList,errInner:=s.app.GetAllIPInWhiteList(ctx)
+		if newData.IP == "ALL" {
+			IPList, errInner := s.app.GetAllIPInWhiteList(ctx)
 			if errInner != nil {
 				newMessage.Text = errInner.Error()
 				newMessage.Code = 1
-				w.Header().Add("ErrCustom",errInner.Error())
+				w.Header().Add("ErrCustom", errInner.Error())
 			} else {
 				newMessage.Text = "OK!"
 				newMessage.Code = 0
@@ -273,11 +272,11 @@ func (s *Server) WhiteList_REST(w http.ResponseWriter, r *http.Request) { //noli
 		if errInner != nil {
 			newMessage.Text = errInner.Error()
 			newMessage.Code = 1
-			w.Header().Add("ErrCustom",errInner.Error())
+			w.Header().Add("ErrCustom", errInner.Error())
 		} else {
 			if ok {
 				newMessage.Text = "YES"
-			}else {
+			} else {
 				newMessage.Text = "NO"
 			}
 			newMessage.Code = 0
@@ -302,7 +301,7 @@ func (s *Server) WhiteList_REST(w http.ResponseWriter, r *http.Request) { //noli
 
 		fmt.Println("Post")
 
-		newData:=storageData.StorageIPData{}
+		newData := storageData.StorageIPData{}
 		newMessage := outputJSON{}
 
 		body, err := io.ReadAll(r.Body)
@@ -319,11 +318,11 @@ func (s *Server) WhiteList_REST(w http.ResponseWriter, r *http.Request) { //noli
 
 		fmt.Println("newData: ", newData)
 
-		id, errInner := s.app.AddIPToWhiteList(ctx, newData) 
+		id, errInner := s.app.AddIPToWhiteList(ctx, newData)
 		if errInner != nil {
 			newMessage.Text = errInner.Error()
 			newMessage.Code = 1
-			w.Header().Add("ErrCustom",errInner.Error())
+			w.Header().Add("ErrCustom", errInner.Error())
 		} else {
 			newMessage.Text = "OK!"
 			newMessage.Code = id
@@ -346,7 +345,7 @@ func (s *Server) WhiteList_REST(w http.ResponseWriter, r *http.Request) { //noli
 	case http.MethodDelete:
 
 		fmt.Println("Delete")
-		removeData:=storageData.StorageIPData{}
+		removeData := storageData.StorageIPData{}
 		newMessage := outputJSON{}
 
 		body, err := io.ReadAll(r.Body)
@@ -362,12 +361,12 @@ func (s *Server) WhiteList_REST(w http.ResponseWriter, r *http.Request) { //noli
 		}
 
 		fmt.Println("removeData: ", removeData)
-		
+
 		errInner := s.app.RemoveIPInWhiteList(ctx, removeData)
 		if errInner != nil {
 			newMessage.Text = errInner.Error()
 			newMessage.Code = 1
-			w.Header().Add("ErrCustom",errInner.Error())
+			w.Header().Add("ErrCustom", errInner.Error())
 		} else {
 			newMessage.Text = "OK!"
 			newMessage.Code = 0
@@ -401,9 +400,9 @@ func (s *Server) BlackList_REST(w http.ResponseWriter, r *http.Request) { //noli
 	switch r.Method {
 	case http.MethodGet:
 		fmt.Println("Get")
-		
+
 		IPListAnsw := IPListAnswer{}
-		newData:=storageData.StorageIPData{}
+		newData := storageData.StorageIPData{}
 		newMessage := outputJSON{}
 
 		body, err := io.ReadAll(r.Body)
@@ -417,14 +416,14 @@ func (s *Server) BlackList_REST(w http.ResponseWriter, r *http.Request) { //noli
 			apiErrHandler(err, &w)
 			return
 		}
-		
+
 		fmt.Println("newData: ", newData)
-		if newData.IP=="ALL" {
-			IPList,errInner:=s.app.GetAllIPInBlackList(ctx)
+		if newData.IP == "ALL" {
+			IPList, errInner := s.app.GetAllIPInBlackList(ctx)
 			if errInner != nil {
 				newMessage.Text = errInner.Error()
 				newMessage.Code = 1
-				w.Header().Add("ErrCustom",errInner.Error())
+				w.Header().Add("ErrCustom", errInner.Error())
 			} else {
 				newMessage.Text = "OK!"
 				newMessage.Code = 0
@@ -449,11 +448,11 @@ func (s *Server) BlackList_REST(w http.ResponseWriter, r *http.Request) { //noli
 		if errInner != nil {
 			newMessage.Text = errInner.Error()
 			newMessage.Code = 1
-			w.Header().Add("ErrCustom",errInner.Error())
+			w.Header().Add("ErrCustom", errInner.Error())
 		} else {
 			if ok {
 				newMessage.Text = "YES"
-			}else {
+			} else {
 				newMessage.Text = "NO"
 			}
 			newMessage.Code = 0
@@ -478,7 +477,7 @@ func (s *Server) BlackList_REST(w http.ResponseWriter, r *http.Request) { //noli
 
 		fmt.Println("Post")
 
-		newData:=storageData.StorageIPData{}
+		newData := storageData.StorageIPData{}
 		newMessage := outputJSON{}
 
 		body, err := io.ReadAll(r.Body)
@@ -495,11 +494,11 @@ func (s *Server) BlackList_REST(w http.ResponseWriter, r *http.Request) { //noli
 
 		fmt.Println("newData: ", newData)
 
-		id, errInner := s.app.AddIPToBlackList(ctx, newData) 
+		id, errInner := s.app.AddIPToBlackList(ctx, newData)
 		if errInner != nil {
 			newMessage.Text = errInner.Error()
 			newMessage.Code = 1
-			w.Header().Add("ErrCustom",errInner.Error())
+			w.Header().Add("ErrCustom", errInner.Error())
 		} else {
 			newMessage.Text = "OK!"
 			newMessage.Code = id
@@ -522,7 +521,7 @@ func (s *Server) BlackList_REST(w http.ResponseWriter, r *http.Request) { //noli
 	case http.MethodDelete:
 
 		fmt.Println("Delete")
-		removeData:=storageData.StorageIPData{}
+		removeData := storageData.StorageIPData{}
 		newMessage := outputJSON{}
 
 		body, err := io.ReadAll(r.Body)
@@ -538,12 +537,12 @@ func (s *Server) BlackList_REST(w http.ResponseWriter, r *http.Request) { //noli
 		}
 
 		fmt.Println("removeData: ", removeData)
-		
+
 		errInner := s.app.RemoveIPInBlackList(ctx, removeData)
 		if errInner != nil {
 			newMessage.Text = errInner.Error()
 			newMessage.Code = 1
-			w.Header().Add("ErrCustom",errInner.Error())
+			w.Header().Add("ErrCustom", errInner.Error())
 		} else {
 			newMessage.Text = "OK!"
 			newMessage.Code = 0
@@ -568,4 +567,3 @@ func (s *Server) BlackList_REST(w http.ResponseWriter, r *http.Request) { //noli
 		return
 	}
 }
-

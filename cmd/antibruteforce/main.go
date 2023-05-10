@@ -15,12 +15,12 @@ import (
 	//nolint:gci,gofmt,gofumpt,nolintlint
 	"github.com/skolzkyi/antibruteforce/internal/app"
 	"github.com/skolzkyi/antibruteforce/internal/logger"
-	
+
 	internalhttp "github.com/skolzkyi/antibruteforce/internal/server/http"
-	
-	SQLstorage "github.com/skolzkyi/antibruteforce/internal/storage/sql"
+
 	RedisStorage "github.com/skolzkyi/antibruteforce/internal/storage/redis"
-	//storageSQLMock "github.com/skolzkyi/antibruteforce/internal/storage/storageSQLMock"
+	SQLstorage "github.com/skolzkyi/antibruteforce/internal/storage/sql"
+	// storageSQLMock "github.com/skolzkyi/antibruteforce/internal/storage/storageSQLMock"
 )
 
 var configFilePath string
@@ -30,7 +30,7 @@ func init() {
 }
 
 func main() {
-	//time.Sleep(30*time.Second)
+	// time.Sleep(30*time.Second)
 	flag.Parse()
 
 	if flag.Arg(0) == "version" {
@@ -51,7 +51,7 @@ func main() {
 	log.Info("servAddr: " + config.GetAddress())
 	var storage app.Storage
 	ctxStor, cancelStore := context.WithTimeout(context.Background(), config.GetDBTimeOut())
-	
+
 	storage = SQLstorage.New()
 	err = storage.Init(ctxStor, log, &config)
 	if err != nil {
@@ -60,22 +60,22 @@ func main() {
 	}
 	redis := RedisStorage.New()
 	err = redis.Init(ctxStor, log, &config)
-	//err = redis.InitAsMock(ctxStor, log)
+	// err = redis.InitAsMock(ctxStor, log)
 	if err != nil {
 		cancelStore()
 		log.Fatal("fatal error of inintialization Redis storage: " + err.Error())
 	}
-    
-    /*
-	storage = storageSQLMock.New()
-	err = storage.Init(ctxStor, log, &config)
-	if err != nil {
-		cancelStore()
-		log.Fatal("fatal error of inintialization SQL Mock storage: " + err.Error())
-	}
+
+	/*
+		storage = storageSQLMock.New()
+		err = storage.Init(ctxStor, log, &config)
+		if err != nil {
+			cancelStore()
+			log.Fatal("fatal error of inintialization SQL Mock storage: " + err.Error())
+		}
 	*/
 	//TODO init redis
-	
+
 	antibruteforce := app.New(log, storage, redis, &config)
 
 	server := internalhttp.NewServer(log, antibruteforce, &config)

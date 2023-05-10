@@ -6,14 +6,14 @@ package app
 import (
 	"context"
 	"errors"
+	"strconv"
 	"testing"
 	"time"
-	"strconv"
 
 	logger "github.com/skolzkyi/antibruteforce/internal/logger"
+	RedisStorage "github.com/skolzkyi/antibruteforce/internal/storage/redis"
 	storageData "github.com/skolzkyi/antibruteforce/internal/storage/storageData"
 	storageSQLMock "github.com/skolzkyi/antibruteforce/internal/storage/storageSQLMock"
-	RedisStorage "github.com/skolzkyi/antibruteforce/internal/storage/redis"
 	"github.com/stretchr/testify/require"
 )
 
@@ -83,7 +83,7 @@ func (config *ConfigTest) GetRedisPort() string {
 	return "6379"
 }
 
-func (config *ConfigTest) GetLimitFactorLogin() int{
+func (config *ConfigTest) GetLimitFactorLogin() int {
 	return 10
 }
 
@@ -91,7 +91,7 @@ func (config *ConfigTest) GetLimitFactorPassword() int {
 	return 100
 }
 
-func (config *ConfigTest) GetLimitFactorIP() int{
+func (config *ConfigTest) GetLimitFactorIP() int {
 	return 12
 }
 
@@ -102,7 +102,7 @@ func (config *ConfigTest) GetLimitTimeCheck() time.Duration {
 func initAppWithMocks(t *testing.T) *App {
 	t.Helper()
 	logger, _ := logger.New("debug")
-	config:=ConfigTest{}
+	config := ConfigTest{}
 	var storage Storage
 	storage = storageSQLMock.New()
 	ctxStor, _ := context.WithTimeout(context.Background(), config.GetDBTimeOut())
@@ -118,91 +118,90 @@ func initAppWithMocks(t *testing.T) *App {
 func TestSimpleRequestValidator(t *testing.T) {
 	t.Run("PositiveRequestValidator", func(t *testing.T) {
 		t.Parallel()
-		_, err := SimpleRequestValidator("user0","root","192.168.0.12") 
+		_, err := SimpleRequestValidator("user0", "root", "192.168.0.12")
 		require.NoError(t, err)
 	})
 	t.Run("NegativeErrVoidLogin", func(t *testing.T) {
 		t.Parallel()
-		_, err := SimpleRequestValidator("","root","192.168.0.12") 
+		_, err := SimpleRequestValidator("", "root", "192.168.0.12")
 		require.Truef(t, errors.Is(err, ErrVoidLogin), "actual error %q", err)
 	})
 	t.Run("NegativeErrVoidPassword", func(t *testing.T) {
 		t.Parallel()
-		_, err := SimpleRequestValidator("user0","","192.168.0.12") 
+		_, err := SimpleRequestValidator("user0", "", "192.168.0.12")
 		require.Truef(t, errors.Is(err, ErrVoidPassword), "actual error %q", err)
 	})
 	t.Run("NegativeErrVoidIP", func(t *testing.T) {
 		t.Parallel()
-		_, err := SimpleRequestValidator("user0","root","") 
+		_, err := SimpleRequestValidator("user0", "root", "")
 		require.Truef(t, errors.Is(err, ErrBadIP), "actual error %q", err)
 	})
 }
 
-
 func TestSimpleIPDataValidator(t *testing.T) {
 	t.Run("PositiveIPDataValidator", func(t *testing.T) {
 		t.Parallel()
-		testData:=storageData.StorageIPData{
+		testData := storageData.StorageIPData{
 			IP:   "192.168.0.0",
 			Mask: 25,
 		}
-		err := SimpleIPDataValidator(testData,false) 
+		err := SimpleIPDataValidator(testData, false)
 		require.NoError(t, err)
 	})
 	t.Run("PositiveIPDataValidatorALL", func(t *testing.T) {
 		t.Parallel()
-		testData:=storageData.StorageIPData{
+		testData := storageData.StorageIPData{
 			IP:   "ALL",
 			Mask: 0,
 		}
-		err := SimpleIPDataValidator(testData,true) 
+		err := SimpleIPDataValidator(testData, true)
 		require.NoError(t, err)
 	})
 	t.Run("NegativeErrVoidIP", func(t *testing.T) {
 		t.Parallel()
-		testData:=storageData.StorageIPData{
+		testData := storageData.StorageIPData{
 			IP:   "",
 			Mask: 25,
 		}
-		err := SimpleIPDataValidator(testData,false) 
+		err := SimpleIPDataValidator(testData, false)
 		require.Truef(t, errors.Is(err, ErrBadIP), "actual error %q", err)
 	})
 	t.Run("NegativeErrVoidMask", func(t *testing.T) {
 		t.Parallel()
-		testData:=storageData.StorageIPData{
+		testData := storageData.StorageIPData{
 			IP:   "192.168.0.0",
 			Mask: 0,
 		}
-		err := SimpleIPDataValidator(testData,false) 
+		err := SimpleIPDataValidator(testData, false)
 		require.Truef(t, errors.Is(err, ErrVoidMask), "actual error %q", err)
 	})
 }
 
 func TestAppNegativeAddIPCrossAdding(t *testing.T) {
 	app := initAppWithMocks(t)
-	config:=ConfigTest{}
-	err:=app.InitStorage(context.Background(),&config)
+	config := ConfigTest{}
+	err := app.InitStorage(context.Background(), &config)
 	require.NoError(t, err)
 	defer app.CloseStorage(context.Background())
-	newData:=storageData.StorageIPData{
+	newData := storageData.StorageIPData{
 		IP:   "192.168.0.0",
 		Mask: 25,
 	}
 	_, err = app.AddIPToWhiteList(context.Background(), newData)
-	require.NoError(t, err) 
+	require.NoError(t, err)
 	ok, err := app.IsIPInWhiteList(context.Background(), newData)
-	require.NoError(t, err) 
+	require.NoError(t, err)
 	require.Truef(t, ok == true, "IP not in whitelist", ok)
 	_, err = app.AddIPToBlackList(context.Background(), newData)
 	require.Truef(t, errors.Is(err, ErrIPDataExistInWL), "actual error %q", err)
-	newData =storageData.StorageIPData{
+	newData = storageData.StorageIPData{
 		IP:   "10.0.0.0",
 		Mask: 8,
 	}
 	_, err = app.AddIPToBlackList(context.Background(), newData)
-	require.NoError(t, err) 
+	require.NoError(t, err)
 	ok, err = app.IsIPInBlackList(context.Background(), newData)
-	require.NoError(t, err) 
+	require.NoError(t, err)
 	require.Truef(t, ok == true, "IP not in blacklist", ok)
 	_, err = app.AddIPToWhiteList(context.Background(), newData)
 	require.Truef(t, errors.Is(err, ErrIPDataExistInBL), "actual error %q", err)
@@ -212,137 +211,136 @@ func TestAppNegativeAddIPCrossAdding(t *testing.T) {
 
 func TestAppPositiveAddIPToWhiteListAndIsIPInWhiteList(t *testing.T) {
 	app := initAppWithMocks(t)
-	config:=ConfigTest{}
-	err:=app.InitStorage(context.Background(),&config)
+	config := ConfigTest{}
+	err := app.InitStorage(context.Background(), &config)
 	require.NoError(t, err)
 	defer app.CloseStorage(context.Background())
-	newData:=storageData.StorageIPData{
+	newData := storageData.StorageIPData{
 		IP:   "192.168.0.0",
 		Mask: 25,
 	}
 	_, err = app.AddIPToWhiteList(context.Background(), newData)
-	require.NoError(t, err) 
+	require.NoError(t, err)
 	ok, err := app.IsIPInWhiteList(context.Background(), newData)
-	require.NoError(t, err) 
+	require.NoError(t, err)
 	require.Truef(t, ok == true, "IP not in whitelist", ok)
 }
 
 func TestAppPositiveRemoveIPInWhiteListAndIsIPInWhiteList(t *testing.T) {
 	app := initAppWithMocks(t)
-	config:=ConfigTest{}
-	err:=app.InitStorage(context.Background(),&config)
+	config := ConfigTest{}
+	err := app.InitStorage(context.Background(), &config)
 	require.NoError(t, err)
 	defer app.CloseStorage(context.Background())
-	newData:=storageData.StorageIPData{
+	newData := storageData.StorageIPData{
 		IP:   "192.168.0.0",
 		Mask: 25,
 	}
 	_, err = app.AddIPToWhiteList(context.Background(), newData)
-	require.NoError(t, err) 
+	require.NoError(t, err)
 	ok, err := app.IsIPInWhiteList(context.Background(), newData)
-	require.NoError(t, err) 
+	require.NoError(t, err)
 	require.Truef(t, ok == true, "IP not in whitelist", ok)
 	err = app.RemoveIPInWhiteList(context.Background(), newData)
 	require.NoError(t, err)
 	ok, err = app.IsIPInWhiteList(context.Background(), newData)
-	require.NoError(t, err) 
+	require.NoError(t, err)
 	require.Truef(t, ok == false, "IP in whitelist after removing", ok)
 }
 
 func TestAppPositiveGetAllIPInWhiteList(t *testing.T) {
 	app := initAppWithMocks(t)
-	config:=ConfigTest{}
-	err:=app.InitStorage(context.Background(),&config)
+	config := ConfigTest{}
+	err := app.InitStorage(context.Background(), &config)
 	require.NoError(t, err)
 	defer app.CloseStorage(context.Background())
-	newDataSl:=make([]storageData.StorageIPData,2)
-	newDataSl[0]=storageData.StorageIPData{
+	newDataSl := make([]storageData.StorageIPData, 2)
+	newDataSl[0] = storageData.StorageIPData{
 		ID:   0,
 		IP:   "192.168.0.0",
 		Mask: 25,
 	}
-	newDataSl[1]=storageData.StorageIPData{
+	newDataSl[1] = storageData.StorageIPData{
 		ID:   1,
 		IP:   "10.0.0.0",
 		Mask: 8,
 	}
-    for _,curData:= range newDataSl {
+	for _, curData := range newDataSl {
 		_, err = app.AddIPToWhiteList(context.Background(), curData)
-		require.NoError(t, err) 
+		require.NoError(t, err)
 	}
-	
-	controlDataSl,err:=app.GetAllIPInWhiteList(context.Background())
-	require.NoError(t, err) 
-	require.Equal(t,newDataSl,controlDataSl)
-}
 
+	controlDataSl, err := app.GetAllIPInWhiteList(context.Background())
+	require.NoError(t, err)
+	require.Equal(t, newDataSl, controlDataSl)
+}
 
 // BLACKLIST
 
 func TestAppPositiveAddIPToBlackListAndIsIPInBlackList(t *testing.T) {
 	app := initAppWithMocks(t)
-	config:=ConfigTest{}
-	err:=app.InitStorage(context.Background(),&config)
+	config := ConfigTest{}
+	err := app.InitStorage(context.Background(), &config)
 	require.NoError(t, err)
 	defer app.CloseStorage(context.Background())
-	newData:=storageData.StorageIPData{
+	newData := storageData.StorageIPData{
 		IP:   "192.168.0.0",
 		Mask: 25,
 	}
 	_, err = app.AddIPToBlackList(context.Background(), newData)
-	require.NoError(t, err) 
+	require.NoError(t, err)
 	ok, err := app.IsIPInBlackList(context.Background(), newData)
-	require.NoError(t, err) 
+	require.NoError(t, err)
 	require.Truef(t, ok == true, "IP not in blacklist", ok)
 }
 
 func TestAppPositiveRemoveIPInBlackListAndIsIPInBlackList(t *testing.T) {
 	app := initAppWithMocks(t)
-	config:=ConfigTest{}
-	err:=app.InitStorage(context.Background(),&config)
+	config := ConfigTest{}
+	err := app.InitStorage(context.Background(), &config)
 	require.NoError(t, err)
 	defer app.CloseStorage(context.Background())
-	newData:=storageData.StorageIPData{
+	newData := storageData.StorageIPData{
 		IP:   "192.168.0.0",
 		Mask: 25,
 	}
 	_, err = app.AddIPToBlackList(context.Background(), newData)
-	require.NoError(t, err) 
+	require.NoError(t, err)
 	ok, err := app.IsIPInBlackList(context.Background(), newData)
-	require.NoError(t, err) 
+	require.NoError(t, err)
 	require.Truef(t, ok == true, "IP not in whitelist", ok)
 	err = app.RemoveIPInBlackList(context.Background(), newData)
 	require.NoError(t, err)
 	ok, err = app.IsIPInBlackList(context.Background(), newData)
-	require.NoError(t, err) 
+	require.NoError(t, err)
 	require.Truef(t, ok == false, "IP in whitelist after removing", ok)
 }
 
 func TestAppPositiveGetAllIPInBlackList(t *testing.T) {
 	app := initAppWithMocks(t)
-	config:=ConfigTest{}
-	err:=app.InitStorage(context.Background(),&config)
+	config := ConfigTest{}
+	err := app.InitStorage(context.Background(), &config)
 	require.NoError(t, err)
 	defer app.CloseStorage(context.Background())
-	newDataSl:=make([]storageData.StorageIPData,2)
-	newDataSl[0]=storageData.StorageIPData{
+	newDataSl := make([]storageData.StorageIPData, 2)
+	newDataSl[0] = storageData.StorageIPData{
 		ID:   0,
 		IP:   "192.168.0.0",
 		Mask: 25,
 	}
-	newDataSl[1]=storageData.StorageIPData{
+	newDataSl[1] = storageData.StorageIPData{
 		ID:   1,
 		IP:   "10.0.0.0",
 		Mask: 8,
 	}
-    for _,curData:= range newDataSl {
+	for _, curData := range newDataSl {
 		_, err = app.AddIPToBlackList(context.Background(), curData)
-		require.NoError(t, err) 
+		require.NoError(t, err)
 	}
-	
-	controlDataSl,err:=app.GetAllIPInBlackList(context.Background())
-	require.NoError(t, err) 
-	require.Equal(t,newDataSl,controlDataSl)
+
+	controlDataSl, err := app.GetAllIPInBlackList(context.Background())
+	require.NoError(t, err)
+	require.Equal(t, newDataSl, controlDataSl)
 }
 
 // REQUEST AUTH
@@ -352,128 +350,126 @@ func TestRequestAuth(t *testing.T) {
 		t.Parallel()
 		app := initAppWithMocks(t)
 		req := storageData.RequestAuth{
-			Login:    "user0", 
+			Login:    "user0",
 			Password: "CharlyDonTSerf",
-			IP: "192.168.16.56",    
+			IP:       "192.168.16.56",
 		}
-		ok,message,err:= app.CheckInputRequest(context.Background(), req)
-		require.NoError(t, err) 
-		require.Equal(t,true,ok)
-		require.Equal(t,"clear check",message)
+		ok, message, err := app.CheckInputRequest(context.Background(), req)
+		require.NoError(t, err)
+		require.Equal(t, true, ok)
+		require.Equal(t, "clear check", message)
 	})
-	
+
 	t.Run("PositiveRequestAuthInWhiteList", func(t *testing.T) {
 		t.Parallel()
 		app := initAppWithMocks(t)
 		req := storageData.RequestAuth{
-			Login:    "user0", 
+			Login:    "user0",
 			Password: "CharlyDonTSerf",
-			IP: "192.168.16.56",    
+			IP:       "192.168.16.56",
 		}
-		newData:=storageData.StorageIPData{
+		newData := storageData.StorageIPData{
 			IP:   "192.168.16.0",
 			Mask: 24,
 		}
 		_, err := app.AddIPToWhiteList(context.Background(), newData)
-		require.NoError(t, err) 
-		ok,message,err := app.CheckInputRequest(context.Background(), req)
-		require.NoError(t, err) 
-		require.Equal(t,true,ok)
-		require.Equal(t,"IP in whitelist",message)
+		require.NoError(t, err)
+		ok, message, err := app.CheckInputRequest(context.Background(), req)
+		require.NoError(t, err)
+		require.Equal(t, true, ok)
+		require.Equal(t, "IP in whitelist", message)
 	})
 	t.Run("PositiveRequestAuthInBlackList", func(t *testing.T) {
 		t.Parallel()
 		app := initAppWithMocks(t)
 		req := storageData.RequestAuth{
-			Login:    "user0", 
+			Login:    "user0",
 			Password: "CharlyDonTSerf",
-			IP: "192.168.16.56",    
+			IP:       "192.168.16.56",
 		}
-		newData:=storageData.StorageIPData{
+		newData := storageData.StorageIPData{
 			IP:   "192.168.16.0",
 			Mask: 24,
 		}
 		_, err := app.AddIPToBlackList(context.Background(), newData)
-		require.NoError(t, err) 
-		ok,message,err := app.CheckInputRequest(context.Background(), req)
-		require.NoError(t, err) 
-		require.Equal(t,false,ok)
-		require.Equal(t,"IP in blacklist",message)
+		require.NoError(t, err)
+		ok, message, err := app.CheckInputRequest(context.Background(), req)
+		require.NoError(t, err)
+		require.Equal(t, false, ok)
+		require.Equal(t, "IP in blacklist", message)
 	})
 	t.Run("PositiveRequestAuthRateLimitByTag", func(t *testing.T) {
 		t.Parallel()
 		app := initAppWithMocks(t)
 		req := storageData.RequestAuth{
-			Login:    "user0", 
+			Login:    "user0",
 			Password: "CharlyDonTSerf",
-			IP: "192.168.16.56",    
+			IP:       "192.168.16.56",
 		}
-		for i:=0;i<10;i++ {
-			ok,message,err:= app.CheckInputRequest(context.Background(), req)
-			require.NoError(t, err) 
-			require.Equal(t,true,ok)
-			require.Equal(t,"clear check",message)
+		for i := 0; i < 10; i++ {
+			ok, message, err := app.CheckInputRequest(context.Background(), req)
+			require.NoError(t, err)
+			require.Equal(t, true, ok)
+			require.Equal(t, "clear check", message)
 		}
-		ok,message,err:= app.CheckInputRequest(context.Background(), req)
-		require.NoError(t, err) 
-		require.Equal(t,false,ok)
-		require.Equal(t,"rate limit by login",message)
-	})
-	t.Run("PositiveRequestAuthRateLimitByTagAndClearLoginBucket", func(t *testing.T) {
-		t.Parallel()
-		app := initAppWithMocks(t)
-		req := storageData.RequestAuth{
-			Login:    "user0", 
-			Password: "CharlyDonTSerf",
-			IP: "192.168.16.56",    
-		}
-		for i:=0;i<10;i++ {
-			ok,message,err:= app.CheckInputRequest(context.Background(), req)
-			require.NoError(t, err) 
-			require.Equal(t,true,ok)
-			require.Equal(t,"clear check",message)
-		}
-		ok,message,err:= app.CheckInputRequest(context.Background(), req)
-		require.NoError(t, err) 
-		require.Equal(t,false,ok)
-		require.Equal(t,"rate limit by login",message)
-		err = app.ClearBucketByLogin(context.Background(),"user0")
+		ok, message, err := app.CheckInputRequest(context.Background(), req)
 		require.NoError(t, err)
-		ok,message,err= app.CheckInputRequest(context.Background(), req)
-		require.NoError(t, err) 
-		require.Equal(t,true,ok)
-		require.Equal(t,"clear check",message)
-
+		require.Equal(t, false, ok)
+		require.Equal(t, "rate limit by login", message)
 	})
 	t.Run("PositiveRequestAuthRateLimitByTagAndClearLoginBucket", func(t *testing.T) {
 		t.Parallel()
 		app := initAppWithMocks(t)
 		req := storageData.RequestAuth{
-			Login:    "user0", 
+			Login:    "user0",
 			Password: "CharlyDonTSerf",
-			IP: "192.168.16.56",    
+			IP:       "192.168.16.56",
 		}
-		for i:=0;i<12;i++ {
+		for i := 0; i < 10; i++ {
+			ok, message, err := app.CheckInputRequest(context.Background(), req)
+			require.NoError(t, err)
+			require.Equal(t, true, ok)
+			require.Equal(t, "clear check", message)
+		}
+		ok, message, err := app.CheckInputRequest(context.Background(), req)
+		require.NoError(t, err)
+		require.Equal(t, false, ok)
+		require.Equal(t, "rate limit by login", message)
+		err = app.ClearBucketByLogin(context.Background(), "user0")
+		require.NoError(t, err)
+		ok, message, err = app.CheckInputRequest(context.Background(), req)
+		require.NoError(t, err)
+		require.Equal(t, true, ok)
+		require.Equal(t, "clear check", message)
+	})
+	t.Run("PositiveRequestAuthRateLimitByTagAndClearLoginBucket", func(t *testing.T) {
+		t.Parallel()
+		app := initAppWithMocks(t)
+		req := storageData.RequestAuth{
+			Login:    "user0",
+			Password: "CharlyDonTSerf",
+			IP:       "192.168.16.56",
+		}
+		for i := 0; i < 12; i++ {
 			req := storageData.RequestAuth{
-				Login:    strconv.Itoa(i), 
+				Login:    strconv.Itoa(i),
 				Password: "CharlyDonTSerf",
-				IP: "192.168.16.56",    
+				IP:       "192.168.16.56",
 			}
-			ok,message,err:= app.CheckInputRequest(context.Background(), req)
-			require.NoError(t, err) 
-			require.Equal(t,true,ok)
-			require.Equal(t,"clear check",message)
+			ok, message, err := app.CheckInputRequest(context.Background(), req)
+			require.NoError(t, err)
+			require.Equal(t, true, ok)
+			require.Equal(t, "clear check", message)
 		}
-		ok,message,err:= app.CheckInputRequest(context.Background(), req)
-		require.NoError(t, err) 
-		require.Equal(t,false,ok)
-		require.Equal(t,"rate limit by IP",message)
-		err = app.ClearBucketByIP(context.Background(),"192.168.16.56")
+		ok, message, err := app.CheckInputRequest(context.Background(), req)
 		require.NoError(t, err)
-		ok,message,err= app.CheckInputRequest(context.Background(), req)
-		require.NoError(t, err) 
-		require.Equal(t,true,ok)
-		require.Equal(t,"clear check",message)
-
+		require.Equal(t, false, ok)
+		require.Equal(t, "rate limit by IP", message)
+		err = app.ClearBucketByIP(context.Background(), "192.168.16.56")
+		require.NoError(t, err)
+		ok, message, err = app.CheckInputRequest(context.Background(), req)
+		require.NoError(t, err)
+		require.Equal(t, true, ok)
+		require.Equal(t, "clear check", message)
 	})
 }

@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	storageData  "github.com/skolzkyi/antibruteforce/internal/storage/storageData"
+	storageData "github.com/skolzkyi/antibruteforce/internal/storage/storageData"
 	"go.uber.org/zap"
 )
 
@@ -32,11 +32,11 @@ type Config interface {
 	GetDBTimeOut() time.Duration
 	GetDBAddress() string
 	GetDBPort() string
-	GetRedisAddress() string 
-	GetRedisPort() string 
-	GetLimitFactorLogin() int 
+	GetRedisAddress() string
+	GetRedisPort() string
+	GetLimitFactorLogin() int
 	GetLimitFactorPassword() int
-	GetLimitFactorIP() int  
+	GetLimitFactorIP() int
 	GetLimitTimeCheck() time.Duration
 }
 
@@ -60,11 +60,11 @@ type Application interface {
 	IsIPInBlackList(ctx context.Context, IPData storageData.StorageIPData) (bool, error)
 	GetAllIPInBlackList(ctx context.Context) ([]storageData.StorageIPData, error)
 	InitBStorageAndLimits(ctx context.Context, config storageData.Config) error
-	CloseBStorage(ctx context.Context) error 
-	CheckInputRequest(ctx context.Context, req storageData.RequestAuth) (bool,string,error)
-	RLTicker(ctx context.Context) 
-	ClearBucketByLogin(ctx context.Context, login string)error
-	ClearBucketByIP(ctx context.Context, IP string)error
+	CloseBStorage(ctx context.Context) error
+	CheckInputRequest(ctx context.Context, req storageData.RequestAuth) (bool, string, error)
+	RLTicker(ctx context.Context)
+	ClearBucketByLogin(ctx context.Context, login string) error
+	ClearBucketByIP(ctx context.Context, IP string) error
 }
 
 func NewServer(logger Logger, app Application, config Config) *Server {
@@ -73,8 +73,8 @@ func NewServer(logger Logger, app Application, config Config) *Server {
 	server.app = app
 	server.Config = config
 	server.serv = &http.Server{
-		Addr:    config.GetServerURL(),
-		Handler: server.routes(),
+		Addr:              config.GetServerURL(),
+		Handler:           server.routes(),
 		ReadHeaderTimeout: 2 * time.Second,
 	}
 

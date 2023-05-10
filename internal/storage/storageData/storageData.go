@@ -4,6 +4,7 @@ import (
 	"errors"
 	"strconv"
 	"time"
+
 	"go.uber.org/zap"
 
 	helpers "github.com/skolzkyi/antibruteforce/helpers"
@@ -29,11 +30,11 @@ type Config interface {
 	GetDBTimeOut() time.Duration
 	GetDBAddress() string
 	GetDBPort() string
-	GetRedisAddress() string 
-	GetRedisPort() string 
-	GetLimitFactorLogin() int 
-	GetLimitFactorPassword() int 
-	GetLimitFactorIP() int 
+	GetRedisAddress() string
+	GetRedisPort() string
+	GetLimitFactorLogin() int
+	GetLimitFactorPassword() int
+	GetLimitFactorIP() int
 	GetLimitTimeCheck() time.Duration
 }
 
@@ -46,16 +47,15 @@ type Logger interface {
 }
 
 type StorageIPData struct {
-	IP                    string
-	Mask 				  int
-	ID                    int
+	IP   string
+	Mask int
+	ID   int
 }
 
 func (ip *StorageIPData) String() string {
-	res := helpers.StringBuild("[ID: ", strconv.Itoa(ip.ID), ", IP: ", ip.IP, "]") 
+	res := helpers.StringBuild("[ID: ", strconv.Itoa(ip.ID), ", IP: ", ip.IP, "]")
 	return res
 }
-
 
 type RequestAuth struct {
 	Login    string
@@ -64,6 +64,6 @@ type RequestAuth struct {
 }
 
 func (r *RequestAuth) String() string {
-	res := helpers.StringBuild("[Login: ", r.Login," Password: ",r.Password, ", IP: ", r.IP, "]") 
+	res := helpers.StringBuild("[Login: ", r.Login, " Password: ", r.Password, ", IP: ", r.IP, "]")
 	return res
 }

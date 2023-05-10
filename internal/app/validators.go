@@ -4,8 +4,6 @@ import (
 	"errors"
 	"strconv"
 	"strings"
-	//"time"
-	"fmt"
 
 	storageData "github.com/skolzkyi/antibruteforce/internal/storage/storageData"
 )
@@ -60,7 +58,6 @@ func SimpleIPDataValidator(IPData storageData.StorageIPData, isAllRequest bool) 
 func checkIP(IP string, low int, high int) error {
 	oktets := strings.Split(IP, ".")
 	if len(oktets) != 4 {
-		fmt.Println("IP: ", IP, " oktets: ", len(oktets))
 		return ErrBadIP
 	}
 	for _, curOktet := range oktets {
@@ -69,7 +66,6 @@ func checkIP(IP string, low int, high int) error {
 			return err
 		}
 		if intOktet < low || intOktet > high {
-			fmt.Println("IP: ", IP, " bad oktet: ", curOktet)
 			return ErrBadIP
 		}
 	}

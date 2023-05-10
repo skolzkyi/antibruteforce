@@ -6,15 +6,10 @@ package internalhttp
 import (
 	"bytes"
 	"context"
-	//"errors"
-	//"fmt"
 	"io"
 	"net/http/httptest"
-	//"os"
-	//"strconv"
 	"testing"
 	"time"
-	//"encoding/json"
 
 	app "github.com/skolzkyi/antibruteforce/internal/app"
 	logger "github.com/skolzkyi/antibruteforce/internal/logger"

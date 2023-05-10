@@ -4,20 +4,12 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	//"time"
-	//"fmt"
 
 	_ "github.com/go-sql-driver/mysql" // for driver
 	helpers "github.com/skolzkyi/antibruteforce/helpers"
 	storageData "github.com/skolzkyi/antibruteforce/internal/storage/storageData"
 )
 
-/*
-type storageIPData struct {
-	IP                    string
-	ID                    int
-}
-*/
 type Storage struct {
 	DB *sql.DB
 }
@@ -47,7 +39,6 @@ func (s *Storage) Connect(ctx context.Context, logger storageData.Logger, config
 		return storageData.ErrStorageTimeout
 	default:
 		dsn := helpers.StringBuild(config.GetDBUser(), ":", config.GetDBPassword(), "@tcp(", config.GetDBAddress(), ":", config.GetDBPort(), ")/", config.GetDBName(), "?parseTime=true") //nolint:lll
-		// fmt.Println("dsn: ", dsn)
 		var err error
 		s.DB, err = sql.Open("mysql", dsn)
 		if err != nil {

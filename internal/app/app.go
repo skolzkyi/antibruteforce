@@ -3,7 +3,6 @@ package app
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net"
 	"strconv"
 	"time"
@@ -56,7 +55,6 @@ type BStorage interface {
 	SetBucketValue(ctx context.Context, logger storageData.Logger, key string, value int) error
 	Close(ctx context.Context, logger storageData.Logger) error
 	IncrementAndGetBucketValue(ctx context.Context, logger storageData.Logger, key string) (int64, error)
-	// GetBucketValue(ctx context.Context, logger storageData.Logger, key string, valueType string) (int,error)
 	FlushStorage(ctx context.Context, logger storageData.Logger) error
 }
 
@@ -106,7 +104,7 @@ func (a *App) CheckInputRequest(ctx context.Context, req storageData.RequestAuth
 		a.logger.Error(message)
 		return false, "", err
 	}
-	fmt.Println("countLogin: ", strconv.Itoa(int(countLogin)), " a.limitFactorLogin: ", a.limitFactorLogin)
+
 	if countLogin > int64(a.limitFactorLogin) {
 		return false, "rate limit by login", nil
 	}
@@ -119,7 +117,7 @@ func (a *App) CheckInputRequest(ctx context.Context, req storageData.RequestAuth
 	if countPassword > int64(a.limitFactorPassword) {
 		return false, "rate limit by password", nil
 	}
-	fmt.Println("countPassword: ", strconv.Itoa(int(countPassword)), " a.limitFactorPassword: ", a.limitFactorPassword)
+
 	countIP, err := a.bucketStorage.IncrementAndGetBucketValue(ctx, a.logger, "ip_"+req.IP)
 	if err != nil {
 		message := helpers.StringBuild("CheckInputRequest IncrementAndGetBucketValue - IP error: ", err.Error(), ", key: ", "ip_"+req.IP)
@@ -129,7 +127,7 @@ func (a *App) CheckInputRequest(ctx context.Context, req storageData.RequestAuth
 	if countIP > int64(a.limitFactorIP) {
 		return false, "rate limit by IP", nil
 	}
-	fmt.Println("countIP: ", strconv.Itoa(int(countIP)), " a.limitFactorIP: ", a.limitFactorIP)
+
 	return true, "clear check", nil
 }
 

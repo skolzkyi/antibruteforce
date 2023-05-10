@@ -7,7 +7,6 @@ import (
 	redisMock "github.com/alicebob/miniredis/v2"
 	redis "github.com/redis/go-redis/v9"
 	storageData "github.com/skolzkyi/antibruteforce/internal/storage/storageData"
-	//"fmt"
 )
 
 type RedisStorage struct {

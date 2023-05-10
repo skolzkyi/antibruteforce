@@ -9,7 +9,6 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	//"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	//nolint:gci,gofmt,gofumpt,nolintlint
@@ -20,7 +19,6 @@ import (
 
 	RedisStorage "github.com/skolzkyi/antibruteforce/internal/storage/redis"
 	SQLstorage "github.com/skolzkyi/antibruteforce/internal/storage/sql"
-	// storageSQLMock "github.com/skolzkyi/antibruteforce/internal/storage/storageSQLMock"
 )
 
 var configFilePath string
@@ -30,7 +28,6 @@ func init() {
 }
 
 func main() {
-	// time.Sleep(30*time.Second)
 	flag.Parse()
 
 	if flag.Arg(0) == "version" {
@@ -42,11 +39,13 @@ func main() {
 	err := config.Init(configFilePath)
 	if err != nil {
 		fmt.Println(err)
+		panic(err)
 	}
-	fmt.Println("config: ", config)
+
 	log, err := logger.New(config.Logger.Level)
 	if err != nil {
 		fmt.Println(err)
+		panic(err)
 	}
 	log.Info("servAddr: " + config.GetAddress())
 	var storage app.Storage
@@ -60,21 +59,10 @@ func main() {
 	}
 	redis := RedisStorage.New()
 	err = redis.Init(ctxStor, log, &config)
-	// err = redis.InitAsMock(ctxStor, log)
 	if err != nil {
 		cancelStore()
 		log.Fatal("fatal error of inintialization Redis storage: " + err.Error())
 	}
-
-	/*
-		storage = storageSQLMock.New()
-		err = storage.Init(ctxStor, log, &config)
-		if err != nil {
-			cancelStore()
-			log.Fatal("fatal error of inintialization SQL Mock storage: " + err.Error())
-		}
-	*/
-	//TODO init redis
 
 	antibruteforce := app.New(log, storage, redis, &config)
 

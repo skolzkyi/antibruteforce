@@ -1,21 +1,17 @@
 package main
 
 import (
+	"bufio"
 	"context"
-	//"encoding/json"
-	//"time"
+	"errors"
 	"flag"
 	"fmt"
-	"os"
-	"os/signal"
-	//"strconv"
-	"bufio"
-	"errors"
 	"io"
 	"net/http"
+	"os"
+	"os/signal"
 	"syscall"
 
-	// helpers "github.com/skolzkyi/antibruteforce/helpers"
 	helpers "github.com/skolzkyi/antibruteforce/helpers"
 	"github.com/skolzkyi/antibruteforce/internal/logger_cli"
 )
@@ -50,7 +46,7 @@ func main() {
 		fmt.Println(err)
 		panic(err)
 	}
-	// fmt.Println("config: ", config)
+
 	log, err := logger_cli.New(config.Logger.Level)
 	if err != nil {
 		fmt.Println(err)
@@ -91,7 +87,6 @@ func main() {
 				fmt.Println("bye")
 				log.Info("antibruteforce-cli  down")
 				os.Exit(1) //nolint:gocritic
-				// cancel()
 			}
 			output := comContr.processCommand(rawCommand)
 			fmt.Println(output)

@@ -18,6 +18,8 @@ linters:
      - lll
      - dupl
      - gci
+     - usestdlibvars
+     - testpackage
 
 
     

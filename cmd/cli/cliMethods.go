@@ -1,19 +1,13 @@
 package main
 
 import (
-	//"context"
 	"bytes"
 	"encoding/json"
 	"io"
 	"net/http"
-	//"flag"
-	//"fmt"
-	//"os"
-	//"os/signal"
-	"strconv"
-	//"syscall"
-	//"bufio"
+
 	"errors"
+	"strconv"
 	"strings"
 
 	helpers "github.com/skolzkyi/antibruteforce/helpers"
@@ -265,7 +259,6 @@ func (cc *CommandController) isInWhiteList(arg []string) string {
 		cc.logger.Error(errStr)
 		return errStr
 	}
-	// fmt.Println("iwl body: ", string(respBody))
 	answer := IPListAnswer{}
 	err = json.Unmarshal(respBody, &answer)
 	if err != nil {
@@ -310,7 +303,7 @@ func (cc *CommandController) allInWhiteList() string {
 		cc.logger.Error(errStr)
 		return errStr
 	}
-	// fmt.Println("iwl body: ", string(respBody))
+
 	answer := IPListAnswer{}
 	err = json.Unmarshal(respBody, &answer)
 	if err != nil {
@@ -483,7 +476,7 @@ func (cc *CommandController) isInBlackList(arg []string) string {
 		cc.logger.Error(errStr)
 		return errStr
 	}
-	// fmt.Println("iwl body: ", string(respBody))
+
 	answer := IPListAnswer{}
 	err = json.Unmarshal(respBody, &answer)
 	if err != nil {
@@ -530,7 +523,7 @@ func (cc *CommandController) allInBlackList() string {
 		cc.logger.Error(errStr)
 		return errStr
 	}
-	// fmt.Println("iwl body: ", string(respBody))
+
 	answer := IPListAnswer{}
 	err = json.Unmarshal(respBody, &answer)
 	if err != nil {
@@ -591,7 +584,7 @@ func (cc *CommandController) request(arg []string) string {
 		cc.logger.Error(errStr)
 		return errStr
 	}
-	// fmt.Println("iwl body: ", string(respBody))
+
 	answer := AuthorizationRequestAnswer{}
 	err = json.Unmarshal(respBody, &answer)
 	if err != nil {

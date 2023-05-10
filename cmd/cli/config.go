@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	//"time"
 
 	"github.com/spf13/viper"
 )

@@ -4,11 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
-	//"strconv"
-	//"strings"
 	"time"
 
 	helpers "github.com/skolzkyi/antibruteforce/helpers"
@@ -84,8 +81,6 @@ func (s *Server) AuthorizationRequest(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		fmt.Println("newRequest: ", newRequest)
-
 		answer := AuthorizationRequestAnswer{}
 
 		ok, message, errInner := s.app.CheckInputRequest(ctx, newRequest)
@@ -135,7 +130,6 @@ func (s *Server) ClearBucketByLogin(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		fmt.Println("ClearBucketByLogin Login: ", inputTag.Tag)
 		err = s.app.ClearBucketByLogin(ctx, inputTag.Tag)
 		if err != nil {
 			newMessage.Text = err.Error()
@@ -186,7 +180,6 @@ func (s *Server) ClearBucketByIP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		fmt.Println(" ClearBucketByIP IP: ", inputTag.Tag)
 		err = s.app.ClearBucketByIP(ctx, inputTag.Tag)
 		if err != nil {
 			newMessage.Text = err.Error()
@@ -223,8 +216,6 @@ func (s *Server) WhiteList_REST(w http.ResponseWriter, r *http.Request) { //noli
 	defer cancel()
 	switch r.Method {
 	case http.MethodGet:
-		fmt.Println("Get")
-
 		IPListAnsw := IPListAnswer{}
 		newData := storageData.StorageIPData{}
 		newMessage := outputJSON{}
@@ -241,7 +232,6 @@ func (s *Server) WhiteList_REST(w http.ResponseWriter, r *http.Request) { //noli
 			return
 		}
 
-		fmt.Println("newData: ", newData)
 		if newData.IP == "ALL" {
 			IPList, errInner := s.app.GetAllIPInWhiteList(ctx)
 			if errInner != nil {
@@ -298,9 +288,6 @@ func (s *Server) WhiteList_REST(w http.ResponseWriter, r *http.Request) { //noli
 		return
 
 	case http.MethodPost:
-
-		fmt.Println("Post")
-
 		newData := storageData.StorageIPData{}
 		newMessage := outputJSON{}
 
@@ -315,8 +302,6 @@ func (s *Server) WhiteList_REST(w http.ResponseWriter, r *http.Request) { //noli
 			apiErrHandler(err, &w)
 			return
 		}
-
-		fmt.Println("newData: ", newData)
 
 		id, errInner := s.app.AddIPToWhiteList(ctx, newData)
 		if errInner != nil {
@@ -343,8 +328,6 @@ func (s *Server) WhiteList_REST(w http.ResponseWriter, r *http.Request) { //noli
 		return
 
 	case http.MethodDelete:
-
-		fmt.Println("Delete")
 		removeData := storageData.StorageIPData{}
 		newMessage := outputJSON{}
 
@@ -359,8 +342,6 @@ func (s *Server) WhiteList_REST(w http.ResponseWriter, r *http.Request) { //noli
 			apiErrHandler(err, &w)
 			return
 		}
-
-		fmt.Println("removeData: ", removeData)
 
 		errInner := s.app.RemoveIPInWhiteList(ctx, removeData)
 		if errInner != nil {
@@ -399,8 +380,6 @@ func (s *Server) BlackList_REST(w http.ResponseWriter, r *http.Request) { //noli
 	defer cancel()
 	switch r.Method {
 	case http.MethodGet:
-		fmt.Println("Get")
-
 		IPListAnsw := IPListAnswer{}
 		newData := storageData.StorageIPData{}
 		newMessage := outputJSON{}
@@ -417,7 +396,6 @@ func (s *Server) BlackList_REST(w http.ResponseWriter, r *http.Request) { //noli
 			return
 		}
 
-		fmt.Println("newData: ", newData)
 		if newData.IP == "ALL" {
 			IPList, errInner := s.app.GetAllIPInBlackList(ctx)
 			if errInner != nil {
@@ -475,8 +453,6 @@ func (s *Server) BlackList_REST(w http.ResponseWriter, r *http.Request) { //noli
 
 	case http.MethodPost:
 
-		fmt.Println("Post")
-
 		newData := storageData.StorageIPData{}
 		newMessage := outputJSON{}
 
@@ -491,8 +467,6 @@ func (s *Server) BlackList_REST(w http.ResponseWriter, r *http.Request) { //noli
 			apiErrHandler(err, &w)
 			return
 		}
-
-		fmt.Println("newData: ", newData)
 
 		id, errInner := s.app.AddIPToBlackList(ctx, newData)
 		if errInner != nil {
@@ -520,7 +494,6 @@ func (s *Server) BlackList_REST(w http.ResponseWriter, r *http.Request) { //noli
 
 	case http.MethodDelete:
 
-		fmt.Println("Delete")
 		removeData := storageData.StorageIPData{}
 		newMessage := outputJSON{}
 
@@ -535,8 +508,6 @@ func (s *Server) BlackList_REST(w http.ResponseWriter, r *http.Request) { //noli
 			apiErrHandler(err, &w)
 			return
 		}
-
-		fmt.Println("removeData: ", removeData)
 
 		errInner := s.app.RemoveIPInBlackList(ctx, removeData)
 		if errInner != nil {

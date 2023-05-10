@@ -2,6 +2,7 @@ BIN := "./bin/antibruteforce"
 BIN_CLI := "./bin/cli"
 DOCKER_IMG="antibruteforce:develop"
 DSN="imapp:LightInDark@/OTUSAntibruteforce?parseTime=true"
+XTERM="/usr/bin/xterm -bg RED -e ./bin/cli"
 
 GIT_HASH := $(shell git log --format="%h" -n 1)
 LDFLAGS := -X main.release="develop" -X main.buildDate=$(shell date -u +%Y-%m-%dT%H:%M:%S) -X main.gitHash=$(GIT_HASH)
@@ -49,10 +50,14 @@ lint: install-lint-deps
 
 up:
 	go build -v -o $(BIN_CLI) -ldflags "$(LDFLAGS)" ./cmd/cli && \
-	docker-compose -f ./deployments/docker-compose.yaml up --build 
-x:
-	gnome-terminal --chmod +x $(BIN_CLI) -config ./configs/config_cli.env 
+	gnome-terminal -- bash -c 'exec ./bin/cli -config ./configs/config_cli.env; bash' &&\
+	docker-compose -f ./deployments/docker-compose.yaml up --build > deployLog.txt 
 	
+
+x:
+	gnome-terminal --chmod +x $(BIN_CLI) -config ./configs/config_cli.env &
+	exec chmod 777 $(BIN_CLI)
+	-- bash -c $(BIN_CLI) -config ./configs/config_cli.env; bash" 
 
 down:
 	docker-compose -f ./deployments/docker-compose.yaml down

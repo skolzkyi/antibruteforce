@@ -11,11 +11,16 @@ import (
 	//"strconv"
 	"syscall"
 	"bufio"
+	"errors"
+	"net/http"
+	"io"
 
 	//helpers "github.com/skolzkyi/antibruteforce/helpers"
 	"github.com/skolzkyi/antibruteforce/internal/logger_cli"
+	helpers "github.com/skolzkyi/antibruteforce/helpers"
 	
 )
+var ErrABNotAvailable = errors.New("antibruteforce not available")
 
 type inputData struct {
 	scanner *bufio.Scanner
@@ -43,17 +48,23 @@ func main() {
 	err := config.Init(configFilePath)
 	if err != nil {
 		fmt.Println(err)
+		panic(err)
 	}
 	//fmt.Println("config: ", config)
 	log, err := logger_cli.New(config.Logger.Level)
 	if err != nil {
 		fmt.Println(err)
+		panic(err)
 	}
 
 	ctx, cancel := signal.NotifyContext(context.Background(),
 		syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
 	defer cancel()
 
+	err = pingAB(config.GetAddress() + ":" + config.GetPort())
+	if err != nil {
+		log.Fatal(err.Error())
+	}
 	inData:=inputData{}
 	inData.Init()
 
@@ -86,4 +97,24 @@ func main() {
 			fmt.Println(output)
 		}
 	}
+}
+
+func pingAB(address string) error {
+	url := helpers.StringBuild("http://", address, "/")
+
+	resp, err := http.Get(url)
+	if err!=nil {
+		return err
+	}	
+	defer resp.Body.Close()
+
+	respBody, err := io.ReadAll(resp.Body)
+	if err!=nil {
+		return err
+	}
+ 	if string(respBody)!= "test" {
+		return ErrABNotAvailable
+ 	}
+
+	return nil
 }

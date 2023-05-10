@@ -5,7 +5,6 @@ package integrationTests
 
 import (
 	"testing"
-	//"time"
 	"net/http"
 	"context"
 	"os/signal"
@@ -75,7 +74,7 @@ func TestMain(m *testing.M){
 	if err != nil {
 		fmt.Println(err)
 	}
-	//fmt.Println("config: ", config)
+	
 	log, err = logger.New(config.Logger.Level)
 	if err != nil {
 		fmt.Println(err)
@@ -93,17 +92,11 @@ func TestMain(m *testing.M){
 				cancel()
 			}
 			rdb, err = InitAndConnectRedis(ctx, log, &config)
-			/*
-			err = createTestEventPool(mySQL_DB)
-			if err != nil {
-				log.Error("SQL DB createTestEventPool error: " + err.Error())
-				cancel()
-			}
-			*/
+			
 			log.Info("Integration tests up")
   			exitCode := m.Run()
 			log.Info("exitCode:"+strconv.Itoa(exitCode))
-			for{} //debug
+			//for{} //debug
 			err = cleanDatabaseAndRedis(ctx)
 			if err != nil {
     			cancel()

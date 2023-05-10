@@ -36,3 +36,6 @@ func (l LogWrap) Error(msg string) {
 	l.logger.Error(msg)
 }
 
+func (l LogWrap) Fatal(msg string) {
+	l.logger.Fatal(msg)
+}

@@ -174,6 +174,7 @@ func TestWhiteListREST(t *testing.T) {
 		for _, curControlData := range controlDataSl {
 			if curControlData.IP == "192.168.16.0" && curControlData.Mask == 8 {
 				flag = true
+
 				break
 			}
 		}
@@ -197,6 +198,7 @@ func TestWhiteListREST(t *testing.T) {
 		for _, curControlData := range controlDataSl {
 			if curControlData.IP == "192.168.16.0" && curControlData.Mask == 8 {
 				flag = true
+
 				break
 			}
 		}
@@ -311,6 +313,7 @@ func TestBlackListREST(t *testing.T) {
 		for _, curControlData := range controlDataSl {
 			if curControlData.IP == "192.168.16.0" && curControlData.Mask == 8 {
 				flag = true
+
 				break
 			}
 		}
@@ -334,6 +337,7 @@ func TestBlackListREST(t *testing.T) {
 		for _, curControlData := range controlDataSl {
 			if curControlData.IP == "192.168.16.0" && curControlData.Mask == 8 {
 				flag = true
+
 				break
 			}
 		}

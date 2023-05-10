@@ -23,6 +23,7 @@ func NewConfig() Config {
 func (config *Config) Init(path string) error {
 	if path == "" {
 		err := errors.New("void path to config_cli.env")
+
 		return err
 	}
 
@@ -40,6 +41,7 @@ func (config *Config) Init(path string) error {
 	err := viper.ReadInConfig()
 	if err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); !ok { //nolint:errorlint
+
 			return err
 		}
 	}

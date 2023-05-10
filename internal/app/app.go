@@ -68,6 +68,7 @@ func New(logger Logger, storage Storage, bStorage BStorage, config storageData.C
 		limitFactorIP:       config.GetLimitFactorIP(),
 		periodic:            config.GetLimitTimeCheck(),
 	}
+
 	return &app
 }
 
@@ -84,6 +85,7 @@ func (a *App) CheckInputRequest(ctx context.Context, req storageData.RequestAuth
 	if err != nil {
 		message := helpers.StringBuild("CheckInputRequest isIPInBlackListCheck error: ", err.Error())
 		a.logger.Error(message)
+
 		return false, "", err
 	}
 	if ok {
@@ -93,6 +95,7 @@ func (a *App) CheckInputRequest(ctx context.Context, req storageData.RequestAuth
 	if err != nil {
 		message := helpers.StringBuild("CheckInputRequest isIPInWhiteListCheck error: ", err.Error())
 		a.logger.Error(message)
+
 		return false, "", err
 	}
 	if ok {
@@ -102,6 +105,7 @@ func (a *App) CheckInputRequest(ctx context.Context, req storageData.RequestAuth
 	if err != nil {
 		message := helpers.StringBuild("CheckInputRequest IncrementAndGetBucketValue - Login error: ", err.Error(), ", key: ", "l_"+req.Login)
 		a.logger.Error(message)
+
 		return false, "", err
 	}
 
@@ -112,6 +116,7 @@ func (a *App) CheckInputRequest(ctx context.Context, req storageData.RequestAuth
 	if err != nil {
 		message := helpers.StringBuild("CheckInputRequest IncrementAndGetBucketValue - Password error: ", err.Error(), ", key: ", "p_"+req.Password)
 		a.logger.Error(message)
+
 		return false, "", err
 	}
 	if countPassword > int64(a.limitFactorPassword) {
@@ -122,6 +127,7 @@ func (a *App) CheckInputRequest(ctx context.Context, req storageData.RequestAuth
 	if err != nil {
 		message := helpers.StringBuild("CheckInputRequest IncrementAndGetBucketValue - IP error: ", err.Error(), ", key: ", "ip_"+req.IP)
 		a.logger.Error(message)
+
 		return false, "", err
 	}
 	if countIP > int64(a.limitFactorIP) {
@@ -139,6 +145,7 @@ func (a *App) RLTicker(ctx context.Context) {
 			select {
 			case <-ctx.Done():
 				a.logger.Info("ticker stop")
+
 				break
 			case <-a.ticker.C:
 				a.bucketStorage.FlushStorage(ctx, a.logger)
@@ -153,9 +160,11 @@ func (a *App) ClearBucketByLogin(ctx context.Context, login string) error {
 	if err != nil {
 		message := helpers.StringBuild("ClearBucketByLogin error", err.Error(), " Login: ", login)
 		a.logger.Error(message)
+
 		return err
 	}
 	a.logger.Info(" login bucket clear, login: " + login)
+
 	return nil
 }
 
@@ -164,9 +173,11 @@ func (a *App) ClearBucketByIP(ctx context.Context, IP string) error {
 	if err != nil {
 		message := helpers.StringBuild("ClearBucketByIP error", err.Error(), " IP: ", IP)
 		a.logger.Error(message)
+
 		return err
 	}
 	a.logger.Info(" IP bucket clear, IP: " + IP)
+
 	return nil
 }
 
@@ -185,12 +196,14 @@ func (a *App) AddIPToWhiteList(ctx context.Context, IPData storageData.StorageIP
 	if err != nil {
 		message := helpers.StringBuild("AddIPToWhiteList validate IPData error", err.Error())
 		a.logger.Error(message)
+
 		return 0, err
 	}
 	ok, err := a.storage.IsIPInBlackList(ctx, a.logger, IPData)
 	if err != nil {
 		message := helpers.StringBuild("AddIPToWhiteList validate in blacklist IPData error", err.Error())
 		a.logger.Error(message)
+
 		return 0, err
 	}
 	if ok {
@@ -200,10 +213,12 @@ func (a *App) AddIPToWhiteList(ctx context.Context, IPData storageData.StorageIP
 	if err != nil {
 		message := helpers.StringBuild("AddIPToWhiteList IPData storage error", err.Error())
 		a.logger.Error(message)
+
 		return 0, err
 	}
 	message := helpers.StringBuild("IP added to whitelist(IP - ", IPData.IP, "/", strconv.Itoa(IPData.Mask), ")")
 	a.logger.Info(message)
+
 	return id, nil
 }
 
@@ -212,12 +227,14 @@ func (a *App) RemoveIPInWhiteList(ctx context.Context, IPData storageData.Storag
 	if err != nil {
 		message := helpers.StringBuild("RemoveIPInWhiteList validate IPData error", err.Error())
 		a.logger.Error(message)
+
 		return err
 	}
 	err = a.storage.RemoveIPInWhiteList(ctx, a.logger, IPData)
 	if err != nil {
 		message := helpers.StringBuild("RemoveIPInWhiteList app error(IP - ", IPData.IP, "),error: ", err.Error())
 		a.logger.Error(message)
+
 		return err
 	}
 	message := helpers.StringBuild("IP remove from whitelist(IP - ", IPData.IP, "/", strconv.Itoa(IPData.Mask), ")")
@@ -231,14 +248,17 @@ func (a *App) IsIPInWhiteList(ctx context.Context, IPData storageData.StorageIPD
 	if err != nil {
 		message := helpers.StringBuild("IsIPInWhiteList validate IPData error", err.Error())
 		a.logger.Error(message)
+
 		return false, err
 	}
 	ok, err := a.storage.IsIPInWhiteList(ctx, a.logger, IPData)
+
 	return ok, err
 }
 
 func (a *App) GetAllIPInWhiteList(ctx context.Context) ([]storageData.StorageIPData, error) {
 	whiteList, err := a.storage.GetAllIPInWhiteList(ctx, a.logger)
+
 	return whiteList, err
 }
 
@@ -258,6 +278,7 @@ func (a *App) isIPInWhiteListCheck(ctx context.Context, IP string) (bool, error)
 			return true, nil
 		}
 	}
+
 	return false, nil
 }
 
@@ -268,12 +289,14 @@ func (a *App) AddIPToBlackList(ctx context.Context, IPData storageData.StorageIP
 	if err != nil {
 		message := helpers.StringBuild("AddIPToBlackList validate IPData error", err.Error())
 		a.logger.Error(message)
+
 		return 0, err
 	}
 	ok, err := a.storage.IsIPInWhiteList(ctx, a.logger, IPData)
 	if err != nil {
 		message := helpers.StringBuild("AddIPToBlackList validate in whitelist IPData error", err.Error())
 		a.logger.Error(message)
+
 		return 0, err
 	}
 	if ok {
@@ -283,10 +306,12 @@ func (a *App) AddIPToBlackList(ctx context.Context, IPData storageData.StorageIP
 	if err != nil {
 		message := helpers.StringBuild("AddIPToBlackList IPData storage error", err.Error())
 		a.logger.Error(message)
+
 		return 0, err
 	}
 	message := helpers.StringBuild("IP added to blacklist(IP - ", IPData.IP, "/", strconv.Itoa(IPData.Mask), ")")
 	a.logger.Info(message)
+
 	return id, nil
 }
 
@@ -295,12 +320,14 @@ func (a *App) RemoveIPInBlackList(ctx context.Context, IPData storageData.Storag
 	if err != nil {
 		message := helpers.StringBuild("RemoveIPInBlackList validate IPData error", err.Error())
 		a.logger.Error(message)
+
 		return err
 	}
 	err = a.storage.RemoveIPInBlackList(ctx, a.logger, IPData)
 	if err != nil {
 		message := helpers.StringBuild("RemoveIPInBlackList app error(IP - ", IPData.IP, "/", strconv.Itoa(IPData.Mask), "),error: ", err.Error())
 		a.logger.Error(message)
+
 		return err
 	}
 	message := helpers.StringBuild("IP remove from blacklist(IP - ", IPData.IP, ")")
@@ -314,14 +341,17 @@ func (a *App) IsIPInBlackList(ctx context.Context, IPData storageData.StorageIPD
 	if err != nil {
 		message := helpers.StringBuild("IsIPInBlackList validate IPData error", err.Error())
 		a.logger.Error(message)
+
 		return false, err
 	}
 	ok, err := a.storage.IsIPInBlackList(ctx, a.logger, IPData)
+
 	return ok, err
 }
 
 func (a *App) GetAllIPInBlackList(ctx context.Context) ([]storageData.StorageIPData, error) {
 	whiteList, err := a.storage.GetAllIPInBlackList(ctx, a.logger)
+
 	return whiteList, err
 }
 
@@ -341,5 +371,6 @@ func (a *App) isIPInBlackListCheck(ctx context.Context, IP string) (bool, error)
 			return true, nil
 		}
 	}
+
 	return false, nil
 }

@@ -25,6 +25,7 @@ func New(level string) (*LogWrap, error) {
 		EncoderConfig:    zap.NewDevelopmentEncoderConfig(),
 	}
 	logWrap.logger = zap.Must(logWrap.config.Build()).Sugar()
+
 	return &logWrap, nil
 }
 

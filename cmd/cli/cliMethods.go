@@ -3,10 +3,9 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
-
-	"errors"
 	"strconv"
 	"strings"
 
@@ -90,6 +89,7 @@ func (cc *CommandController) processCommand(rawCommand string) string {
 	}
 	mes := "error: " + ErrUnSupCommand.Error()
 	cc.logger.Info(mes)
+
 	return mes
 }
 
@@ -114,6 +114,7 @@ func (cc *CommandController) addToWhiteList(arg []string) string {
 	if len(arg) != 2 {
 		errStr := "error: " + ErrBadArgCount.Error()
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 	subArgs := strings.Split(arg[1], "/")
@@ -121,6 +122,7 @@ func (cc *CommandController) addToWhiteList(arg []string) string {
 	if len(subArgs) != 2 {
 		errStr := "error: " + ErrBadArgument.Error()
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 
@@ -131,6 +133,7 @@ func (cc *CommandController) addToWhiteList(arg []string) string {
 	if err != nil {
 		errStr := "error: " + err.Error()
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 	defer resp.Body.Close()
@@ -139,6 +142,7 @@ func (cc *CommandController) addToWhiteList(arg []string) string {
 	if err != nil {
 		errStr := "error: " + err.Error()
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 
@@ -147,15 +151,17 @@ func (cc *CommandController) addToWhiteList(arg []string) string {
 	if err != nil {
 		errStr := "error: " + err.Error()
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 	if answer.Text != "OK!" {
 		errStr := "error: " + answer.Text
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 
-	mes := "subnet add to whitelist succesful"
+	mes := "subnet add to whitelist successful"
 	cc.logger.Info(mes)
 
 	return mes
@@ -165,6 +171,7 @@ func (cc *CommandController) removeFromWhiteList(arg []string) string {
 	if len(arg) != 2 {
 		errStr := "error: " + ErrBadArgCount.Error()
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 	subArgs := strings.Split(arg[1], "/")
@@ -172,6 +179,7 @@ func (cc *CommandController) removeFromWhiteList(arg []string) string {
 	if len(subArgs) != 2 {
 		errStr := "error: " + ErrBadArgument.Error()
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 
@@ -182,6 +190,7 @@ func (cc *CommandController) removeFromWhiteList(arg []string) string {
 	if err != nil {
 		errStr := "error: " + err.Error()
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 	req.Header.Set("Content-Type", "application/json")
@@ -191,6 +200,7 @@ func (cc *CommandController) removeFromWhiteList(arg []string) string {
 	if err != nil {
 		errStr := "error: " + err.Error()
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 	defer resp.Body.Close()
@@ -199,6 +209,7 @@ func (cc *CommandController) removeFromWhiteList(arg []string) string {
 	if err != nil {
 		errStr := "error: " + err.Error()
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 
@@ -207,15 +218,17 @@ func (cc *CommandController) removeFromWhiteList(arg []string) string {
 	if err != nil {
 		errStr := "error: " + err.Error()
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 	if answer.Text != "OK!" {
 		errStr := "error: " + answer.Text
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 
-	mes := "subnet remove from whitelist succesful"
+	mes := "subnet remove from whitelist successful"
 	cc.logger.Info(mes)
 
 	return mes
@@ -225,6 +238,7 @@ func (cc *CommandController) isInWhiteList(arg []string) string {
 	if len(arg) != 2 {
 		errStr := "error: " + ErrBadArgCount.Error()
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 	subArgs := strings.Split(arg[1], "/")
@@ -232,6 +246,7 @@ func (cc *CommandController) isInWhiteList(arg []string) string {
 	if len(subArgs) != 2 {
 		errStr := "error: " + ErrBadArgument.Error()
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 
@@ -249,6 +264,7 @@ func (cc *CommandController) isInWhiteList(arg []string) string {
 	if err != nil {
 		errStr := "error: " + err.Error()
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 	defer resp.Body.Close()
@@ -257,6 +273,7 @@ func (cc *CommandController) isInWhiteList(arg []string) string {
 	if err != nil {
 		errStr := "error: " + err.Error()
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 	answer := IPListAnswer{}
@@ -264,11 +281,13 @@ func (cc *CommandController) isInWhiteList(arg []string) string {
 	if err != nil {
 		errStr := "error: " + err.Error()
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 	if answer.Message.Code != 0 {
 		errStr := "error: " + answer.Message.Text
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 
@@ -293,6 +312,7 @@ func (cc *CommandController) allInWhiteList() string {
 	if err != nil {
 		errStr := "error: " + err.Error()
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 	defer resp.Body.Close()
@@ -301,6 +321,7 @@ func (cc *CommandController) allInWhiteList() string {
 	if err != nil {
 		errStr := "error: " + err.Error()
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 
@@ -309,11 +330,13 @@ func (cc *CommandController) allInWhiteList() string {
 	if err != nil {
 		errStr := "error: " + err.Error()
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 	if answer.Message.Code != 0 {
 		errStr := "error: " + answer.Message.Text
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 	result := ""
@@ -331,6 +354,7 @@ func (cc *CommandController) addToBlackList(arg []string) string {
 	if len(arg) != 2 {
 		errStr := "error: " + ErrBadArgCount.Error()
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 	subArgs := strings.Split(arg[1], "/")
@@ -338,6 +362,7 @@ func (cc *CommandController) addToBlackList(arg []string) string {
 	if len(subArgs) != 2 {
 		errStr := "error: " + ErrBadArgument.Error()
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 
@@ -348,6 +373,7 @@ func (cc *CommandController) addToBlackList(arg []string) string {
 	if err != nil {
 		errStr := "error: " + err.Error()
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 	defer resp.Body.Close()
@@ -356,6 +382,7 @@ func (cc *CommandController) addToBlackList(arg []string) string {
 	if err != nil {
 		errStr := "error: " + err.Error()
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 
@@ -364,15 +391,17 @@ func (cc *CommandController) addToBlackList(arg []string) string {
 	if err != nil {
 		errStr := "error: " + err.Error()
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 	if answer.Text != "OK!" {
 		errStr := "error: " + answer.Text
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 
-	mes := "subnet add to blacklist succesful"
+	mes := "subnet add to blacklist successful"
 	cc.logger.Info(mes)
 
 	return mes
@@ -382,6 +411,7 @@ func (cc *CommandController) removeFromBlackList(arg []string) string {
 	if len(arg) != 2 {
 		errStr := "error: " + ErrBadArgCount.Error()
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 	subArgs := strings.Split(arg[1], "/")
@@ -389,6 +419,7 @@ func (cc *CommandController) removeFromBlackList(arg []string) string {
 	if len(subArgs) != 2 {
 		errStr := "error: " + ErrBadArgument.Error()
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 
@@ -399,6 +430,7 @@ func (cc *CommandController) removeFromBlackList(arg []string) string {
 	if err != nil {
 		errStr := "error: " + err.Error()
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 	req.Header.Set("Content-Type", "application/json")
@@ -408,6 +440,7 @@ func (cc *CommandController) removeFromBlackList(arg []string) string {
 	if err != nil {
 		errStr := "error: " + err.Error()
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 	defer resp.Body.Close()
@@ -416,6 +449,7 @@ func (cc *CommandController) removeFromBlackList(arg []string) string {
 	if err != nil {
 		errStr := "error: " + err.Error()
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 
@@ -424,15 +458,17 @@ func (cc *CommandController) removeFromBlackList(arg []string) string {
 	if err != nil {
 		errStr := "error: " + err.Error()
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 	if answer.Text != "OK!" {
 		errStr := "error: " + answer.Text
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 
-	mes := "subnet remove from blacklist succesful"
+	mes := "subnet remove from blacklist successful"
 	cc.logger.Info(mes)
 
 	return mes
@@ -442,6 +478,7 @@ func (cc *CommandController) isInBlackList(arg []string) string {
 	if len(arg) != 2 {
 		errStr := "error: " + ErrBadArgCount.Error()
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 	subArgs := strings.Split(arg[1], "/")
@@ -449,6 +486,7 @@ func (cc *CommandController) isInBlackList(arg []string) string {
 	if len(subArgs) != 2 {
 		errStr := "error: " + ErrBadArgument.Error()
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 
@@ -466,6 +504,7 @@ func (cc *CommandController) isInBlackList(arg []string) string {
 	if err != nil {
 		errStr := "error: " + err.Error()
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 	defer resp.Body.Close()
@@ -474,6 +513,7 @@ func (cc *CommandController) isInBlackList(arg []string) string {
 	if err != nil {
 		errStr := "error: " + err.Error()
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 
@@ -482,11 +522,13 @@ func (cc *CommandController) isInBlackList(arg []string) string {
 	if err != nil {
 		errStr := "error: " + err.Error()
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 	if answer.Message.Code != 0 {
 		errStr := "error: " + answer.Message.Text
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 
@@ -504,6 +546,7 @@ func (cc *CommandController) allInBlackList() string {
 	if err != nil {
 		errStr := "error: " + err.Error()
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 	req.Header.Set("Content-Type", "application/json")
@@ -513,6 +556,7 @@ func (cc *CommandController) allInBlackList() string {
 	if err != nil {
 		errStr := "error: " + err.Error()
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 	defer resp.Body.Close()
@@ -521,6 +565,7 @@ func (cc *CommandController) allInBlackList() string {
 	if err != nil {
 		errStr := "error: " + err.Error()
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 
@@ -529,11 +574,13 @@ func (cc *CommandController) allInBlackList() string {
 	if err != nil {
 		errStr := "error: " + err.Error()
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 	if answer.Message.Code != 0 {
 		errStr := "error: " + answer.Message.Text
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 	result := ""
@@ -551,6 +598,7 @@ func (cc *CommandController) request(arg []string) string {
 	if len(arg) != 4 {
 		errStr := "error: " + ErrBadArgCount.Error()
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 
@@ -565,6 +613,7 @@ func (cc *CommandController) request(arg []string) string {
 	if err != nil {
 		errStr := "error: " + err.Error()
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 	req.Header.Set("Content-Type", "application/json")
@@ -574,6 +623,7 @@ func (cc *CommandController) request(arg []string) string {
 	if err != nil {
 		errStr := "error: " + err.Error()
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 	defer resp.Body.Close()
@@ -582,6 +632,7 @@ func (cc *CommandController) request(arg []string) string {
 	if err != nil {
 		errStr := "error: " + err.Error()
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 
@@ -590,6 +641,7 @@ func (cc *CommandController) request(arg []string) string {
 	if err != nil {
 		errStr := "error: " + err.Error()
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 	var txtAnswer string
@@ -609,6 +661,7 @@ func (cc *CommandController) clearBucketByLogin(arg []string) string {
 	if len(arg) != 2 {
 		errStr := "error: " + ErrBadArgCount.Error()
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 
@@ -619,6 +672,7 @@ func (cc *CommandController) clearBucketByLogin(arg []string) string {
 	if err != nil {
 		errStr := "error: " + err.Error()
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 	req.Header.Set("Content-Type", "application/json")
@@ -628,6 +682,7 @@ func (cc *CommandController) clearBucketByLogin(arg []string) string {
 	if err != nil {
 		errStr := "error: " + err.Error()
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 	defer resp.Body.Close()
@@ -636,6 +691,7 @@ func (cc *CommandController) clearBucketByLogin(arg []string) string {
 	if err != nil {
 		errStr := "error: " + err.Error()
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 
@@ -644,11 +700,13 @@ func (cc *CommandController) clearBucketByLogin(arg []string) string {
 	if err != nil {
 		errStr := "error: " + err.Error()
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 	if answer.Text != "OK!" {
 		errStr := "error: " + answer.Text
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 
@@ -662,6 +720,7 @@ func (cc *CommandController) clearBucketByIP(arg []string) string {
 	if len(arg) != 2 {
 		errStr := "error: " + ErrBadArgCount.Error()
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 
@@ -672,6 +731,7 @@ func (cc *CommandController) clearBucketByIP(arg []string) string {
 	if err != nil {
 		errStr := "error: " + err.Error()
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 	req.Header.Set("Content-Type", "application/json")
@@ -681,6 +741,7 @@ func (cc *CommandController) clearBucketByIP(arg []string) string {
 	if err != nil {
 		errStr := "error: " + err.Error()
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 	defer resp.Body.Close()
@@ -689,6 +750,7 @@ func (cc *CommandController) clearBucketByIP(arg []string) string {
 	if err != nil {
 		errStr := "error: " + err.Error()
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 
@@ -697,11 +759,13 @@ func (cc *CommandController) clearBucketByIP(arg []string) string {
 	if err != nil {
 		errStr := "error: " + err.Error()
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 	if answer.Text != "OK!" {
 		errStr := "error: " + answer.Text
 		cc.logger.Error(errStr)
+
 		return errStr
 	}
 

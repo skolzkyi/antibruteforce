@@ -37,6 +37,7 @@ func main() {
 
 	if flag.Arg(0) == "version" {
 		printVersion()
+
 		return
 	}
 

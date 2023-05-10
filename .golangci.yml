@@ -20,6 +20,16 @@ linters:
      - gci
      - usestdlibvars
      - testpackage
+     - gomnd
+     - gochecknoglobals
+     - interfacebloat
+     - forbidigo
+     - gochecknoinits
+     - wsl
+     - whitespace
+     - goconst
+     - funlen
+     - gocognit
 
 
     

@@ -69,5 +69,6 @@ func checkIP(IP string, low int, high int) error {
 			return ErrBadIP
 		}
 	}
+
 	return nil
 }

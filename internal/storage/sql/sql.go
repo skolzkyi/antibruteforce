@@ -22,11 +22,13 @@ func (s *Storage) Init(ctx context.Context, logger storageData.Logger, config st
 	err := s.Connect(ctx, logger, config)
 	if err != nil {
 		logger.Error("SQL connect error: " + err.Error())
+
 		return err
 	}
 	err = s.DB.PingContext(ctx)
 	if err != nil {
 		logger.Error("SQL DB ping error: " + err.Error())
+
 		return err
 	}
 
@@ -36,6 +38,7 @@ func (s *Storage) Init(ctx context.Context, logger storageData.Logger, config st
 func (s *Storage) Connect(ctx context.Context, logger storageData.Logger, config storageData.Config) error {
 	select {
 	case <-ctx.Done():
+
 		return storageData.ErrStorageTimeout
 	default:
 		dsn := helpers.StringBuild(config.GetDBUser(), ":", config.GetDBPassword(), "@tcp(", config.GetDBAddress(), ":", config.GetDBPort(), ")/", config.GetDBName(), "?parseTime=true") //nolint:lll
@@ -43,6 +46,7 @@ func (s *Storage) Connect(ctx context.Context, logger storageData.Logger, config
 		s.DB, err = sql.Open("mysql", dsn)
 		if err != nil {
 			logger.Error("SQL open error: " + err.Error())
+
 			return err
 		}
 
@@ -57,14 +61,17 @@ func (s *Storage) Connect(ctx context.Context, logger storageData.Logger, config
 func (s *Storage) Close(ctx context.Context, logger storageData.Logger) error {
 	select {
 	case <-ctx.Done():
+
 		return storageData.ErrStorageTimeout
 	default:
 		err := s.DB.Close()
 		if err != nil {
 			logger.Error("SQL DB close error: " + err.Error())
+
 			return err
 		}
 	}
+
 	return nil
 }
 
@@ -75,11 +82,13 @@ func (s *Storage) AddIPToWhiteList(ctx context.Context, logger storageData.Logge
 	res, err := s.DB.ExecContext(ctx, stmt, ipdata.Mask, ipdata.IP)
 	if err != nil {
 		logger.Error("SQL DB exec stmt AddIPToWhiteList error: " + err.Error() + " stmt: " + stmt)
+
 		return 0, err
 	}
 	id, err := res.LastInsertId()
 	if err != nil {
 		logger.Error("SQL AddIPToWhiteList get new id error: " + err.Error() + " stmt: " + stmt)
+
 		return 0, err
 	}
 
@@ -92,17 +101,20 @@ func (s *Storage) RemoveIPInWhiteList(ctx context.Context, logger storageData.Lo
 	result, err := s.DB.ExecContext(ctx, stmt, ipdata.IP, ipdata.Mask)
 	if err != nil {
 		logger.Error("SQL DB exec stmt RemoveIPInWhiteList error: " + err.Error() + " stmt: " + stmt)
+
 		return err
 	}
 
 	count, err := result.RowsAffected()
 	if err != nil {
 		logger.Error("SQL DB type RemoveIPInWhiteList error: " + err.Error() + " stmt: " + stmt)
+
 		return err
 	}
 
 	if count == int64(0) {
 		logger.Error("SQL DB exec stmt RemoveIPInWhiteList error: " + storageData.ErrNoRecord.Error() + " stmt: " + stmt)
+
 		return storageData.ErrNoRecord
 	}
 
@@ -122,8 +134,10 @@ func (s *Storage) IsIPInWhiteList(ctx context.Context, logger storageData.Logger
 			return false, nil
 		}
 		logger.Error("SQL row scan IsIPInWhiteList error: " + err.Error() + " stmt: " + stmt)
+
 		return false, err
 	}
+
 	return true, nil
 }
 
@@ -135,6 +149,7 @@ func (s *Storage) GetAllIPInWhiteList(ctx context.Context, logger storageData.Lo
 	rows, err := s.DB.QueryContext(ctx, stmt)
 	if err != nil {
 		logger.Error("SQL GetAllIPInWhiteList DB query error: " + err.Error() + " stmt: " + stmt)
+
 		return nil, err
 	}
 
@@ -146,6 +161,7 @@ func (s *Storage) GetAllIPInWhiteList(ctx context.Context, logger storageData.Lo
 		err = rows.Scan(&storagedIP.ID, &storagedIP.Mask, &storagedIP.IP)
 		if err != nil {
 			logger.Error("SQL rows scan GetAllIPInWhiteList error")
+
 			return nil, err
 		}
 
@@ -155,6 +171,7 @@ func (s *Storage) GetAllIPInWhiteList(ctx context.Context, logger storageData.Lo
 
 	if err = rows.Err(); err != nil {
 		logger.Error("SQL GetAllIPInWhiteList  rows error: " + err.Error())
+
 		return nil, err
 	}
 
@@ -168,11 +185,13 @@ func (s *Storage) AddIPToBlackList(ctx context.Context, logger storageData.Logge
 	res, err := s.DB.ExecContext(ctx, stmt, ipdata.Mask, ipdata.IP)
 	if err != nil {
 		logger.Error("SQL DB exec stmt AddIPToBlackList error: " + err.Error() + " stmt: " + stmt)
+
 		return 0, err
 	}
 	id, err := res.LastInsertId()
 	if err != nil {
 		logger.Error("SQL AddIPToBlackList get new id error: " + err.Error() + " stmt: " + stmt)
+
 		return 0, err
 	}
 
@@ -185,16 +204,19 @@ func (s *Storage) RemoveIPInBlackList(ctx context.Context, logger storageData.Lo
 	result, err := s.DB.ExecContext(ctx, stmt, ipdata.IP, ipdata.Mask)
 	if err != nil {
 		logger.Error("SQL DB exec stmt RemoveIPInBlackList error: " + err.Error() + " stmt: " + stmt)
+
 		return err
 	}
 	count, err := result.RowsAffected()
 	if err != nil {
 		logger.Error("SQL DB type RemoveIPInWhiteList error: " + err.Error() + " stmt: " + stmt)
+
 		return err
 	}
 
 	if count == int64(0) {
 		logger.Error("SQL DB exec stmt RemoveIPInWhiteList error: " + storageData.ErrNoRecord.Error() + " stmt: " + stmt)
+
 		return storageData.ErrNoRecord
 	}
 
@@ -214,8 +236,10 @@ func (s *Storage) IsIPInBlackList(ctx context.Context, logger storageData.Logger
 			return false, nil
 		}
 		logger.Error("SQL row scan IsIPInBlackList error: " + err.Error() + " stmt: " + stmt)
+
 		return false, err
 	}
+
 	return true, nil
 }
 
@@ -227,6 +251,7 @@ func (s *Storage) GetAllIPInBlackList(ctx context.Context, logger storageData.Lo
 	rows, err := s.DB.QueryContext(ctx, stmt)
 	if err != nil {
 		logger.Error("SQL GetAllIPInBlackList DB query error: " + err.Error() + " stmt: " + stmt)
+
 		return nil, err
 	}
 
@@ -238,6 +263,7 @@ func (s *Storage) GetAllIPInBlackList(ctx context.Context, logger storageData.Lo
 		err = rows.Scan(&storagedIP.ID, &storagedIP.Mask, &storagedIP.IP)
 		if err != nil {
 			logger.Error("SQL rows scan GetAllIPInBlackList error")
+
 			return nil, err
 		}
 
@@ -247,6 +273,7 @@ func (s *Storage) GetAllIPInBlackList(ctx context.Context, logger storageData.Lo
 
 	if err = rows.Err(); err != nil {
 		logger.Error("SQL GetAllIPInBlackList  rows error: " + err.Error())
+
 		return nil, err
 	}
 

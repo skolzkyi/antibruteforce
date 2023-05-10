@@ -27,9 +27,11 @@ func (rs *RedisStorage) Init(ctx context.Context, logger storageData.Logger, con
 	_, err := rs.rdb.Ping(ctx).Result()
 	if err != nil {
 		logger.Error("Redis DB ping error: " + err.Error())
+
 		return err
 	}
 	rs.rdb.FlushDB(ctx)
+
 	return nil
 }
 
@@ -38,6 +40,7 @@ func (rs *RedisStorage) InitAsMock(ctx context.Context, logger storageData.Logge
 	rs.mockServer, err = redisMock.Run()
 	if err != nil {
 		logger.Error("Redis DB mock init error: " + err.Error())
+
 		return err
 	}
 	rs.rdb = redis.NewClient(&redis.Options{
@@ -48,9 +51,11 @@ func (rs *RedisStorage) InitAsMock(ctx context.Context, logger storageData.Logge
 	_, err = rs.rdb.Ping(ctx).Result()
 	if err != nil {
 		logger.Error("Redis DB mock ping error: " + err.Error())
+
 		return err
 	}
 	rs.rdb.FlushDB(ctx)
+
 	return nil
 }
 
@@ -58,6 +63,7 @@ func (rs *RedisStorage) Close(ctx context.Context, logger storageData.Logger) er
 	err := rs.FlushStorage(ctx, logger)
 	if err != nil {
 		logger.Error("Redis DB flush error on close: " + err.Error())
+
 		return err
 	}
 	if rs.mockServer != nil {
@@ -66,8 +72,10 @@ func (rs *RedisStorage) Close(ctx context.Context, logger storageData.Logger) er
 	err = rs.rdb.Close()
 	if err != nil {
 		logger.Error("Redis DB error on close: " + err.Error())
+
 		return err
 	}
+
 	return nil
 }
 
@@ -75,6 +83,7 @@ func (rs *RedisStorage) IncrementAndGetBucketValue(ctx context.Context, logger s
 	result, err := rs.rdb.Incr(ctx, key).Result()
 	if err != nil {
 		logger.Error("Redis DB IncrementAndGetBucketValue error: " + err.Error())
+
 		return 0, err
 	}
 
@@ -86,6 +95,7 @@ func (rs *RedisStorage) SetBucketValue(ctx context.Context, logger storageData.L
 	err := rs.rdb.Set(ctx, key, strValue, 0).Err()
 	if err != nil {
 		logger.Error("Redis DB SetBucketValue error: " + err.Error())
+
 		return err
 	}
 
@@ -94,5 +104,6 @@ func (rs *RedisStorage) SetBucketValue(ctx context.Context, logger storageData.L
 
 func (rs *RedisStorage) FlushStorage(ctx context.Context, _ storageData.Logger) error {
 	rs.rdb.FlushDB(ctx)
+
 	return nil
 }

@@ -28,6 +28,7 @@ func (s *StorageMock) Init(_ context.Context, _ storageData.Logger, _ storageDat
 	s.blacklist = make(map[string]storageData.StorageIPData)
 	s.idWL = 0
 	s.idBL = 0
+
 	return nil
 }
 
@@ -40,6 +41,7 @@ func (s *StorageMock) Close(_ context.Context, _ storageData.Logger) error {
 func (s *StorageMock) AddIPToWhiteList(ctx context.Context, logger storageData.Logger, value storageData.StorageIPData) (int, error) {
 	select {
 	case <-ctx.Done():
+
 		return 0, storageData.ErrStorageTimeout
 	default:
 		tag := value.IP + "/" + strconv.Itoa(value.Mask)
@@ -48,6 +50,7 @@ func (s *StorageMock) AddIPToWhiteList(ctx context.Context, logger storageData.L
 		value.ID = s.idWL
 		s.whitelist[tag] = value
 		s.idWL++
+
 		return value.ID, nil
 	}
 }
@@ -55,6 +58,7 @@ func (s *StorageMock) AddIPToWhiteList(ctx context.Context, logger storageData.L
 func (s *StorageMock) IsIPInWhiteList(ctx context.Context, _ storageData.Logger, value storageData.StorageIPData) (bool, error) {
 	select {
 	case <-ctx.Done():
+
 		return false, storageData.ErrStorageTimeout
 	default:
 		tag := value.IP + "/" + strconv.Itoa(value.Mask)
@@ -62,6 +66,7 @@ func (s *StorageMock) IsIPInWhiteList(ctx context.Context, _ storageData.Logger,
 		defer s.mu.RUnlock()
 		var err error
 		_, ok := s.whitelist[tag]
+
 		return ok, err
 	}
 }
@@ -69,6 +74,7 @@ func (s *StorageMock) IsIPInWhiteList(ctx context.Context, _ storageData.Logger,
 func (s *StorageMock) RemoveIPInWhiteList(ctx context.Context, _ storageData.Logger, value storageData.StorageIPData) error {
 	select {
 	case <-ctx.Done():
+
 		return storageData.ErrStorageTimeout
 	default:
 		tag := value.IP + "/" + strconv.Itoa(value.Mask)
@@ -79,6 +85,7 @@ func (s *StorageMock) RemoveIPInWhiteList(ctx context.Context, _ storageData.Log
 		s.mu.Lock()
 		defer s.mu.Unlock()
 		delete(s.whitelist, tag)
+
 		return nil
 	}
 }
@@ -87,6 +94,7 @@ func (s *StorageMock) GetAllIPInWhiteList(ctx context.Context, _ storageData.Log
 	resIPData := make([]storageData.StorageIPData, 0)
 	select {
 	case <-ctx.Done():
+
 		return nil, storageData.ErrStorageTimeout
 	default:
 		s.mu.RLock()
@@ -97,6 +105,7 @@ func (s *StorageMock) GetAllIPInWhiteList(ctx context.Context, _ storageData.Log
 		sort.SliceStable(resIPData, func(i, j int) bool {
 			return resIPData[i].ID < resIPData[j].ID
 		})
+
 		return resIPData, nil
 	}
 }
@@ -106,6 +115,7 @@ func (s *StorageMock) GetAllIPInWhiteList(ctx context.Context, _ storageData.Log
 func (s *StorageMock) AddIPToBlackList(ctx context.Context, logger storageData.Logger, value storageData.StorageIPData) (int, error) {
 	select {
 	case <-ctx.Done():
+
 		return 0, storageData.ErrStorageTimeout
 	default:
 		tag := value.IP + "/" + strconv.Itoa(value.Mask)
@@ -114,6 +124,7 @@ func (s *StorageMock) AddIPToBlackList(ctx context.Context, logger storageData.L
 		value.ID = s.idBL
 		s.blacklist[tag] = value
 		s.idBL++
+
 		return value.ID, nil
 	}
 }
@@ -121,6 +132,7 @@ func (s *StorageMock) AddIPToBlackList(ctx context.Context, logger storageData.L
 func (s *StorageMock) IsIPInBlackList(ctx context.Context, _ storageData.Logger, value storageData.StorageIPData) (bool, error) {
 	select {
 	case <-ctx.Done():
+
 		return false, storageData.ErrStorageTimeout
 	default:
 		tag := value.IP + "/" + strconv.Itoa(value.Mask)
@@ -128,6 +140,7 @@ func (s *StorageMock) IsIPInBlackList(ctx context.Context, _ storageData.Logger,
 		defer s.mu.RUnlock()
 		var err error
 		_, ok := s.blacklist[tag]
+
 		return ok, err
 	}
 }
@@ -135,6 +148,7 @@ func (s *StorageMock) IsIPInBlackList(ctx context.Context, _ storageData.Logger,
 func (s *StorageMock) RemoveIPInBlackList(ctx context.Context, _ storageData.Logger, value storageData.StorageIPData) error {
 	select {
 	case <-ctx.Done():
+
 		return storageData.ErrStorageTimeout
 	default:
 		tag := value.IP + "/" + strconv.Itoa(value.Mask)
@@ -145,6 +159,7 @@ func (s *StorageMock) RemoveIPInBlackList(ctx context.Context, _ storageData.Log
 		s.mu.Lock()
 		defer s.mu.Unlock()
 		delete(s.blacklist, tag)
+
 		return nil
 	}
 }
@@ -153,6 +168,7 @@ func (s *StorageMock) GetAllIPInBlackList(ctx context.Context, _ storageData.Log
 	resIPData := make([]storageData.StorageIPData, 0)
 	select {
 	case <-ctx.Done():
+
 		return nil, storageData.ErrStorageTimeout
 	default:
 		s.mu.RLock()
@@ -163,6 +179,7 @@ func (s *StorageMock) GetAllIPInBlackList(ctx context.Context, _ storageData.Log
 		sort.SliceStable(resIPData, func(i, j int) bool {
 			return resIPData[i].ID < resIPData[j].ID
 		})
+
 		return resIPData, nil
 	}
 }

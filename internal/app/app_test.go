@@ -112,6 +112,7 @@ func initAppWithMocks(t *testing.T) *App {
 	err = redis.InitAsMock(ctxStor, logger)
 	require.NoError(t, err)
 	antibruteforce := New(logger, storage, redis, &config)
+
 	return antibruteforce
 }
 

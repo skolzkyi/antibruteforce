@@ -54,6 +54,7 @@ type StorageIPData struct {
 
 func (ip *StorageIPData) String() string {
 	res := helpers.StringBuild("[ID: ", strconv.Itoa(ip.ID), ", IP: ", ip.IP, "]")
+
 	return res
 }
 
@@ -65,5 +66,6 @@ type RequestAuth struct {
 
 func (r *RequestAuth) String() string {
 	res := helpers.StringBuild("[Login: ", r.Login, " Password: ", r.Password, ", IP: ", r.IP, "]")
+
 	return res
 }

@@ -72,12 +72,14 @@ func (s *Server) AuthorizationRequest(w http.ResponseWriter, r *http.Request) {
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			apiErrHandler(err, &w)
+
 			return
 		}
 
 		err = json.Unmarshal(body, &newRequest)
 		if err != nil {
 			apiErrHandler(err, &w)
+
 			return
 		}
 
@@ -94,17 +96,21 @@ func (s *Server) AuthorizationRequest(w http.ResponseWriter, r *http.Request) {
 		jsonstring, err := json.Marshal(answer)
 		if err != nil {
 			apiErrHandler(err, &w)
+
 			return
 		}
 		_, err = w.Write(jsonstring)
 		if err != nil {
 			apiErrHandler(err, &w)
+
 			return
 		}
+
 		return
 
 	default:
 		apiErrHandler(ErrUnsupportedMethod, &w)
+
 		return
 	}
 }
@@ -121,12 +127,14 @@ func (s *Server) ClearBucketByLogin(w http.ResponseWriter, r *http.Request) {
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			apiErrHandler(err, &w)
+
 			return
 		}
 
 		err = json.Unmarshal(body, &inputTag)
 		if err != nil {
 			apiErrHandler(err, &w)
+
 			return
 		}
 
@@ -143,18 +151,21 @@ func (s *Server) ClearBucketByLogin(w http.ResponseWriter, r *http.Request) {
 		jsonstring, err := json.Marshal(newMessage)
 		if err != nil {
 			apiErrHandler(err, &w)
+
 			return
 		}
 
 		_, err = w.Write(jsonstring)
 		if err != nil {
 			apiErrHandler(err, &w)
+
 			return
 		}
 
 		return
 	default:
 		apiErrHandler(ErrUnsupportedMethod, &w)
+
 		return
 	}
 }
@@ -171,12 +182,14 @@ func (s *Server) ClearBucketByIP(w http.ResponseWriter, r *http.Request) {
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			apiErrHandler(err, &w)
+
 			return
 		}
 
 		err = json.Unmarshal(body, &inputTag)
 		if err != nil {
 			apiErrHandler(err, &w)
+
 			return
 		}
 
@@ -193,23 +206,26 @@ func (s *Server) ClearBucketByIP(w http.ResponseWriter, r *http.Request) {
 		jsonstring, err := json.Marshal(newMessage)
 		if err != nil {
 			apiErrHandler(err, &w)
+
 			return
 		}
 
 		_, err = w.Write(jsonstring)
 		if err != nil {
 			apiErrHandler(err, &w)
+
 			return
 		}
 
 		return
 	default:
 		apiErrHandler(ErrUnsupportedMethod, &w)
+
 		return
 	}
 }
 
-func (s *Server) WhiteList_REST(w http.ResponseWriter, r *http.Request) { //nolint:funlen
+func (s *Server) WhiteList_REST(w http.ResponseWriter, r *http.Request) { //nolint:funlen, gocognit
 	defer r.Body.Close()
 
 	ctx, cancel := context.WithTimeout(r.Context(), s.Config.GetDBTimeOut())
@@ -223,12 +239,14 @@ func (s *Server) WhiteList_REST(w http.ResponseWriter, r *http.Request) { //noli
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			apiErrHandler(err, &w)
+
 			return
 		}
 
 		err = json.Unmarshal(body, &newData)
 		if err != nil {
 			apiErrHandler(err, &w)
+
 			return
 		}
 
@@ -248,13 +266,16 @@ func (s *Server) WhiteList_REST(w http.ResponseWriter, r *http.Request) { //noli
 			jsonstring, err := json.Marshal(IPListAnsw)
 			if err != nil {
 				apiErrHandler(err, &w)
+
 				return
 			}
 			_, err = w.Write(jsonstring)
 			if err != nil {
 				apiErrHandler(err, &w)
+
 				return
 			}
+
 			return
 		}
 
@@ -276,12 +297,14 @@ func (s *Server) WhiteList_REST(w http.ResponseWriter, r *http.Request) { //noli
 		jsonstring, err := json.Marshal(IPListAnsw)
 		if err != nil {
 			apiErrHandler(err, &w)
+
 			return
 		}
 
 		_, err = w.Write(jsonstring)
 		if err != nil {
 			apiErrHandler(err, &w)
+
 			return
 		}
 
@@ -294,12 +317,14 @@ func (s *Server) WhiteList_REST(w http.ResponseWriter, r *http.Request) { //noli
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			apiErrHandler(err, &w)
+
 			return
 		}
 
 		err = json.Unmarshal(body, &newData)
 		if err != nil {
 			apiErrHandler(err, &w)
+
 			return
 		}
 
@@ -316,12 +341,14 @@ func (s *Server) WhiteList_REST(w http.ResponseWriter, r *http.Request) { //noli
 		jsonstring, err := json.Marshal(newMessage)
 		if err != nil {
 			apiErrHandler(err, &w)
+
 			return
 		}
 
 		_, err = w.Write(jsonstring)
 		if err != nil {
 			apiErrHandler(err, &w)
+
 			return
 		}
 
@@ -334,12 +361,14 @@ func (s *Server) WhiteList_REST(w http.ResponseWriter, r *http.Request) { //noli
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			apiErrHandler(err, &w)
+
 			return
 		}
 
 		err = json.Unmarshal(body, &removeData)
 		if err != nil {
 			apiErrHandler(err, &w)
+
 			return
 		}
 
@@ -356,12 +385,14 @@ func (s *Server) WhiteList_REST(w http.ResponseWriter, r *http.Request) { //noli
 		jsonstring, err := json.Marshal(newMessage)
 		if err != nil {
 			apiErrHandler(err, &w)
+
 			return
 		}
 
 		_, err = w.Write(jsonstring)
 		if err != nil {
 			apiErrHandler(err, &w)
+
 			return
 		}
 
@@ -369,11 +400,12 @@ func (s *Server) WhiteList_REST(w http.ResponseWriter, r *http.Request) { //noli
 
 	default:
 		apiErrHandler(ErrUnsupportedMethod, &w)
+
 		return
 	}
 }
 
-func (s *Server) BlackList_REST(w http.ResponseWriter, r *http.Request) { //nolint:funlen
+func (s *Server) BlackList_REST(w http.ResponseWriter, r *http.Request) { //nolint:funlen, gocognit
 	defer r.Body.Close()
 
 	ctx, cancel := context.WithTimeout(r.Context(), s.Config.GetDBTimeOut())
@@ -387,12 +419,14 @@ func (s *Server) BlackList_REST(w http.ResponseWriter, r *http.Request) { //noli
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			apiErrHandler(err, &w)
+
 			return
 		}
 
 		err = json.Unmarshal(body, &newData)
 		if err != nil {
 			apiErrHandler(err, &w)
+
 			return
 		}
 
@@ -412,13 +446,16 @@ func (s *Server) BlackList_REST(w http.ResponseWriter, r *http.Request) { //noli
 			jsonstring, err := json.Marshal(IPListAnsw)
 			if err != nil {
 				apiErrHandler(err, &w)
+
 				return
 			}
 			_, err = w.Write(jsonstring)
 			if err != nil {
 				apiErrHandler(err, &w)
+
 				return
 			}
+
 			return
 		}
 
@@ -440,31 +477,34 @@ func (s *Server) BlackList_REST(w http.ResponseWriter, r *http.Request) { //noli
 		jsonstring, err := json.Marshal(IPListAnsw)
 		if err != nil {
 			apiErrHandler(err, &w)
+
 			return
 		}
 
 		_, err = w.Write(jsonstring)
 		if err != nil {
 			apiErrHandler(err, &w)
+
 			return
 		}
 
 		return
 
 	case http.MethodPost:
-
 		newData := storageData.StorageIPData{}
 		newMessage := outputJSON{}
 
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			apiErrHandler(err, &w)
+
 			return
 		}
 
 		err = json.Unmarshal(body, &newData)
 		if err != nil {
 			apiErrHandler(err, &w)
+
 			return
 		}
 
@@ -481,12 +521,14 @@ func (s *Server) BlackList_REST(w http.ResponseWriter, r *http.Request) { //noli
 		jsonstring, err := json.Marshal(newMessage)
 		if err != nil {
 			apiErrHandler(err, &w)
+
 			return
 		}
 
 		_, err = w.Write(jsonstring)
 		if err != nil {
 			apiErrHandler(err, &w)
+
 			return
 		}
 
@@ -500,12 +542,14 @@ func (s *Server) BlackList_REST(w http.ResponseWriter, r *http.Request) { //noli
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			apiErrHandler(err, &w)
+
 			return
 		}
 
 		err = json.Unmarshal(body, &removeData)
 		if err != nil {
 			apiErrHandler(err, &w)
+
 			return
 		}
 
@@ -522,12 +566,14 @@ func (s *Server) BlackList_REST(w http.ResponseWriter, r *http.Request) { //noli
 		jsonstring, err := json.Marshal(newMessage)
 		if err != nil {
 			apiErrHandler(err, &w)
+
 			return
 		}
 
 		_, err = w.Write(jsonstring)
 		if err != nil {
 			apiErrHandler(err, &w)
+
 			return
 		}
 
@@ -535,6 +581,7 @@ func (s *Server) BlackList_REST(w http.ResponseWriter, r *http.Request) { //noli
 
 	default:
 		apiErrHandler(ErrUnsupportedMethod, &w)
+
 		return
 	}
 }

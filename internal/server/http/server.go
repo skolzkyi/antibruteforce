@@ -88,10 +88,12 @@ func (s *Server) Start(ctx context.Context) error {
 	if err != nil {
 		if !errors.Is(err, http.ErrServerClosed) {
 			s.logg.Error("server start error: " + err.Error())
+
 			return err
 		}
 	}
 	<-ctx.Done()
+
 	return err
 }
 
@@ -99,18 +101,22 @@ func (s *Server) Stop(ctx context.Context) error {
 	err := s.serv.Shutdown(ctx)
 	if err != nil {
 		s.logg.Error("server shutdown error: " + err.Error())
+
 		return err
 	}
 	err = s.app.CloseStorage(ctx)
 	if err != nil {
 		s.logg.Error("server closeStorage error: " + err.Error())
+
 		return err
 	}
 	err = s.app.CloseBStorage(ctx)
 	if err != nil {
 		s.logg.Error("server CloseBStorage error: " + err.Error())
+
 		return err
 	}
 	s.logg.Info("server graceful shutdown")
+
 	return err
 }

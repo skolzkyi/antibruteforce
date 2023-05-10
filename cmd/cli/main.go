@@ -9,25 +9,25 @@ import (
 	"os"
 	"os/signal"
 	//"strconv"
-	"syscall"
 	"bufio"
 	"errors"
-	"net/http"
 	"io"
+	"net/http"
+	"syscall"
 
-	//helpers "github.com/skolzkyi/antibruteforce/helpers"
-	"github.com/skolzkyi/antibruteforce/internal/logger_cli"
+	// helpers "github.com/skolzkyi/antibruteforce/helpers"
 	helpers "github.com/skolzkyi/antibruteforce/helpers"
-	
+	"github.com/skolzkyi/antibruteforce/internal/logger_cli"
 )
+
 var ErrABNotAvailable = errors.New("antibruteforce not available")
 
 type inputData struct {
 	scanner *bufio.Scanner
 }
 
-func(id *inputData) Init() {
-	id.scanner=bufio.NewScanner(os.Stdin)
+func (id *inputData) Init() {
+	id.scanner = bufio.NewScanner(os.Stdin)
 }
 
 var configFilePath string
@@ -50,7 +50,7 @@ func main() {
 		fmt.Println(err)
 		panic(err)
 	}
-	//fmt.Println("config: ", config)
+	// fmt.Println("config: ", config)
 	log, err := logger_cli.New(config.Logger.Level)
 	if err != nil {
 		fmt.Println(err)
@@ -65,17 +65,17 @@ func main() {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-	inData:=inputData{}
+	inData := inputData{}
 	inData.Init()
 
-	comContr:=CommandControllerNew()
-	comContr.Init(config.GetAddress() + ":" + config.GetPort(),log)
+	comContr := CommandControllerNew()
+	comContr.Init(config.GetAddress()+":"+config.GetPort(), log)
 
 	log.Info("antibruteforceAddr: " + config.GetAddress() + ":" + config.GetPort())
 	log.Info("antibruteforce-cli up")
 	fmt.Println("Welcome to antibrutforce-cli!")
 	fmt.Println(`Use "help" command for an overview of available commands`)
-	
+
 	for {
 		select {
 		case <-ctx.Done():
@@ -83,17 +83,17 @@ func main() {
 			os.Exit(1) //nolint:gocritic
 		default:
 			inData.scanner.Scan()
-			rawCommand:=inData.scanner.Text()
+			rawCommand := inData.scanner.Text()
 			if rawCommand == "" {
 				continue
 			}
-			if rawCommand=="exit" {
+			if rawCommand == "exit" {
 				fmt.Println("bye")
 				log.Info("antibruteforce-cli  down")
 				os.Exit(1) //nolint:gocritic
-				//cancel()
+				// cancel()
 			}
-			output:=comContr.processCommand(rawCommand)
+			output := comContr.processCommand(rawCommand)
 			fmt.Println(output)
 		}
 	}
@@ -103,18 +103,18 @@ func pingAB(address string) error {
 	url := helpers.StringBuild("http://", address, "/")
 
 	resp, err := http.Get(url)
-	if err!=nil {
+	if err != nil {
 		return err
-	}	
+	}
 	defer resp.Body.Close()
 
 	respBody, err := io.ReadAll(resp.Body)
-	if err!=nil {
+	if err != nil {
 		return err
 	}
- 	if string(respBody)!= "test" {
+	if string(respBody) != "test" {
 		return ErrABNotAvailable
- 	}
+	}
 
 	return nil
 }

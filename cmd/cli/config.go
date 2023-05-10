@@ -7,11 +7,10 @@ import (
 	"github.com/spf13/viper"
 )
 
-
 type Config struct {
-	Logger                LoggerConf
-	address               string        `mapstructure:"ADDRESS"`
-	port                  string        `mapstructure:"PORT"`
+	Logger  LoggerConf
+	address string `mapstructure:"ADDRESS"`
+	port    string `mapstructure:"PORT"`
 }
 
 type LoggerConf struct {

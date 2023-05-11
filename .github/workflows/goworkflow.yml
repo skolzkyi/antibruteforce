@@ -15,19 +15,19 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v3
-      with:
-        GITHUB_TOKEN: ${{ secrets.GO_AB }}
+   #   with:
+   #     GITHUB_TOKEN: ${{ secrets.GO_AB }}
     
     - name: Set up Go
       uses: actions/setup-go@v3
       with:
         go-version: 1.20
     
-    - name: Download dependencies
-      run: go mod download   
+   # - name: Download dependencies
+   #   run: go mod download   
 
-    - name: Verify dependencies
-      run: go mod verify
+   # - name: Verify dependencies
+   #   run: go mod verify
 
     - name: Build
       run: make build

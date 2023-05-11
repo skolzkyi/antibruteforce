@@ -1,4 +1,4 @@
-package integrationTests
+package integrationtests
 
 import (
 	"errors"
@@ -73,7 +73,6 @@ func (config *Config) Init(path string) error {
 	err := viper.ReadInConfig()
 	if err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); !ok { //nolint:errorlint
-
 			return err
 		}
 	}

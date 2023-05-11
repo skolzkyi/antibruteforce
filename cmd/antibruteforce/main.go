@@ -14,9 +14,7 @@ import (
 	//nolint:gci,gofmt,gofumpt,nolintlint
 	"github.com/skolzkyi/antibruteforce/internal/app"
 	"github.com/skolzkyi/antibruteforce/internal/logger"
-
 	internalhttp "github.com/skolzkyi/antibruteforce/internal/server/http"
-
 	RedisStorage "github.com/skolzkyi/antibruteforce/internal/storage/redis"
 	SQLstorage "github.com/skolzkyi/antibruteforce/internal/storage/sql"
 )

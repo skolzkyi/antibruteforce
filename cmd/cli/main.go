@@ -13,7 +13,7 @@ import (
 	"syscall"
 
 	helpers "github.com/skolzkyi/antibruteforce/helpers"
-	"github.com/skolzkyi/antibruteforce/internal/logger_cli"
+	"github.com/skolzkyi/antibruteforce/internal/loggercli"
 )
 
 var ErrABNotAvailable = errors.New("antibruteforce not available")
@@ -48,7 +48,7 @@ func main() {
 		panic(err)
 	}
 
-	log, err := logger_cli.New(config.Logger.Level)
+	log, err := loggercli.New(config.Logger.Level)
 	if err != nil {
 		fmt.Println(err)
 		panic(err)
@@ -60,7 +60,8 @@ func main() {
 
 	err = pingAB(config.GetAddress() + ":" + config.GetPort())
 	if err != nil {
-		log.Fatal(err.Error())
+		log.Error(err.Error())
+		panic(err)
 	}
 	inData := inputData{}
 	inData.Init()

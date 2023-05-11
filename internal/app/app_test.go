@@ -17,6 +17,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const localhost string = "127.0.0.1"
+
 type ConfigTest struct{}
 
 func (config *ConfigTest) Init(_ string) error {
@@ -28,7 +30,7 @@ func (config *ConfigTest) GetServerURL() string {
 }
 
 func (config *ConfigTest) GetAddress() string {
-	return "127.0.0.1"
+	return localhost
 }
 
 func (config *ConfigTest) GetPort() string {
@@ -68,7 +70,7 @@ func (config *ConfigTest) GetDBTimeOut() time.Duration {
 }
 
 func (config *ConfigTest) GetDBAddress() string {
-	return "127.0.0.1"
+	return localhost
 }
 
 func (config *ConfigTest) GetDBPort() string {
@@ -76,7 +78,7 @@ func (config *ConfigTest) GetDBPort() string {
 }
 
 func (config *ConfigTest) GetRedisAddress() string {
-	return "127.0.0.1"
+	return localhost
 }
 
 func (config *ConfigTest) GetRedisPort() string {

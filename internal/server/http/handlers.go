@@ -12,6 +12,8 @@ import (
 	storageData "github.com/skolzkyi/antibruteforce/internal/storage/storageData"
 )
 
+const correctAnswerText string = "OK!"
+
 type AuthorizationRequestAnswer struct {
 	Message string
 	Ok      bool
@@ -144,7 +146,7 @@ func (s *Server) ClearBucketByLogin(w http.ResponseWriter, r *http.Request) {
 			newMessage.Code = 1
 			w.Header().Add("ErrCustom", err.Error())
 		} else {
-			newMessage.Text = "OK!"
+			newMessage.Text = correctAnswerText
 			newMessage.Code = 0
 		}
 
@@ -199,7 +201,7 @@ func (s *Server) ClearBucketByIP(w http.ResponseWriter, r *http.Request) {
 			newMessage.Code = 1
 			w.Header().Add("ErrCustom", err.Error())
 		} else {
-			newMessage.Text = "OK!"
+			newMessage.Text = correctAnswerText
 			newMessage.Code = 0
 		}
 
@@ -257,7 +259,7 @@ func (s *Server) WhiteList_REST(w http.ResponseWriter, r *http.Request) { //noli
 				newMessage.Code = 1
 				w.Header().Add("ErrCustom", errInner.Error())
 			} else {
-				newMessage.Text = "OK!"
+				newMessage.Text = correctAnswerText
 				newMessage.Code = 0
 			}
 			IPListAnsw.IPList = make([]storageData.StorageIPData, len(IPList))
@@ -334,7 +336,7 @@ func (s *Server) WhiteList_REST(w http.ResponseWriter, r *http.Request) { //noli
 			newMessage.Code = 1
 			w.Header().Add("ErrCustom", errInner.Error())
 		} else {
-			newMessage.Text = "OK!"
+			newMessage.Text = correctAnswerText
 			newMessage.Code = id
 		}
 
@@ -378,7 +380,7 @@ func (s *Server) WhiteList_REST(w http.ResponseWriter, r *http.Request) { //noli
 			newMessage.Code = 1
 			w.Header().Add("ErrCustom", errInner.Error())
 		} else {
-			newMessage.Text = "OK!"
+			newMessage.Text = correctAnswerText
 			newMessage.Code = 0
 		}
 
@@ -437,7 +439,7 @@ func (s *Server) BlackList_REST(w http.ResponseWriter, r *http.Request) { //noli
 				newMessage.Code = 1
 				w.Header().Add("ErrCustom", errInner.Error())
 			} else {
-				newMessage.Text = "OK!"
+				newMessage.Text = correctAnswerText
 				newMessage.Code = 0
 			}
 			IPListAnsw.IPList = make([]storageData.StorageIPData, len(IPList))
@@ -514,7 +516,7 @@ func (s *Server) BlackList_REST(w http.ResponseWriter, r *http.Request) { //noli
 			newMessage.Code = 1
 			w.Header().Add("ErrCustom", errInner.Error())
 		} else {
-			newMessage.Text = "OK!"
+			newMessage.Text = correctAnswerText
 			newMessage.Code = id
 		}
 
@@ -559,7 +561,7 @@ func (s *Server) BlackList_REST(w http.ResponseWriter, r *http.Request) { //noli
 			newMessage.Code = 1
 			w.Header().Add("ErrCustom", errInner.Error())
 		} else {
-			newMessage.Text = "OK!"
+			newMessage.Text = correctAnswerText
 			newMessage.Code = 0
 		}
 

@@ -10,9 +10,11 @@ import (
 	"strings"
 
 	helpers "github.com/skolzkyi/antibruteforce/helpers"
-	logger_cli "github.com/skolzkyi/antibruteforce/internal/logger_cli"
+	loggercli "github.com/skolzkyi/antibruteforce/internal/loggercli"
 	storageData "github.com/skolzkyi/antibruteforce/internal/storage/storageData"
 )
+
+const correctAnswerText string = "OK!"
 
 type AuthorizationRequestAnswer struct {
 	Message string
@@ -35,7 +37,7 @@ type InputTag struct {
 
 type CommandController struct {
 	address string
-	logger  *logger_cli.LogWrap
+	logger  *loggercli.LogWrap
 }
 
 var (
@@ -48,7 +50,7 @@ func CommandControllerNew() *CommandController {
 	return &CommandController{}
 }
 
-func (cc *CommandController) Init(address string, logger *logger_cli.LogWrap) {
+func (cc *CommandController) Init(address string, logger *loggercli.LogWrap) {
 	cc.address = address
 	cc.logger = logger
 }
@@ -154,7 +156,7 @@ func (cc *CommandController) addToWhiteList(arg []string) string {
 
 		return errStr
 	}
-	if answer.Text != "OK!" {
+	if answer.Text != correctAnswerText {
 		errStr := "error: " + answer.Text
 		cc.logger.Error(errStr)
 
@@ -221,7 +223,7 @@ func (cc *CommandController) removeFromWhiteList(arg []string) string {
 
 		return errStr
 	}
-	if answer.Text != "OK!" {
+	if answer.Text != correctAnswerText {
 		errStr := "error: " + answer.Text
 		cc.logger.Error(errStr)
 
@@ -394,7 +396,7 @@ func (cc *CommandController) addToBlackList(arg []string) string {
 
 		return errStr
 	}
-	if answer.Text != "OK!" {
+	if answer.Text != correctAnswerText {
 		errStr := "error: " + answer.Text
 		cc.logger.Error(errStr)
 
@@ -461,7 +463,7 @@ func (cc *CommandController) removeFromBlackList(arg []string) string {
 
 		return errStr
 	}
-	if answer.Text != "OK!" {
+	if answer.Text != correctAnswerText {
 		errStr := "error: " + answer.Text
 		cc.logger.Error(errStr)
 
@@ -703,7 +705,7 @@ func (cc *CommandController) clearBucketByLogin(arg []string) string {
 
 		return errStr
 	}
-	if answer.Text != "OK!" {
+	if answer.Text != correctAnswerText {
 		errStr := "error: " + answer.Text
 		cc.logger.Error(errStr)
 
@@ -762,7 +764,7 @@ func (cc *CommandController) clearBucketByIP(arg []string) string {
 
 		return errStr
 	}
-	if answer.Text != "OK!" {
+	if answer.Text != correctAnswerText {
 		errStr := "error: " + answer.Text
 		cc.logger.Error(errStr)
 

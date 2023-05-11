@@ -1,13 +1,12 @@
-package storageData
+package storagedata
 
 import (
 	"errors"
 	"strconv"
 	"time"
 
-	"go.uber.org/zap"
-
 	helpers "github.com/skolzkyi/antibruteforce/helpers"
+	"go.uber.org/zap"
 )
 
 var (

@@ -7,10 +7,9 @@ import (
 	"strconv"
 	"time"
 
-	"go.uber.org/zap"
-
 	helpers "github.com/skolzkyi/antibruteforce/helpers"
 	storageData "github.com/skolzkyi/antibruteforce/internal/storage/storageData"
+	"go.uber.org/zap"
 )
 
 var (
@@ -127,7 +126,8 @@ func (a *App) CheckInputRequest(ctx context.Context, req storageData.RequestAuth
 
 	countIP, err := a.bucketStorage.IncrementAndGetBucketValue(ctx, a.logger, "ip_"+req.IP)
 	if err != nil {
-		message := helpers.StringBuild("CheckInputRequest IncrementAndGetBucketValue - IP error: ", err.Error(), ", key: ", "ip_"+req.IP)
+		errBaseText := "CheckInputRequest IncrementAndGetBucketValue - IP error: "
+		message := helpers.StringBuild(errBaseText, err.Error(), ", key: ", "ip_"+req.IP)
 		a.logger.Error(message)
 
 		return false, "", err

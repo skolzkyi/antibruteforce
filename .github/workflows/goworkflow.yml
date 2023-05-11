@@ -30,13 +30,13 @@ jobs:
     - name: Build
       run: make build
 
-    - name: Install golangci-lint
+    - name: Install and run golangci-lint
       uses: golangci/golangci-lint-action@v3
       with:
         version: v1.52.2
 
-    - name: Run golangci-lint
-      run: make lint
+  #  - name: Run golangci-lint
+  #    run: make lint
 
     - name: Run tests
       run: make test

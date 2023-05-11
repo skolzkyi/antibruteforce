@@ -1,7 +1,7 @@
 # Собираем в гошке
 FROM golang:1.19 as build
 
-ENV BIN_FILE /opt/antibruteforce/integrationTests
+ENV BIN_FILE /opt/antibruteforce/integrationtests
 ENV CODE_DIR /go/src/
 
 WORKDIR ${CODE_DIR}
@@ -19,7 +19,7 @@ COPY . ${CODE_DIR}
 ARG LDFLAGS
 RUN CGO_ENABLED=0 go test -c\
         -ldflags "$LDFLAGS" \
-        -o ${BIN_FILE} integrationTests/*
+        -o ${BIN_FILE} integrationtests/*
 
 # На выходе тонкий образ
 FROM alpine:3.9
@@ -28,7 +28,7 @@ LABEL ORGANIZATION="OTUS Online Education"
 LABEL SERVICE="integration_tests"
 LABEL MAINTAINERS="skolzkyi@gmail.com"
 
-ENV BIN_FILE "/opt/antibruteforce/integrationTests"
+ENV BIN_FILE "/opt/antibruteforce/integrationtests"
 COPY --from=build ${BIN_FILE} ${BIN_FILE}
 
 ENV CONFIG_FILE /etc/antibruteforce/config.env

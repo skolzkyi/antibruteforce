@@ -21,6 +21,8 @@ import (
 
 const correctOutputJSONAnswer string = `{"Text":"OK!","Code":0}`
 
+const localhost string = "127.0.0.1"
+
 type ConfigTest struct{}
 
 func (config *ConfigTest) Init(_ string) error {
@@ -32,7 +34,7 @@ func (config *ConfigTest) GetServerURL() string {
 }
 
 func (config *ConfigTest) GetAddress() string {
-	return "127.0.0.1"
+	return localhost
 }
 
 func (config *ConfigTest) GetPort() string {
@@ -72,7 +74,7 @@ func (config *ConfigTest) GetDBTimeOut() time.Duration {
 }
 
 func (config *ConfigTest) GetDBAddress() string {
-	return "127.0.0.1"
+	return localhost
 }
 
 func (config *ConfigTest) GetDBPort() string {
@@ -80,7 +82,7 @@ func (config *ConfigTest) GetDBPort() string {
 }
 
 func (config *ConfigTest) GetRedisAddress() string {
-	return "127.0.0.1"
+	return localhost
 }
 
 func (config *ConfigTest) GetRedisPort() string {
@@ -129,12 +131,12 @@ func TestWhiteListREST(t *testing.T) {
 	t.Run("IsIPInWhiteList", func(t *testing.T) {
 		t.Parallel()
 		newData := storageData.StorageIPData{
-			IP:   "192.168.16.0",
+			IP:   "192.168.16.1",
 			Mask: 8,
 		}
 
 		data := bytes.NewBufferString(`{
-			"IP":"192.168.16.0",
+			"IP":"192.168.16.1",
 			"Mask":8
 		
 		}`)
@@ -157,8 +159,9 @@ func TestWhiteListREST(t *testing.T) {
 	})
 	t.Run("RemoveIPInWhiteList", func(t *testing.T) {
 		t.Parallel()
+		controldataTestIP := "192.168.16.0"
 		newData := storageData.StorageIPData{
-			IP:   "192.168.16.0",
+			IP:   controldataTestIP,
 			Mask: 8,
 		}
 
@@ -175,7 +178,7 @@ func TestWhiteListREST(t *testing.T) {
 		require.NoError(t, err)
 		flag := false
 		for _, curControlData := range controlDataSl {
-			if curControlData.IP == "192.168.16.0" && curControlData.Mask == 8 {
+			if curControlData.IP == controldataTestIP && curControlData.Mask == 8 {
 				flag = true
 
 				break
@@ -199,7 +202,7 @@ func TestWhiteListREST(t *testing.T) {
 		require.NoError(t, err)
 		flag = false
 		for _, curControlData := range controlDataSl {
-			if curControlData.IP == "192.168.16.0" && curControlData.Mask == 8 {
+			if curControlData.IP == controldataTestIP && curControlData.Mask == 8 {
 				flag = true
 
 				break

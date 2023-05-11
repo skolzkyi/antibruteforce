@@ -26,16 +26,18 @@ jobs:
     - name: Download dependencies
       run: go mod download   
 
-   # - name: Verify dependencies
-   #   run: go mod verify
+    - name: Verify dependencies
+      run: go mod verify
 
     - name: Build
       run: make build
 
-    - name: Install golint
-      run: make install-lint-deps
+    - name: Install golangci-lint
+      uses: golangci/golangci-lint-action@v3
+      with:
+        version: v1.49
 
-    - name: Run golint
+    - name: Run golangci-lint
       run: make lint
 
     - name: Run tests

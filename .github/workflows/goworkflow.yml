@@ -13,6 +13,8 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v3
+      with:
+        GITHUB_TOKEN: ${{ secrets.GO_AB }}
     
     - name: Set up Go
       uses: actions/setup-go@v3
@@ -21,18 +23,30 @@ jobs:
     
     - name: Download dependencies
       run: go mod download
+      with:
+        GITHUB_TOKEN: ${{ secrets.GO_AB }}
 
     - name: Verify dependencies
       run: go mod verify
+      with:
+        GITHUB_TOKEN: ${{ secrets.GO_AB }}
 
     - name: Build
       run: make build
+      with:
+        GITHUB_TOKEN: ${{ secrets.GO_AB }}
 
     - name: Install golint
       run: make install-lint-deps
+      with:
+        GITHUB_TOKEN: ${{ secrets.GO_AB }}
 
     - name: Run golint
       run: make lint
+      with:
+        GITHUB_TOKEN: ${{ secrets.GO_AB }}
 
     - name: Run tests
       run: make test
+      with:
+        GITHUB_TOKEN: ${{ secrets.GO_AB }}

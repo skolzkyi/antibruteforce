@@ -15,8 +15,6 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v3
-   #   with:
-   #     GITHUB_TOKEN: ${{ secrets.GO_AB }}
     
     - name: Set up Go
       uses: actions/setup-go@v3
@@ -35,7 +33,7 @@ jobs:
     - name: Install golangci-lint
       uses: golangci/golangci-lint-action@v3
       with:
-        version: v1.49
+        version: v1.52.2
 
     - name: Run golangci-lint
       run: make lint

@@ -79,10 +79,10 @@ func (rs *RedisStorage) Close(ctx context.Context, logger storageData.Logger) er
 	return nil
 }
 
-func (rs *RedisStorage) IncrementAndGetBucketValue(ctx context.Context, logger storageData.Logger, key string) (int64, error) {
-	result, err := rs.rdb.Incr(ctx, key).Result()
+func (rs *RedisStorage) IncrementAndGetBucketValue(ctx context.Context, l storageData.Logger, k string) (int64, error) {
+	result, err := rs.rdb.Incr(ctx, k).Result()
 	if err != nil {
-		logger.Error("Redis DB IncrementAndGetBucketValue error: " + err.Error())
+		l.Error("Redis DB IncrementAndGetBucketValue error: " + err.Error())
 
 		return 0, err
 	}

@@ -103,9 +103,9 @@ func initAppWithMocks(t *testing.T) *App {
 	t.Helper()
 	logger, _ := logger.New("debug")
 	config := ConfigTest{}
-	var storage Storage
-	storage = storageSQLMock.New()
-	ctxStor, _ := context.WithTimeout(context.Background(), config.GetDBTimeOut())
+	storage := storageSQLMock.New()
+	ctxStor, cancel := context.WithTimeout(context.Background(), config.GetDBTimeOut())
+	defer cancel()
 	err := storage.Init(ctxStor, logger, &config)
 	require.NoError(t, err)
 	redis := RedisStorage.New()
@@ -117,6 +117,7 @@ func initAppWithMocks(t *testing.T) *App {
 }
 
 func TestSimpleRequestValidator(t *testing.T) {
+	t.Parallel()
 	t.Run("PositiveRequestValidator", func(t *testing.T) {
 		t.Parallel()
 		_, err := SimpleRequestValidator("user0", "root", "192.168.0.12")
@@ -140,6 +141,7 @@ func TestSimpleRequestValidator(t *testing.T) {
 }
 
 func TestSimpleIPDataValidator(t *testing.T) {
+	t.Parallel()
 	t.Run("PositiveIPDataValidator", func(t *testing.T) {
 		t.Parallel()
 		testData := storageData.StorageIPData{
@@ -347,6 +349,7 @@ func TestAppPositiveGetAllIPInBlackList(t *testing.T) {
 // REQUEST AUTH
 
 func TestRequestAuth(t *testing.T) {
+	t.Parallel()
 	t.Run("PositiveRequestAuth", func(t *testing.T) {
 		t.Parallel()
 		app := initAppWithMocks(t)

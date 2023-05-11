@@ -77,7 +77,7 @@ func main() {
 		select {
 		case <-ctx.Done():
 			log.Info("antibruteforce-cli  down")
-			os.Exit(1) //nolint:gocritic
+			os.Exit(1) //nolint:gocritic, nolintlint
 		default:
 			inData.scanner.Scan()
 			rawCommand := inData.scanner.Text()
@@ -87,7 +87,7 @@ func main() {
 			if rawCommand == "exit" {
 				fmt.Println("bye")
 				log.Info("antibruteforce-cli  down")
-				os.Exit(1) //nolint:gocritic
+				os.Exit(1) //nolint:gocritic, nolintlint
 			}
 			output := comContr.processCommand(rawCommand)
 			fmt.Println(output)

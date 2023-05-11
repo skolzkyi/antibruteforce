@@ -19,9 +19,9 @@ var (
 	ErrIncorrectMask = errors.New("mask is incorrect")
 )
 
-func SimpleRequestValidator(login string, password string, IP string) (storageData.RequestAuth, error) { //nolint:lll
-	request := storageData.RequestAuth{Login: login, Password: password, IP: IP} //nolint:lll
-	err := checkIP(IP, 0, 255)
+func SimpleRequestValidator(login string, password string, ip string) (storageData.RequestAuth, error) {
+	request := storageData.RequestAuth{Login: login, Password: password, IP: ip}
+	err := checkIP(ip, 0, 255)
 	switch {
 	case err != nil:
 		return storageData.RequestAuth{}, err
@@ -35,19 +35,19 @@ func SimpleRequestValidator(login string, password string, IP string) (storageDa
 	return request, nil
 }
 
-func SimpleIPDataValidator(IPData storageData.StorageIPData, isAllRequest bool) error { //nolint:lll
+func SimpleIPDataValidator(ipData storageData.StorageIPData, isAllRequest bool) error {
 	var err error
 	if !isAllRequest {
-		err = checkIP(IPData.IP, 0, 255)
+		err = checkIP(ipData.IP, 0, 255)
 	}
 	switch {
 	case err != nil:
 		return err
-	case IPData.IP == "":
+	case ipData.IP == "":
 		return ErrVoidIP
-	case IPData.Mask == 0 && !isAllRequest:
+	case ipData.Mask == 0 && !isAllRequest:
 		return ErrVoidMask
-	case IPData.Mask < 0 || IPData.Mask > 31:
+	case ipData.Mask < 0 || ipData.Mask > 31:
 		return ErrIncorrectMask
 	default:
 	}
@@ -55,8 +55,8 @@ func SimpleIPDataValidator(IPData storageData.StorageIPData, isAllRequest bool) 
 	return nil
 }
 
-func checkIP(IP string, low int, high int) error {
-	oktets := strings.Split(IP, ".")
+func checkIP(ip string, low int, high int) error {
+	oktets := strings.Split(ip, ".")
 	if len(oktets) != 4 {
 		return ErrBadIP
 	}

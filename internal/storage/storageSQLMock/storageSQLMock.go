@@ -1,4 +1,4 @@
-package storageMock
+package storagemock
 
 import (
 	"context"
@@ -21,7 +21,7 @@ func New() *StorageMock {
 	return &StorageMock{}
 }
 
-func (s *StorageMock) Init(_ context.Context, _ storageData.Logger, _ storageData.Config) error {
+func (s *StorageMock) Init(_ context.Context, _ storageData.Logger, _ storageData.Config) error { //nolint: lll, nolintnolint
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.whitelist = make(map[string]storageData.StorageIPData)
@@ -38,7 +38,7 @@ func (s *StorageMock) Close(_ context.Context, _ storageData.Logger) error {
 
 // WHITELIST
 
-func (s *StorageMock) AddIPToWhiteList(ctx context.Context, logger storageData.Logger, value storageData.StorageIPData) (int, error) {
+func (s *StorageMock) AddIPToWhiteList(ctx context.Context, logger storageData.Logger, value storageData.StorageIPData) (int, error) { //nolint: lll, nolintnolint
 	select {
 	case <-ctx.Done():
 
@@ -55,7 +55,7 @@ func (s *StorageMock) AddIPToWhiteList(ctx context.Context, logger storageData.L
 	}
 }
 
-func (s *StorageMock) IsIPInWhiteList(ctx context.Context, _ storageData.Logger, value storageData.StorageIPData) (bool, error) {
+func (s *StorageMock) IsIPInWhiteList(ctx context.Context, _ storageData.Logger, value storageData.StorageIPData) (bool, error) { //nolint: lll, nolintnolint
 	select {
 	case <-ctx.Done():
 
@@ -71,7 +71,7 @@ func (s *StorageMock) IsIPInWhiteList(ctx context.Context, _ storageData.Logger,
 	}
 }
 
-func (s *StorageMock) RemoveIPInWhiteList(ctx context.Context, _ storageData.Logger, value storageData.StorageIPData) error {
+func (s *StorageMock) RemoveIPInWhiteList(ctx context.Context, _ storageData.Logger, value storageData.StorageIPData) error { //nolint: lll, nolintnolint
 	select {
 	case <-ctx.Done():
 
@@ -90,7 +90,7 @@ func (s *StorageMock) RemoveIPInWhiteList(ctx context.Context, _ storageData.Log
 	}
 }
 
-func (s *StorageMock) GetAllIPInWhiteList(ctx context.Context, _ storageData.Logger) ([]storageData.StorageIPData, error) {
+func (s *StorageMock) GetAllIPInWhiteList(ctx context.Context, _ storageData.Logger) ([]storageData.StorageIPData, error) { //nolint: lll, nolintnolint
 	resIPData := make([]storageData.StorageIPData, 0)
 	select {
 	case <-ctx.Done():
@@ -112,7 +112,7 @@ func (s *StorageMock) GetAllIPInWhiteList(ctx context.Context, _ storageData.Log
 
 // BLACKLIST
 
-func (s *StorageMock) AddIPToBlackList(ctx context.Context, logger storageData.Logger, value storageData.StorageIPData) (int, error) {
+func (s *StorageMock) AddIPToBlackList(ctx context.Context, logger storageData.Logger, value storageData.StorageIPData) (int, error) { //nolint: lll, nolintnolint
 	select {
 	case <-ctx.Done():
 
@@ -129,7 +129,7 @@ func (s *StorageMock) AddIPToBlackList(ctx context.Context, logger storageData.L
 	}
 }
 
-func (s *StorageMock) IsIPInBlackList(ctx context.Context, _ storageData.Logger, value storageData.StorageIPData) (bool, error) {
+func (s *StorageMock) IsIPInBlackList(ctx context.Context, _ storageData.Logger, value storageData.StorageIPData) (bool, error) { //nolint: lll, nolintnolint
 	select {
 	case <-ctx.Done():
 
@@ -145,7 +145,7 @@ func (s *StorageMock) IsIPInBlackList(ctx context.Context, _ storageData.Logger,
 	}
 }
 
-func (s *StorageMock) RemoveIPInBlackList(ctx context.Context, _ storageData.Logger, value storageData.StorageIPData) error {
+func (s *StorageMock) RemoveIPInBlackList(ctx context.Context, _ storageData.Logger, value storageData.StorageIPData) error { //nolint: lll, nolintnolint
 	select {
 	case <-ctx.Done():
 
@@ -164,7 +164,7 @@ func (s *StorageMock) RemoveIPInBlackList(ctx context.Context, _ storageData.Log
 	}
 }
 
-func (s *StorageMock) GetAllIPInBlackList(ctx context.Context, _ storageData.Logger) ([]storageData.StorageIPData, error) {
+func (s *StorageMock) GetAllIPInBlackList(ctx context.Context, _ storageData.Logger) ([]storageData.StorageIPData, error) { //nolint: lll, nolintnolint
 	resIPData := make([]storageData.StorageIPData, 0)
 	select {
 	case <-ctx.Done():

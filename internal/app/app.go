@@ -103,7 +103,8 @@ func (a *App) CheckInputRequest(ctx context.Context, req storageData.RequestAuth
 	}
 	countLogin, err := a.bucketStorage.IncrementAndGetBucketValue(ctx, a.logger, "l_"+req.Login)
 	if err != nil {
-		message := helpers.StringBuild("CheckInputRequest IncrementAndGetBucketValue - Login error: ", err.Error(), ", key: ", "l_"+req.Login)
+		errBaseText := "CheckInputRequest IncrementAndGetBucketValue - Login error: "
+		message := helpers.StringBuild(errBaseText, err.Error(), ", key: ", "l_"+req.Login)
 		a.logger.Error(message)
 
 		return false, "", err
@@ -114,7 +115,8 @@ func (a *App) CheckInputRequest(ctx context.Context, req storageData.RequestAuth
 	}
 	countPassword, err := a.bucketStorage.IncrementAndGetBucketValue(ctx, a.logger, "p_"+req.Password)
 	if err != nil {
-		message := helpers.StringBuild("CheckInputRequest IncrementAndGetBucketValue - Password error: ", err.Error(), ", key: ", "p_"+req.Password)
+		errBaseText := "CheckInputRequest IncrementAndGetBucketValue - Password error: "
+		message := helpers.StringBuild(errBaseText, err.Error(), ", key: ", "p_"+req.Password)
 		a.logger.Error(message)
 
 		return false, "", err
@@ -168,15 +170,15 @@ func (a *App) ClearBucketByLogin(ctx context.Context, login string) error {
 	return nil
 }
 
-func (a *App) ClearBucketByIP(ctx context.Context, IP string) error {
-	err := a.bucketStorage.SetBucketValue(ctx, a.logger, "ip_"+IP, 0)
+func (a *App) ClearBucketByIP(ctx context.Context, ip string) error {
+	err := a.bucketStorage.SetBucketValue(ctx, a.logger, "ip_"+ip, 0)
 	if err != nil {
-		message := helpers.StringBuild("ClearBucketByIP error", err.Error(), " IP: ", IP)
+		message := helpers.StringBuild("ClearBucketByIP error", err.Error(), " IP: ", ip)
 		a.logger.Error(message)
 
 		return err
 	}
-	a.logger.Info(" IP bucket clear, IP: " + IP)
+	a.logger.Info(" IP bucket clear, IP: " + ip)
 
 	return nil
 }
@@ -191,15 +193,15 @@ func (a *App) CloseStorage(ctx context.Context) error {
 
 // WHITELIST
 
-func (a *App) AddIPToWhiteList(ctx context.Context, IPData storageData.StorageIPData) (int, error) {
-	err := SimpleIPDataValidator(IPData, false)
+func (a *App) AddIPToWhiteList(ctx context.Context, ipData storageData.StorageIPData) (int, error) {
+	err := SimpleIPDataValidator(ipData, false)
 	if err != nil {
 		message := helpers.StringBuild("AddIPToWhiteList validate IPData error", err.Error())
 		a.logger.Error(message)
 
 		return 0, err
 	}
-	ok, err := a.storage.IsIPInBlackList(ctx, a.logger, IPData)
+	ok, err := a.storage.IsIPInBlackList(ctx, a.logger, ipData)
 	if err != nil {
 		message := helpers.StringBuild("AddIPToWhiteList validate in blacklist IPData error", err.Error())
 		a.logger.Error(message)
@@ -209,49 +211,49 @@ func (a *App) AddIPToWhiteList(ctx context.Context, IPData storageData.StorageIP
 	if ok {
 		return 0, ErrIPDataExistInBL
 	}
-	id, err := a.storage.AddIPToWhiteList(ctx, a.logger, IPData)
+	id, err := a.storage.AddIPToWhiteList(ctx, a.logger, ipData)
 	if err != nil {
 		message := helpers.StringBuild("AddIPToWhiteList IPData storage error", err.Error())
 		a.logger.Error(message)
 
 		return 0, err
 	}
-	message := helpers.StringBuild("IP added to whitelist(IP - ", IPData.IP, "/", strconv.Itoa(IPData.Mask), ")")
+	message := helpers.StringBuild("IP added to whitelist(IP - ", ipData.IP, "/", strconv.Itoa(ipData.Mask), ")")
 	a.logger.Info(message)
 
 	return id, nil
 }
 
-func (a *App) RemoveIPInWhiteList(ctx context.Context, IPData storageData.StorageIPData) error {
-	err := SimpleIPDataValidator(IPData, false)
+func (a *App) RemoveIPInWhiteList(ctx context.Context, ipData storageData.StorageIPData) error {
+	err := SimpleIPDataValidator(ipData, false)
 	if err != nil {
 		message := helpers.StringBuild("RemoveIPInWhiteList validate IPData error", err.Error())
 		a.logger.Error(message)
 
 		return err
 	}
-	err = a.storage.RemoveIPInWhiteList(ctx, a.logger, IPData)
+	err = a.storage.RemoveIPInWhiteList(ctx, a.logger, ipData)
 	if err != nil {
-		message := helpers.StringBuild("RemoveIPInWhiteList app error(IP - ", IPData.IP, "),error: ", err.Error())
+		message := helpers.StringBuild("RemoveIPInWhiteList app error(IP - ", ipData.IP, "),error: ", err.Error())
 		a.logger.Error(message)
 
 		return err
 	}
-	message := helpers.StringBuild("IP remove from whitelist(IP - ", IPData.IP, "/", strconv.Itoa(IPData.Mask), ")")
+	message := helpers.StringBuild("IP remove from whitelist(IP - ", ipData.IP, "/", strconv.Itoa(ipData.Mask), ")")
 	a.logger.Info(message)
 
 	return nil
 }
 
-func (a *App) IsIPInWhiteList(ctx context.Context, IPData storageData.StorageIPData) (bool, error) {
-	err := SimpleIPDataValidator(IPData, false)
+func (a *App) IsIPInWhiteList(ctx context.Context, ipData storageData.StorageIPData) (bool, error) {
+	err := SimpleIPDataValidator(ipData, false)
 	if err != nil {
 		message := helpers.StringBuild("IsIPInWhiteList validate IPData error", err.Error())
 		a.logger.Error(message)
 
 		return false, err
 	}
-	ok, err := a.storage.IsIPInWhiteList(ctx, a.logger, IPData)
+	ok, err := a.storage.IsIPInWhiteList(ctx, a.logger, ipData)
 
 	return ok, err
 }
@@ -262,8 +264,8 @@ func (a *App) GetAllIPInWhiteList(ctx context.Context) ([]storageData.StorageIPD
 	return whiteList, err
 }
 
-func (a *App) isIPInWhiteListCheck(ctx context.Context, IP string) (bool, error) {
-	canIP := net.ParseIP(IP)
+func (a *App) isIPInWhiteListCheck(ctx context.Context, ip string) (bool, error) {
+	canIP := net.ParseIP(ip)
 	whiteList, err := a.storage.GetAllIPInWhiteList(ctx, a.logger)
 	if err != nil {
 		return false, err
@@ -315,36 +317,37 @@ func (a *App) AddIPToBlackList(ctx context.Context, IPData storageData.StorageIP
 	return id, nil
 }
 
-func (a *App) RemoveIPInBlackList(ctx context.Context, IPData storageData.StorageIPData) error {
-	err := SimpleIPDataValidator(IPData, false)
+func (a *App) RemoveIPInBlackList(ctx context.Context, ipData storageData.StorageIPData) error {
+	err := SimpleIPDataValidator(ipData, false)
 	if err != nil {
 		message := helpers.StringBuild("RemoveIPInBlackList validate IPData error", err.Error())
 		a.logger.Error(message)
 
 		return err
 	}
-	err = a.storage.RemoveIPInBlackList(ctx, a.logger, IPData)
+	err = a.storage.RemoveIPInBlackList(ctx, a.logger, ipData)
 	if err != nil {
-		message := helpers.StringBuild("RemoveIPInBlackList app error(IP - ", IPData.IP, "/", strconv.Itoa(IPData.Mask), "),error: ", err.Error())
+		errBaseText := "RemoveIPInBlackList app error(IP - "
+		message := helpers.StringBuild(errBaseText, ipData.IP, "/", strconv.Itoa(ipData.Mask), "),error: ", err.Error())
 		a.logger.Error(message)
 
 		return err
 	}
-	message := helpers.StringBuild("IP remove from blacklist(IP - ", IPData.IP, ")")
+	message := helpers.StringBuild("IP remove from blacklist(IP - ", ipData.IP, ")")
 	a.logger.Info(message)
 
 	return nil
 }
 
-func (a *App) IsIPInBlackList(ctx context.Context, IPData storageData.StorageIPData) (bool, error) {
-	err := SimpleIPDataValidator(IPData, false)
+func (a *App) IsIPInBlackList(ctx context.Context, ipData storageData.StorageIPData) (bool, error) {
+	err := SimpleIPDataValidator(ipData, false)
 	if err != nil {
 		message := helpers.StringBuild("IsIPInBlackList validate IPData error", err.Error())
 		a.logger.Error(message)
 
 		return false, err
 	}
-	ok, err := a.storage.IsIPInBlackList(ctx, a.logger, IPData)
+	ok, err := a.storage.IsIPInBlackList(ctx, a.logger, ipData)
 
 	return ok, err
 }
@@ -355,8 +358,8 @@ func (a *App) GetAllIPInBlackList(ctx context.Context) ([]storageData.StorageIPD
 	return whiteList, err
 }
 
-func (a *App) isIPInBlackListCheck(ctx context.Context, IP string) (bool, error) {
-	canIP := net.ParseIP(IP)
+func (a *App) isIPInBlackListCheck(ctx context.Context, ip string) (bool, error) {
+	canIP := net.ParseIP(ip)
 	blackList, err := a.storage.GetAllIPInBlackList(ctx, a.logger)
 	if err != nil {
 		return false, err

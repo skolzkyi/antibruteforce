@@ -19,6 +19,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const correctOutputJSONAnswer string = `{"Text":"OK!","Code":0}`
+
 type ConfigTest struct{}
 
 func (config *ConfigTest) Init(_ string) error {
@@ -102,6 +104,7 @@ func (config *ConfigTest) GetLimitTimeCheck() time.Duration {
 }
 
 func TestWhiteListREST(t *testing.T) {
+	t.Parallel()
 	t.Run("AddIPToWhiteList", func(t *testing.T) {
 		t.Parallel()
 		data := bytes.NewBufferString(`{
@@ -120,7 +123,7 @@ func TestWhiteListREST(t *testing.T) {
 		respBody, err := io.ReadAll(res.Body)
 		require.NoError(t, err)
 
-		respExp := `{"Text":"OK!","Code":0}`
+		respExp := correctOutputJSONAnswer
 		require.Equal(t, respExp, string(respBody))
 	})
 	t.Run("IsIPInWhiteList", func(t *testing.T) {
@@ -189,7 +192,7 @@ func TestWhiteListREST(t *testing.T) {
 		respBody, err := io.ReadAll(res.Body)
 		require.NoError(t, err)
 
-		respExp := `{"Text":"OK!","Code":0}`
+		respExp := correctOutputJSONAnswer
 		require.Equal(t, respExp, string(respBody))
 
 		controlDataSl, err = server.app.GetAllIPInWhiteList(context.Background())
@@ -235,12 +238,14 @@ func TestWhiteListREST(t *testing.T) {
 		respBody, err := io.ReadAll(res.Body)
 		require.NoError(t, err)
 
-		respExp := `{"IPList":[{"IP":"192.168.16.0","Mask":8,"ID":0},{"IP":"172.92.24.0","Mask":24,"ID":1}],"Message":{"Text":"OK!","Code":0}}`
+		respExp := `{"IPList":[{"IP":"192.168.16.0","Mask":8,"ID":0},` +
+			`{"IP":"172.92.24.0","Mask":24,"ID":1}],"Message":{"Text":"OK!","Code":0}}`
 		require.Equal(t, respExp, string(respBody))
 	})
 }
 
 func TestBlackListREST(t *testing.T) {
+	t.Parallel()
 	t.Run("AddIPToBlackList", func(t *testing.T) {
 		t.Parallel()
 		data := bytes.NewBufferString(`{
@@ -259,7 +264,7 @@ func TestBlackListREST(t *testing.T) {
 		respBody, err := io.ReadAll(res.Body)
 		require.NoError(t, err)
 
-		respExp := `{"Text":"OK!","Code":0}`
+		respExp := correctOutputJSONAnswer
 		require.Equal(t, respExp, string(respBody))
 	})
 	t.Run("IsIPInBlackList", func(t *testing.T) {
@@ -328,7 +333,7 @@ func TestBlackListREST(t *testing.T) {
 		respBody, err := io.ReadAll(res.Body)
 		require.NoError(t, err)
 
-		respExp := `{"Text":"OK!","Code":0}`
+		respExp := correctOutputJSONAnswer
 		require.Equal(t, respExp, string(respBody))
 
 		controlDataSl, err = server.app.GetAllIPInBlackList(context.Background())
@@ -374,7 +379,8 @@ func TestBlackListREST(t *testing.T) {
 		respBody, err := io.ReadAll(res.Body)
 		require.NoError(t, err)
 
-		respExp := `{"IPList":[{"IP":"192.168.16.0","Mask":8,"ID":0},{"IP":"172.92.24.0","Mask":24,"ID":1}],"Message":{"Text":"OK!","Code":0}}`
+		respExp := `{"IPList":[{"IP":"192.168.16.0","Mask":8,"ID":0},` +
+			`{"IP":"172.92.24.0","Mask":24,"ID":1}],"Message":{"Text":"OK!","Code":0}}`
 		require.Equal(t, respExp, string(respBody))
 	})
 }
@@ -418,7 +424,7 @@ func TestClearBucketByLogin(t *testing.T) {
 		respBody, err := io.ReadAll(res.Body)
 		require.NoError(t, err)
 
-		respExp := `{"Text":"OK!","Code":0}`
+		respExp := correctOutputJSONAnswer
 		require.Equal(t, respExp, string(respBody))
 	})
 }
@@ -439,7 +445,7 @@ func TestClearBucketByIP(t *testing.T) {
 		respBody, err := io.ReadAll(res.Body)
 		require.NoError(t, err)
 
-		respExp := `{"Text":"OK!","Code":0}`
+		respExp := correctOutputJSONAnswer
 		require.Equal(t, respExp, string(respBody))
 	})
 }
@@ -449,9 +455,9 @@ func createServer(t *testing.T) *Server {
 	t.Helper()
 	logger, _ := logger.New("debug")
 	config := ConfigTest{}
-	var storage app.Storage
-	storage = storageSQLMock.New()
-	ctxStor, _ := context.WithTimeout(context.Background(), config.GetDBTimeOut())
+	storage := storageSQLMock.New()
+	ctxStor, cancel := context.WithTimeout(context.Background(), config.GetDBTimeOut())
+	defer cancel()
 	err := storage.Init(ctxStor, logger, &config)
 	require.NoError(t, err)
 	redis := RedisStorage.New()

@@ -64,27 +64,27 @@ func (cc *CommandController) processCommand(rawCommand string) string {
 	case "help":
 		return cc.help()
 	case "addtowhitelist", "awl":
-		return cc.addToWhiteList(commandData)
+		return cc.addToList(commandData, "whitelist")
 	case "removefromwhitelist", "rwl":
-		return cc.removeFromWhiteList(commandData)
+		return cc.removeFromList(commandData, "whitelist")
 	case "isinwhitelist", "iwl":
-		return cc.isInWhiteList(commandData)
+		return cc.isInList(commandData, "whitelist")
 	case "allinwhitelist", "allwl":
-		return cc.allInWhiteList()
+		return cc.allInList("whitelist")
 	case "addtoblacklist", "abl":
-		return cc.addToBlackList(commandData)
+		return cc.addToList(commandData, "blacklist")
 	case "removefromblacklist", "rbl":
-		return cc.removeFromBlackList(commandData)
+		return cc.removeFromList(commandData, "blacklist")
 	case "isinblacklist", "ibl":
-		return cc.isInBlackList(commandData)
+		return cc.isInList(commandData, "blacklist")
 	case "allinblacklist", "allbl":
-		return cc.allInBlackList()
+		return cc.allInList("blacklist")
 	case "request", "req":
 		return cc.request(commandData)
 	case "clearbucketbylogin", "cbl":
-		return cc.clearBucketByLogin(commandData)
+		return cc.clearBucketByTag(commandData, "login")
 	case "clearbucketbyip", "cbip":
-		return cc.clearBucketByIP(commandData)
+		return cc.clearBucketByTag(commandData, "ip")
 	default:
 	}
 	mes := "error: " + ErrUnSupCommand.Error()
@@ -110,7 +110,7 @@ long: ClearBucketByLogin [login], short: cbl [login] - cleared login bucket in b
 long: ClearBucketByIP [IP], short: cbip [IP] - cleared IP bucket in bucket storage`
 }
 
-func (cc *CommandController) addToWhiteList(arg []string) string {
+func (cc *CommandController) addToList(arg []string, listname string) string {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if len(arg) != 2 {
@@ -128,7 +128,7 @@ func (cc *CommandController) addToWhiteList(arg []string) string {
 		return errStr
 	}
 
-	url := helpers.StringBuild("http://", cc.address, "/whitelist/")
+	url := helpers.StringBuild("http://", cc.address, "/",listname,"/")
 
 	jsonStr := []byte(`{"IP":"` + subArgs[0] + `","Mask":` + subArgs[1] + `}`)
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
@@ -173,13 +173,13 @@ func (cc *CommandController) addToWhiteList(arg []string) string {
 		return errStr
 	}
 
-	mes := "subnet add to whitelist successful"
+	mes := "subnet add to "+listname+" successful"
 	cc.logger.Info(mes)
 
 	return mes
 }
 
-func (cc *CommandController) removeFromWhiteList(arg []string) string {
+func (cc *CommandController) removeFromList(arg []string, listname string) string {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if len(arg) != 2 {
@@ -197,7 +197,7 @@ func (cc *CommandController) removeFromWhiteList(arg []string) string {
 		return errStr
 	}
 
-	url := helpers.StringBuild("http://", cc.address, "/whitelist/")
+	url := helpers.StringBuild("http://", cc.address, "/" + listname + "/")
 
 	jsonStr := []byte(`{"IP":"` + subArgs[0] + `","Mask":` + subArgs[1] + `}`)
 	req, err := http.NewRequest("DELETE", url, bytes.NewBuffer(jsonStr))
@@ -242,13 +242,13 @@ func (cc *CommandController) removeFromWhiteList(arg []string) string {
 		return errStr
 	}
 
-	mes := "subnet remove from whitelist successful"
+	mes := "subnet remove from " + listname + "successful"
 	cc.logger.Info(mes)
 
 	return mes
 }
 
-func (cc *CommandController) isInWhiteList(arg []string) string {
+func (cc *CommandController) isInList(arg []string, listname string) string {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if len(arg) != 2 {
@@ -266,7 +266,7 @@ func (cc *CommandController) isInWhiteList(arg []string) string {
 		return errStr
 	}
 
-	url := helpers.StringBuild("http://", cc.address, "/whitelist/")
+	url := helpers.StringBuild("http://", cc.address, "/" + listname + "/")
 
 	jsonStr := []byte(`{"IP":"` + subArgs[0] + `","Mask":` + subArgs[1] + `}`)
 	req, err := http.NewRequest("GET", url, bytes.NewBuffer(jsonStr))
@@ -307,16 +307,16 @@ func (cc *CommandController) isInWhiteList(arg []string) string {
 		return errStr
 	}
 
-	mes := "subnet in whitelist: " + answer.Message.Text
+	mes := "subnet in " + listname + ": " + answer.Message.Text
 	cc.logger.Info(mes)
 
 	return mes
 }
 
-func (cc *CommandController) allInWhiteList() string {
+func (cc *CommandController) allInList(listname string) string {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	url := helpers.StringBuild("http://", cc.address, "/whitelist/")
+	url := helpers.StringBuild("http://", cc.address, "/" + listname + "/")
 
 	jsonStr := []byte(`{"IP":"ALL","Mask":0}`)
 	req, err := http.NewRequest("GET", url, bytes.NewBuffer(jsonStr))
@@ -362,269 +362,7 @@ func (cc *CommandController) allInWhiteList() string {
 		result = helpers.StringBuild(result, curIPSubNet.IP, "/", strconv.Itoa(curIPSubNet.Mask), "\n")
 	}
 
-	mes := "whitelist:\n" + result
-	cc.logger.Info(mes)
-
-	return mes
-}
-
-func (cc *CommandController) addToBlackList(arg []string) string {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	if len(arg) != 2 {
-		errStr := "error: " + ErrBadArgCount.Error()
-		cc.logger.Error(errStr)
-
-		return errStr
-	}
-	subArgs := strings.Split(arg[1], "/")
-
-	if len(subArgs) != 2 {
-		errStr := "error: " + ErrBadArgument.Error()
-		cc.logger.Error(errStr)
-
-		return errStr
-	}
-
-	url := helpers.StringBuild("http://", cc.address, "/blacklist/")
-
-	jsonStr := []byte(`{"IP":"` + subArgs[0] + `","Mask":` + subArgs[1] + `}`)
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
-	if err != nil {
-		errStr := "error: " + err.Error()
-		cc.logger.Error(errStr)
-
-		return errStr
-	}
-	req.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{}
-	resp, err := client.Do(req.WithContext(ctx))
-	if err != nil {
-		errStr := "error: " + err.Error()
-		cc.logger.Error(errStr)
-
-		return errStr
-	}
-	defer resp.Body.Close()
-
-	respBody, err := io.ReadAll(resp.Body)
-	if err != nil {
-		errStr := "error: " + err.Error()
-		cc.logger.Error(errStr)
-
-		return errStr
-	}
-
-	answer := outputJSON{}
-	err = json.Unmarshal(respBody, &answer)
-	if err != nil {
-		errStr := "error: " + err.Error()
-		cc.logger.Error(errStr)
-
-		return errStr
-	}
-	if answer.Text != correctAnswerText {
-		errStr := "error: " + answer.Text
-		cc.logger.Error(errStr)
-
-		return errStr
-	}
-
-	mes := "subnet add to blacklist successful"
-	cc.logger.Info(mes)
-
-	return mes
-}
-
-func (cc *CommandController) removeFromBlackList(arg []string) string {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	if len(arg) != 2 {
-		errStr := "error: " + ErrBadArgCount.Error()
-		cc.logger.Error(errStr)
-
-		return errStr
-	}
-	subArgs := strings.Split(arg[1], "/")
-
-	if len(subArgs) != 2 {
-		errStr := "error: " + ErrBadArgument.Error()
-		cc.logger.Error(errStr)
-
-		return errStr
-	}
-
-	url := helpers.StringBuild("http://", cc.address, "/blacklist/")
-
-	jsonStr := []byte(`{"IP":"` + subArgs[0] + `","Mask":` + subArgs[1] + `}`)
-	req, err := http.NewRequest("DELETE", url, bytes.NewBuffer(jsonStr))
-	if err != nil {
-		errStr := "error: " + err.Error()
-		cc.logger.Error(errStr)
-
-		return errStr
-	}
-	req.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{}
-	resp, err := client.Do(req.WithContext(ctx))
-	if err != nil {
-		errStr := "error: " + err.Error()
-		cc.logger.Error(errStr)
-
-		return errStr
-	}
-	defer resp.Body.Close()
-
-	respBody, err := io.ReadAll(resp.Body)
-	if err != nil {
-		errStr := "error: " + err.Error()
-		cc.logger.Error(errStr)
-
-		return errStr
-	}
-
-	answer := outputJSON{}
-	err = json.Unmarshal(respBody, &answer)
-	if err != nil {
-		errStr := "error: " + err.Error()
-		cc.logger.Error(errStr)
-
-		return errStr
-	}
-	if answer.Text != correctAnswerText {
-		errStr := "error: " + answer.Text
-		cc.logger.Error(errStr)
-
-		return errStr
-	}
-
-	mes := "subnet remove from blacklist successful"
-	cc.logger.Info(mes)
-
-	return mes
-}
-
-func (cc *CommandController) isInBlackList(arg []string) string {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	if len(arg) != 2 {
-		errStr := "error: " + ErrBadArgCount.Error()
-		cc.logger.Error(errStr)
-
-		return errStr
-	}
-	subArgs := strings.Split(arg[1], "/")
-
-	if len(subArgs) != 2 {
-		errStr := "error: " + ErrBadArgument.Error()
-		cc.logger.Error(errStr)
-
-		return errStr
-	}
-
-	url := helpers.StringBuild("http://", cc.address, "/blacklist/")
-
-	jsonStr := []byte(`{"IP":"` + subArgs[0] + `","Mask":` + subArgs[1] + `}`)
-	req, err := http.NewRequest("GET", url, bytes.NewBuffer(jsonStr))
-	if err != nil {
-		return "error: " + err.Error()
-	}
-	req.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{}
-	resp, err := client.Do(req.WithContext(ctx))
-	if err != nil {
-		errStr := "error: " + err.Error()
-		cc.logger.Error(errStr)
-
-		return errStr
-	}
-	defer resp.Body.Close()
-
-	respBody, err := io.ReadAll(resp.Body)
-	if err != nil {
-		errStr := "error: " + err.Error()
-		cc.logger.Error(errStr)
-
-		return errStr
-	}
-
-	answer := IPListAnswer{}
-	err = json.Unmarshal(respBody, &answer)
-	if err != nil {
-		errStr := "error: " + err.Error()
-		cc.logger.Error(errStr)
-
-		return errStr
-	}
-	if answer.Message.Code != 0 {
-		errStr := "error: " + answer.Message.Text
-		cc.logger.Error(errStr)
-
-		return errStr
-	}
-
-	mes := "subnet in blacklist: " + answer.Message.Text
-	cc.logger.Info(mes)
-
-	return mes
-}
-
-func (cc *CommandController) allInBlackList() string {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	url := helpers.StringBuild("http://", cc.address, "/blacklist/")
-
-	jsonStr := []byte(`{"IP":"ALL","Mask":0}`)
-	req, err := http.NewRequest("GET", url, bytes.NewBuffer(jsonStr))
-	if err != nil {
-		errStr := "error: " + err.Error()
-		cc.logger.Error(errStr)
-
-		return errStr
-	}
-	req.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{}
-	resp, err := client.Do(req.WithContext(ctx))
-	if err != nil {
-		errStr := "error: " + err.Error()
-		cc.logger.Error(errStr)
-
-		return errStr
-	}
-	defer resp.Body.Close()
-
-	respBody, err := io.ReadAll(resp.Body)
-	if err != nil {
-		errStr := "error: " + err.Error()
-		cc.logger.Error(errStr)
-
-		return errStr
-	}
-
-	answer := IPListAnswer{}
-	err = json.Unmarshal(respBody, &answer)
-	if err != nil {
-		errStr := "error: " + err.Error()
-		cc.logger.Error(errStr)
-
-		return errStr
-	}
-	if answer.Message.Code != 0 {
-		errStr := "error: " + answer.Message.Text
-		cc.logger.Error(errStr)
-
-		return errStr
-	}
-	result := ""
-	for _, curIPSubNet := range answer.IPList {
-		result = helpers.StringBuild(result, curIPSubNet.IP, "/", strconv.Itoa(curIPSubNet.Mask), "\n")
-	}
-
-	mes := "blacklist:\n" + result
+	mes := listname + ":\n" + result
 	cc.logger.Info(mes)
 
 	return mes
@@ -695,7 +433,8 @@ func (cc *CommandController) request(arg []string) string {
 	return mes
 }
 
-func (cc *CommandController) clearBucketByLogin(arg []string) string {
+func (cc *CommandController) clearBucketByTag(arg []string, typeClear string) string {
+	var urlSegByType string
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if len(arg) != 2 {
@@ -705,7 +444,19 @@ func (cc *CommandController) clearBucketByLogin(arg []string) string {
 		return errStr
 	}
 
-	url := helpers.StringBuild("http://", cc.address, "/clearbucketbylogin/")
+	switch typeClear {
+	case "login":
+		urlSegByType = "/clearbucketbylogin/"
+	case "ip":
+		urlSegByType = "/clearbucketbyip/"
+	default:
+		errStr := "error: " + ErrBadArgument.Error()
+		cc.logger.Error(errStr)
+
+		return errStr
+	}
+
+	url := helpers.StringBuild("http://", cc.address, urlSegByType)
 
 	jsonStr := []byte(`{"Tag":"` + arg[1] + `"}`)
 	req, err := http.NewRequest("DELETE", url, bytes.NewBuffer(jsonStr))
@@ -750,68 +501,7 @@ func (cc *CommandController) clearBucketByLogin(arg []string) string {
 		return errStr
 	}
 
-	mes := `Login bucket "` + arg[1] + `" cleared`
-	cc.logger.Info(mes)
-
-	return mes
-}
-
-func (cc *CommandController) clearBucketByIP(arg []string) string {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	if len(arg) != 2 {
-		errStr := "error: " + ErrBadArgCount.Error()
-		cc.logger.Error(errStr)
-
-		return errStr
-	}
-
-	url := helpers.StringBuild("http://", cc.address, "/clearbucketbyip/")
-
-	jsonStr := []byte(`{"Tag":"` + arg[1] + `"}`)
-	req, err := http.NewRequest("DELETE", url, bytes.NewBuffer(jsonStr))
-	if err != nil {
-		errStr := "error: " + err.Error()
-		cc.logger.Error(errStr)
-
-		return errStr
-	}
-	req.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{}
-	resp, err := client.Do(req.WithContext(ctx))
-	if err != nil {
-		errStr := "error: " + err.Error()
-		cc.logger.Error(errStr)
-
-		return errStr
-	}
-	defer resp.Body.Close()
-
-	respBody, err := io.ReadAll(resp.Body)
-	if err != nil {
-		errStr := "error: " + err.Error()
-		cc.logger.Error(errStr)
-
-		return errStr
-	}
-
-	answer := outputJSON{}
-	err = json.Unmarshal(respBody, &answer)
-	if err != nil {
-		errStr := "error: " + err.Error()
-		cc.logger.Error(errStr)
-
-		return errStr
-	}
-	if answer.Text != correctAnswerText {
-		errStr := "error: " + answer.Text
-		cc.logger.Error(errStr)
-
-		return errStr
-	}
-
-	mes := `IP bucket "` + arg[1] + `" cleared`
+	mes := typeClear + ` bucket "` + arg[1] + `" cleared`
 	cc.logger.Info(mes)
 
 	return mes

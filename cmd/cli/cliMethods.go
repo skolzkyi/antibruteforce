@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"io"
@@ -9,7 +10,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"context"
 
 	helpers "github.com/skolzkyi/antibruteforce/helpers"
 	loggercli "github.com/skolzkyi/antibruteforce/internal/loggercli"
@@ -128,7 +128,7 @@ func (cc *CommandController) addToList(arg []string, listname string) string {
 		return errStr
 	}
 
-	url := helpers.StringBuild("http://", cc.address, "/",listname,"/")
+	url := helpers.StringBuild("http://", cc.address, "/", listname, "/")
 
 	jsonStr := []byte(`{"IP":"` + subArgs[0] + `","Mask":` + subArgs[1] + `}`)
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
@@ -173,7 +173,7 @@ func (cc *CommandController) addToList(arg []string, listname string) string {
 		return errStr
 	}
 
-	mes := "subnet add to "+listname+" successful"
+	mes := "subnet add to " + listname + " successful"
 	cc.logger.Info(mes)
 
 	return mes
@@ -197,7 +197,7 @@ func (cc *CommandController) removeFromList(arg []string, listname string) strin
 		return errStr
 	}
 
-	url := helpers.StringBuild("http://", cc.address, "/" + listname + "/")
+	url := helpers.StringBuild("http://", cc.address, "/"+listname+"/")
 
 	jsonStr := []byte(`{"IP":"` + subArgs[0] + `","Mask":` + subArgs[1] + `}`)
 	req, err := http.NewRequest("DELETE", url, bytes.NewBuffer(jsonStr))
@@ -266,7 +266,7 @@ func (cc *CommandController) isInList(arg []string, listname string) string {
 		return errStr
 	}
 
-	url := helpers.StringBuild("http://", cc.address, "/" + listname + "/")
+	url := helpers.StringBuild("http://", cc.address, "/"+listname+"/")
 
 	jsonStr := []byte(`{"IP":"` + subArgs[0] + `","Mask":` + subArgs[1] + `}`)
 	req, err := http.NewRequest("GET", url, bytes.NewBuffer(jsonStr))
@@ -316,7 +316,7 @@ func (cc *CommandController) isInList(arg []string, listname string) string {
 func (cc *CommandController) allInList(listname string) string {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	url := helpers.StringBuild("http://", cc.address, "/" + listname + "/")
+	url := helpers.StringBuild("http://", cc.address, "/"+listname+"/")
 
 	jsonStr := []byte(`{"IP":"ALL","Mask":0}`)
 	req, err := http.NewRequest("GET", url, bytes.NewBuffer(jsonStr))

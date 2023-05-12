@@ -1,6 +1,6 @@
 # Antibruteforce
-![Go](https://https://github.com/skolzkyi/antibruteforce/actions/workflows/goworkflow.yml/badge.svg)
-[![Go Report Card](https://goreportcard.com/badge/github.com/skolzkyi/antibruteforce)](https://goreportcard.com/report/github.com/skolzkyi/antibruteforce)
+![goworkflow](https://https://github.com/skolzkyi/antibruteforce/actions/workflows/goworkflow.yml/badge.svg)
+[![Go Report Card](https://goreportcard.com/badge/github.com/skolzkyi/antibruteforce)](https://goreportcard.com/report/github.com/skolzkyi/antibruteforce)<br/>
 Сервис предназначен для борьбы с подбором паролей при авторизации в какой-либо системе.<br/>
 Сервис вызывается перед авторизацией пользователя и может либо разрешить, либо заблокировать попытку.<br/>
 Cервис используется только для server-server, т.е. скрыт от конечного пользователя.<br/>

@@ -187,7 +187,7 @@ func (a *App) CloseStorage(ctx context.Context) error {
 	return a.storage.Close(ctx, a.logger)
 }
 
-func (a *App) AddIPToList(ctx context.Context, listname string, ipData storageData.StorageIPData) (int, error) { //nolint: dupl, nolintlint
+func (a *App) AddIPToList(ctx context.Context, listname string, ipData storageData.StorageIPData) (int, error) { //nolint: dupl, lll, nolintlint
 	err := SimpleIPDataValidator(ipData, false)
 	if err != nil {
 		message := helpers.StringBuild("AddIPToList validate IPData error", err.Error())
@@ -235,7 +235,7 @@ func (a *App) AddIPToList(ctx context.Context, listname string, ipData storageDa
 	return id, nil
 }
 
-func (a *App) RemoveIPInList(ctx context.Context, listname string, ipData storageData.StorageIPData) error { //nolint: dupl, nolintlint
+func (a *App) RemoveIPInList(ctx context.Context, listname string, ipData storageData.StorageIPData) error { //nolint: dupl, lll, nolintlint
 	err := checkListnName(listname)
 	if err != nil {
 		message := helpers.StringBuild("RemoveIPInList checkListnName error", err.Error())
@@ -262,7 +262,7 @@ func (a *App) RemoveIPInList(ctx context.Context, listname string, ipData storag
 	return nil
 }
 
-func (a *App) IsIPInList(ctx context.Context, listname string, ipData storageData.StorageIPData) (bool, error) { //nolint: dupl, nolintlint
+func (a *App) IsIPInList(ctx context.Context, listname string, ipData storageData.StorageIPData) (bool, error) { //nolint: dupl, lll, nolintlint
 	err := checkListnName(listname)
 	if err != nil {
 		message := helpers.StringBuild("IsIPInList  checkListnName error", err.Error())
@@ -280,7 +280,7 @@ func (a *App) IsIPInList(ctx context.Context, listname string, ipData storageDat
 	return ok, err
 }
 
-func (a *App) GetAllIPInList(ctx context.Context, listname string) ([]storageData.StorageIPData, error) { //nolint: dupl, nolintlint
+func (a *App) GetAllIPInList(ctx context.Context, listname string) ([]storageData.StorageIPData, error) { //nolint: dupl, lll, nolintlint
 	err := checkListnName(listname)
 	if err != nil {
 		message := helpers.StringBuild("GetAllIPInList  checkListnName error", err.Error())
@@ -292,7 +292,7 @@ func (a *App) GetAllIPInList(ctx context.Context, listname string) ([]storageDat
 	return list, err
 }
 
-func (a *App) isIPInListCheck(ctx context.Context, listname string, ip string) (bool, error) { //nolint: dupl, nolintlint
+func (a *App) isIPInListCheck(ctx context.Context, listname string, ip string) (bool, error) { //nolint: dupl, lll, nolintlint
 	err := checkListnName(listname)
 	if err != nil {
 		message := helpers.StringBuild("isIPInListCheck checkListnName error", err.Error())

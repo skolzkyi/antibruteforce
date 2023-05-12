@@ -10,6 +10,8 @@ import (
 	"go.uber.org/zap"
 )
 
+var ErrBadBucketTypeTag  = errors.New("bad bucket type tag")
+
 type Server struct {
 	serv   *http.Server
 	logg   Logger
@@ -60,18 +62,7 @@ type Application interface {
 	AddIPToList(ctx context.Context, listname string, IPData storageData.StorageIPData) (int, error)
 	RemoveIPInList(ctx context.Context, listname string, IPData storageData.StorageIPData) error
 	IsIPInList(ctx context.Context, listname string, IPData storageData.StorageIPData) (bool, error)
-	GetAllIPInList(ctx context.Context, listname string) ([]storageData.StorageIPData, error)
-/*
-	AddIPToWhiteList(ctx context.Context, IPData storageData.StorageIPData) (int, error)
-	RemoveIPInWhiteList(ctx context.Context, IPData storageData.StorageIPData) error
-	IsIPInWhiteList(ctx context.Context, IPData storageData.StorageIPData) (bool, error)
-	GetAllIPInWhiteList(ctx context.Context) ([]storageData.StorageIPData, error)
-	AddIPToBlackList(ctx context.Context, IPData storageData.StorageIPData) (int, error)
-	RemoveIPInBlackList(ctx context.Context, IPData storageData.StorageIPData) error
-	IsIPInBlackList(ctx context.Context, IPData storageData.StorageIPData) (bool, error)
-	GetAllIPInBlackList(ctx context.Context) ([]storageData.StorageIPData, error)
-	*/
-	
+	GetAllIPInList(ctx context.Context, listname string) ([]storageData.StorageIPData, error)	
 }
 
 func NewServer(logger Logger, app Application, config Config) *Server {

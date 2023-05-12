@@ -40,7 +40,7 @@ type Storage interface {
 	Init(ctx context.Context, logger storageData.Logger, config storageData.Config) error
 	Close(ctx context.Context, logger storageData.Logger) error
 	AddIPToList(ctx context.Context, listname string, logger storageData.Logger, IPData storageData.StorageIPData) (int, error) //nolint: lll, nolintlint
-	RemoveIPInList(ctx context.Context, listname string, logger storageData.Logger, IPData storageData.StorageIPData) error //nolint: lll, nolintlint
+	RemoveIPInList(ctx context.Context, listname string, logger storageData.Logger, IPData storageData.StorageIPData) error     //nolint: lll, nolintlint
 	IsIPInList(ctx context.Context, listname string, logger storageData.Logger, IPData storageData.StorageIPData) (bool, error) //nolint: lll, nolintlint
 	GetAllIPInList(ctx context.Context, listname string, logger storageData.Logger) ([]storageData.StorageIPData, error)
 }
@@ -187,7 +187,7 @@ func (a *App) CloseStorage(ctx context.Context) error {
 	return a.storage.Close(ctx, a.logger)
 }
 
-func (a *App) AddIPToList(ctx context.Context, listname string, ipData storageData.StorageIPData) (int, error) {//nolint: dupl, nolintlint
+func (a *App) AddIPToList(ctx context.Context, listname string, ipData storageData.StorageIPData) (int, error) { //nolint: dupl, nolintlint
 	err := SimpleIPDataValidator(ipData, false)
 	if err != nil {
 		message := helpers.StringBuild("AddIPToList validate IPData error", err.Error())
@@ -204,7 +204,7 @@ func (a *App) AddIPToList(ctx context.Context, listname string, ipData storageDa
 	default:
 		return 0, storageData.ErrErrorBadListType
 	}
-	
+
 	ok, err := a.storage.IsIPInList(ctx, otherlistname, a.logger, ipData)
 	if err != nil {
 		message := helpers.StringBuild("AddIPToList validate in otherlist IPData error", err.Error())
@@ -235,7 +235,7 @@ func (a *App) AddIPToList(ctx context.Context, listname string, ipData storageDa
 	return id, nil
 }
 
-func (a *App) RemoveIPInList(ctx context.Context, listname string, ipData storageData.StorageIPData) error {//nolint: dupl, nolintlint
+func (a *App) RemoveIPInList(ctx context.Context, listname string, ipData storageData.StorageIPData) error { //nolint: dupl, nolintlint
 	err := checkListnName(listname)
 	if err != nil {
 		message := helpers.StringBuild("RemoveIPInList checkListnName error", err.Error())
@@ -256,18 +256,18 @@ func (a *App) RemoveIPInList(ctx context.Context, listname string, ipData storag
 
 		return err
 	}
-	message := helpers.StringBuild("IP remove from " + listname + "(IP - ", ipData.IP, "/", strconv.Itoa(ipData.Mask), ")")
+	message := helpers.StringBuild("IP remove from "+listname+"(IP - ", ipData.IP, "/", strconv.Itoa(ipData.Mask), ")")
 	a.logger.Info(message)
 
 	return nil
 }
 
-func (a *App) IsIPInList(ctx context.Context, listname string, ipData storageData.StorageIPData) (bool, error) {//nolint: dupl, nolintlint
+func (a *App) IsIPInList(ctx context.Context, listname string, ipData storageData.StorageIPData) (bool, error) { //nolint: dupl, nolintlint
 	err := checkListnName(listname)
 	if err != nil {
 		message := helpers.StringBuild("IsIPInList  checkListnName error", err.Error())
 		a.logger.Error(message)
-		return false,err
+		return false, err
 	}
 	err = SimpleIPDataValidator(ipData, false)
 	if err != nil {
@@ -280,7 +280,7 @@ func (a *App) IsIPInList(ctx context.Context, listname string, ipData storageDat
 	return ok, err
 }
 
-func (a *App) GetAllIPInList(ctx context.Context, listname string) ([]storageData.StorageIPData, error) {//nolint: dupl, nolintlint
+func (a *App) GetAllIPInList(ctx context.Context, listname string) ([]storageData.StorageIPData, error) { //nolint: dupl, nolintlint
 	err := checkListnName(listname)
 	if err != nil {
 		message := helpers.StringBuild("GetAllIPInList  checkListnName error", err.Error())
@@ -292,7 +292,7 @@ func (a *App) GetAllIPInList(ctx context.Context, listname string) ([]storageDat
 	return list, err
 }
 
-func (a *App) isIPInListCheck(ctx context.Context, listname string, ip string) (bool, error) {//nolint: dupl, nolintlint
+func (a *App) isIPInListCheck(ctx context.Context, listname string, ip string) (bool, error) { //nolint: dupl, nolintlint
 	err := checkListnName(listname)
 	if err != nil {
 		message := helpers.StringBuild("isIPInListCheck checkListnName error", err.Error())
@@ -318,9 +318,8 @@ func (a *App) isIPInListCheck(ctx context.Context, listname string, ip string) (
 	return false, nil
 }
 
-
 func checkListnName(listname string) error {
-	if listname != storageData.WhiteListName  && listname != storageData.BlackListName {
+	if listname != storageData.WhiteListName && listname != storageData.BlackListName {
 		return storageData.ErrErrorBadListType
 	}
 

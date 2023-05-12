@@ -9,11 +9,14 @@ import (
 	"go.uber.org/zap"
 )
 
-const WhiteListName string = "whitelist"
-const BlackListName string = "blacklist"
+const (
+	WhiteListName string = "whitelist"
+	BlackListName string = "blacklist"
+)
+
 var (
-	ErrNoRecord       = errors.New("record not searched")
-	ErrStorageTimeout = errors.New("storage timeout")
+	ErrNoRecord         = errors.New("record not searched")
+	ErrStorageTimeout   = errors.New("storage timeout")
 	ErrErrorBadListType = errors.New("bad list type")
 )
 

@@ -93,7 +93,7 @@ func (s *Storage) AddIPToList(ctx context.Context, listname string, logger stora
 	return int(id), nil
 }
 
-func (s *Storage) RemoveIPInList(ctx context.Context,listname string, logger storageData.Logger, ipdata storageData.StorageIPData) error { //nolint: lll, nolintlint
+func (s *Storage) RemoveIPInList(ctx context.Context, listname string, logger storageData.Logger, ipdata storageData.StorageIPData) error { //nolint: lll, nolintlint
 	stmt := "DELETE from " + listname + " WHERE IP=? AND mask=?"
 
 	result, err := s.DB.ExecContext(ctx, stmt, ipdata.IP, ipdata.Mask)
@@ -142,7 +142,7 @@ func (s *Storage) IsIPInList(ctx context.Context, listname string, logger storag
 func (s *Storage) GetAllIPInList(ctx context.Context, listname string, logger storageData.Logger) ([]storageData.StorageIPData, error) { //nolint: lll, nolintlint
 	resIP := make([]storageData.StorageIPData, 0)
 
-	stmt := "SELECT id, mask, IP  FROM " + listname 
+	stmt := "SELECT id, mask, IP  FROM " + listname
 
 	rows, err := s.DB.QueryContext(ctx, stmt)
 	if err != nil {

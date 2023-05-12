@@ -10,7 +10,7 @@ import (
 	"go.uber.org/zap"
 )
 
-var ErrBadBucketTypeTag  = errors.New("bad bucket type tag")
+var ErrBadBucketTypeTag = errors.New("bad bucket type tag")
 
 type Server struct {
 	serv   *http.Server
@@ -62,7 +62,7 @@ type Application interface {
 	AddIPToList(ctx context.Context, listname string, IPData storageData.StorageIPData) (int, error)
 	RemoveIPInList(ctx context.Context, listname string, IPData storageData.StorageIPData) error
 	IsIPInList(ctx context.Context, listname string, IPData storageData.StorageIPData) (bool, error)
-	GetAllIPInList(ctx context.Context, listname string) ([]storageData.StorageIPData, error)	
+	GetAllIPInList(ctx context.Context, listname string) ([]storageData.StorageIPData, error)
 }
 
 func NewServer(logger Logger, app Application, config Config) *Server {

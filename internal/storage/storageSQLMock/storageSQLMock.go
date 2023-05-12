@@ -9,7 +9,6 @@ import (
 	storageData "github.com/skolzkyi/antibruteforce/internal/storage/storageData"
 )
 
-
 type StorageMock struct {
 	mu        sync.RWMutex
 	whitelist map[string]storageData.StorageIPData
@@ -58,7 +57,7 @@ func (s *StorageMock) AddIPToList(ctx context.Context, listname string, _ storag
 		default:
 			return 0, storageData.ErrErrorBadListType
 		}
-		
+
 		return value.ID, nil
 	}
 }
@@ -82,7 +81,7 @@ func (s *StorageMock) IsIPInList(ctx context.Context, listname string, _ storage
 		default:
 			return false, storageData.ErrErrorBadListType
 		}
-		
+
 		return ok, err
 	}
 }
@@ -103,7 +102,7 @@ func (s *StorageMock) RemoveIPInList(ctx context.Context, listname string, _ sto
 		default:
 			return storageData.ErrErrorBadListType
 		}
-		
+
 		if !ok {
 			return storageData.ErrNoRecord
 		}
@@ -142,7 +141,7 @@ func (s *StorageMock) GetAllIPInList(ctx context.Context, listname string, _ sto
 		default:
 			return nil, storageData.ErrErrorBadListType
 		}
-		
+
 		s.mu.RUnlock()
 		sort.SliceStable(resIPData, func(i, j int) bool {
 			return resIPData[i].ID < resIPData[j].ID

@@ -214,7 +214,7 @@ func TestAppNegativeAddIPCrossAdding(t *testing.T) {
 
 // WHITELIST
 
-func TestAppPositiveAddIPToWhiteListAndIsIPInWhiteList(t *testing.T) {//nolint: dupl, nolintlint
+func TestAppPositiveAddIPToWhiteListAndIsIPInWhiteList(t *testing.T) { //nolint: dupl, nolintlint
 	app := initAppWithMocks(t)
 	config := ConfigTest{}
 	err := app.InitStorage(context.Background(), &config)
@@ -231,7 +231,7 @@ func TestAppPositiveAddIPToWhiteListAndIsIPInWhiteList(t *testing.T) {//nolint: 
 	require.Truef(t, ok == true, "IP not in whitelist", ok)
 }
 
-func TestAppPositiveRemoveIPInWhiteListAndIsIPInWhiteList(t *testing.T) {//nolint: dupl, nolintlint
+func TestAppPositiveRemoveIPInWhiteListAndIsIPInWhiteList(t *testing.T) { //nolint: dupl, nolintlint
 	app := initAppWithMocks(t)
 	config := ConfigTest{}
 	err := app.InitStorage(context.Background(), &config)
@@ -241,7 +241,7 @@ func TestAppPositiveRemoveIPInWhiteListAndIsIPInWhiteList(t *testing.T) {//nolin
 		IP:   "192.168.0.0",
 		Mask: 25,
 	}
-	_, err = app.AddIPToList(context.Background(),"whitelist", newData)
+	_, err = app.AddIPToList(context.Background(), "whitelist", newData)
 	require.NoError(t, err)
 	ok, err := app.IsIPInList(context.Background(), "whitelist", newData)
 	require.NoError(t, err)
@@ -253,7 +253,7 @@ func TestAppPositiveRemoveIPInWhiteListAndIsIPInWhiteList(t *testing.T) {//nolin
 	require.Truef(t, ok == false, "IP in whitelist after removing", ok)
 }
 
-func TestAppPositiveGetAllIPInWhiteList(t *testing.T) {//nolint: dupl, nolintlint
+func TestAppPositiveGetAllIPInWhiteList(t *testing.T) { //nolint: dupl, nolintlint
 	app := initAppWithMocks(t)
 	config := ConfigTest{}
 	err := app.InitStorage(context.Background(), &config)
@@ -282,7 +282,7 @@ func TestAppPositiveGetAllIPInWhiteList(t *testing.T) {//nolint: dupl, nolintlin
 
 // BLACKLIST
 
-func TestAppPositiveAddIPToBlackListAndIsIPInBlackList(t *testing.T) {//nolint: dupl, nolintlint
+func TestAppPositiveAddIPToBlackListAndIsIPInBlackList(t *testing.T) { //nolint: dupl, nolintlint
 	app := initAppWithMocks(t)
 	config := ConfigTest{}
 	err := app.InitStorage(context.Background(), &config)
@@ -299,7 +299,7 @@ func TestAppPositiveAddIPToBlackListAndIsIPInBlackList(t *testing.T) {//nolint: 
 	require.Truef(t, ok == true, "IP not in blacklist", ok)
 }
 
-func TestAppPositiveRemoveIPInBlackListAndIsIPInBlackList(t *testing.T) {//nolint: dupl, nolintlint
+func TestAppPositiveRemoveIPInBlackListAndIsIPInBlackList(t *testing.T) { //nolint: dupl, nolintlint
 	app := initAppWithMocks(t)
 	config := ConfigTest{}
 	err := app.InitStorage(context.Background(), &config)
@@ -321,7 +321,7 @@ func TestAppPositiveRemoveIPInBlackListAndIsIPInBlackList(t *testing.T) {//nolin
 	require.Truef(t, ok == false, "IP in blacklist after removing", ok)
 }
 
-func TestAppPositiveGetAllIPInBlackList(t *testing.T) {//nolint: dupl, nolintlint
+func TestAppPositiveGetAllIPInBlackList(t *testing.T) { //nolint: dupl, nolintlint
 	app := initAppWithMocks(t)
 	config := ConfigTest{}
 	err := app.InitStorage(context.Background(), &config)

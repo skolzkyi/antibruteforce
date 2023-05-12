@@ -107,7 +107,7 @@ func (config *ConfigTest) GetLimitTimeCheck() time.Duration {
 
 func TestWhiteListREST(t *testing.T) {
 	t.Parallel()
-	t.Run("AddIPToWhiteList", func(t *testing.T) {//nolint: dupl, nolintlint
+	t.Run("AddIPToWhiteList", func(t *testing.T) { //nolint: dupl, nolintlint
 		t.Parallel()
 		data := bytes.NewBufferString(`{
 			"IP":"192.168.16.0",
@@ -128,7 +128,7 @@ func TestWhiteListREST(t *testing.T) {
 		respExp := correctOutputJSONAnswer
 		require.Equal(t, respExp, string(respBody))
 	})
-	t.Run("IsIPInWhiteList", func(t *testing.T) {//nolint: dupl, nolintlint
+	t.Run("IsIPInWhiteList", func(t *testing.T) { //nolint: dupl, nolintlint
 		t.Parallel()
 		newData := storageData.StorageIPData{
 			IP:   "192.168.16.1",
@@ -157,7 +157,7 @@ func TestWhiteListREST(t *testing.T) {
 		respExp := `{"IPList":[],"Message":{"Text":"YES","Code":0}}`
 		require.Equal(t, respExp, string(respBody))
 	})
-	t.Run("RemoveIPInWhiteList", func(t *testing.T) {//nolint: dupl, nolintlint
+	t.Run("RemoveIPInWhiteList", func(t *testing.T) { //nolint: dupl, nolintlint
 		t.Parallel()
 		controldataTestIP := "192.168.16.0" //nolint: goconst
 		newData := storageData.StorageIPData{
@@ -210,7 +210,7 @@ func TestWhiteListREST(t *testing.T) {
 		}
 		require.Equal(t, flag, false)
 	})
-	t.Run("GetAllIPInWhiteList", func(t *testing.T) {//nolint: dupl, nolintlint
+	t.Run("GetAllIPInWhiteList", func(t *testing.T) { //nolint: dupl, nolintlint
 		t.Parallel()
 		data := bytes.NewBufferString(`{
 			"IP":"ALL",
@@ -249,7 +249,7 @@ func TestWhiteListREST(t *testing.T) {
 
 func TestBlackListREST(t *testing.T) {
 	t.Parallel()
-	t.Run("AddIPToBlackList", func(t *testing.T) {//nolint: dupl, nolintlint
+	t.Run("AddIPToBlackList", func(t *testing.T) { //nolint: dupl, nolintlint
 		t.Parallel()
 		data := bytes.NewBufferString(`{
 			"IP":"192.168.16.0",
@@ -272,7 +272,7 @@ func TestBlackListREST(t *testing.T) {
 	})
 	t.Run("IsIPInBlackList", func(t *testing.T) {
 		t.Parallel()
-		newData := storageData.StorageIPData{//nolint: dupl, nolintlint
+		newData := storageData.StorageIPData{ //nolint: dupl, nolintlint
 			IP:   "192.168.16.0",
 			Mask: 8,
 		}
@@ -299,7 +299,7 @@ func TestBlackListREST(t *testing.T) {
 		respExp := `{"IPList":[],"Message":{"Text":"YES","Code":0}}`
 		require.Equal(t, respExp, string(respBody))
 	})
-	t.Run("RemoveIPInBlackList", func(t *testing.T) {//nolint: dupl, nolintlint
+	t.Run("RemoveIPInBlackList", func(t *testing.T) { //nolint: dupl, nolintlint
 		t.Parallel()
 		newData := storageData.StorageIPData{
 			IP:   "192.168.16.0",
@@ -351,7 +351,7 @@ func TestBlackListREST(t *testing.T) {
 		}
 		require.Equal(t, flag, false)
 	})
-	t.Run("GetAllIPInBlackList", func(t *testing.T) {//nolint: dupl, nolintlint
+	t.Run("GetAllIPInBlackList", func(t *testing.T) { //nolint: dupl, nolintlint
 		t.Parallel()
 		data := bytes.NewBufferString(`{
 			"IP":"ALL",
@@ -389,7 +389,7 @@ func TestBlackListREST(t *testing.T) {
 }
 
 func TestAuthorizationRequest(t *testing.T) {
-	t.Run("AuthorizationRequest", func(t *testing.T) {//nolint: dupl, nolintlint
+	t.Run("AuthorizationRequest", func(t *testing.T) { //nolint: dupl, nolintlint
 		data := bytes.NewBufferString(`{
 			"Login":"user0",
 			"Password":"CharlyDonTSerf",
@@ -412,7 +412,7 @@ func TestAuthorizationRequest(t *testing.T) {
 }
 
 func TestClearBucketByLogin(t *testing.T) {
-	t.Run("ClearBucketByLogin", func(t *testing.T) {//nolint: dupl, nolintlint
+	t.Run("ClearBucketByLogin", func(t *testing.T) { //nolint: dupl, nolintlint
 		data := bytes.NewBufferString(`{
 			"Tag":"user0"
 		}`)
@@ -433,7 +433,7 @@ func TestClearBucketByLogin(t *testing.T) {
 }
 
 func TestClearBucketByIP(t *testing.T) {
-	t.Run("ClearBucketByIP", func(t *testing.T) {//nolint: dupl, nolintlint
+	t.Run("ClearBucketByIP", func(t *testing.T) { //nolint: dupl, nolintlint
 		data := bytes.NewBufferString(`{
 			"Tag":"192.168.16.56"
 		}`)

@@ -154,10 +154,10 @@ func (s *Server) clearBucketByTag(w http.ResponseWriter, r *http.Request, tagTyp
 		case "ip":
 			err = s.app.ClearBucketByIP(ctx, inputTag.Tag)
 		default:
-			apiErrHandler(ErrBadBucketTypeTag , &w)
+			apiErrHandler(ErrBadBucketTypeTag, &w)
 			return
 		}
-		
+
 		if err != nil {
 			newMessage.Text = err.Error()
 			newMessage.Code = 1
@@ -189,15 +189,15 @@ func (s *Server) clearBucketByTag(w http.ResponseWriter, r *http.Request, tagTyp
 	}
 }
 
-func (s *Server) WhiteListREST(w http.ResponseWriter, r *http.Request) { 
-	s.list_Rest(w, r, "whitelist")
+func (s *Server) WhiteListREST(w http.ResponseWriter, r *http.Request) {
+	s.listRest(w, r, "whitelist")
 }
 
 func (s *Server) BlackListREST(w http.ResponseWriter, r *http.Request) {
-	s.list_Rest(w, r, "blacklist")
+	s.listRest(w, r, "blacklist")
 }
 
-func (s *Server)list_Rest(w http.ResponseWriter, r *http.Request, listname string,) { //nolint:funlen, gocognit
+func (s *Server) listRest(w http.ResponseWriter, r *http.Request, listname string) { //nolint:funlen, gocognit
 	defer r.Body.Close()
 
 	ctx, cancel := context.WithTimeout(r.Context(), s.Config.GetDBTimeOut())

@@ -94,7 +94,7 @@ func TestMain(m *testing.M) {
 			log.Info("Integration tests up")
 			exitCode := m.Run()
 			log.Info("exitCode:" + strconv.Itoa(exitCode))
-			// for{} //debug
+			for{} //debug
 			err = cleanDatabaseAndRedis(ctx)
 			if err != nil {
 				cancel()

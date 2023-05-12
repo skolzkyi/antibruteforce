@@ -5,9 +5,12 @@ import (
 	"sort"
 	"strconv"
 	"sync"
+	"errors"
 
 	storageData "github.com/skolzkyi/antibruteforce/internal/storage/storageData"
 )
+
+var ErrErrorBadListType = errors.New("bad list type")
 
 type StorageMock struct {
 	mu        sync.RWMutex
@@ -36,9 +39,7 @@ func (s *StorageMock) Close(_ context.Context, _ storageData.Logger) error {
 	return nil
 }
 
-// WHITELIST
-
-func (s *StorageMock) AddIPToWhiteList(ctx context.Context, logger storageData.Logger, value storageData.StorageIPData) (int, error) { //nolint: lll, nolintlint
+func (s *StorageMock) AddIPToList(ctx context.Context, listname string, logger storageData.Logger, value storageData.StorageIPData) (int, error) { //nolint: lll, nolintlint
 	select {
 	case <-ctx.Done():
 
@@ -47,15 +48,24 @@ func (s *StorageMock) AddIPToWhiteList(ctx context.Context, logger storageData.L
 		tag := value.IP + "/" + strconv.Itoa(value.Mask)
 		s.mu.Lock()
 		defer s.mu.Unlock()
-		value.ID = s.idWL
-		s.whitelist[tag] = value
-		s.idWL++
-
+		switch listname {
+		case "whitelist":
+			value.ID = s.idWL
+			s.whitelist[tag] = value
+			s.idWL++
+		case "blacklist":
+			value.ID = s.idBL
+			s.blacklist[tag] = value
+			s.idBL++
+		default:
+			return 0, ErrErrorBadListType
+		}
+		
 		return value.ID, nil
 	}
 }
 
-func (s *StorageMock) IsIPInWhiteList(ctx context.Context, _ storageData.Logger, value storageData.StorageIPData) (bool, error) { //nolint: lll, nolintlint
+func (s *StorageMock) IsIPInList(ctx context.Context, listname string, _ storageData.Logger, value storageData.StorageIPData) (bool, error) { //nolint: lll, nolintlint
 	select {
 	case <-ctx.Done():
 
@@ -65,32 +75,56 @@ func (s *StorageMock) IsIPInWhiteList(ctx context.Context, _ storageData.Logger,
 		s.mu.RLock()
 		defer s.mu.RUnlock()
 		var err error
-		_, ok := s.whitelist[tag]
-
+		var ok bool
+		switch listname {
+		case "whitelist":
+			_, ok = s.whitelist[tag]
+		case "blacklist":
+			_, ok = s.blacklist[tag]
+		default:
+			return false, ErrErrorBadListType
+		}
+		
 		return ok, err
 	}
 }
 
-func (s *StorageMock) RemoveIPInWhiteList(ctx context.Context, _ storageData.Logger, value storageData.StorageIPData) error { //nolint: lll, nolintlint
+func (s *StorageMock) RemoveIPInList(ctx context.Context, listname string, _ storageData.Logger, value storageData.StorageIPData) error { //nolint: lll, nolintlint
 	select {
 	case <-ctx.Done():
 
 		return storageData.ErrStorageTimeout
 	default:
+		var ok bool
 		tag := value.IP + "/" + strconv.Itoa(value.Mask)
-		_, ok := s.whitelist[tag]
+		switch listname {
+		case "whitelist":
+			_, ok = s.whitelist[tag]
+		case "blacklist":
+			_, ok = s.blacklist[tag]
+		default:
+			return ErrErrorBadListType
+		}
+		
 		if !ok {
 			return storageData.ErrNoRecord
 		}
 		s.mu.Lock()
 		defer s.mu.Unlock()
-		delete(s.whitelist, tag)
+		switch listname {
+		case "whitelist":
+			delete(s.whitelist, tag)
+		case "blacklist":
+			delete(s.blacklist, tag)
+		default:
+			return ErrErrorBadListType
+		}
 
 		return nil
 	}
 }
 
-func (s *StorageMock) GetAllIPInWhiteList(ctx context.Context, _ storageData.Logger) ([]storageData.StorageIPData, error) { //nolint: lll, nolintlint
+func (s *StorageMock) GetAllIPInList(ctx context.Context, listname string, _ storageData.Logger) ([]storageData.StorageIPData, error) { //nolint: lll, nolintlint
 	resIPData := make([]storageData.StorageIPData, 0)
 	select {
 	case <-ctx.Done():
@@ -98,83 +132,19 @@ func (s *StorageMock) GetAllIPInWhiteList(ctx context.Context, _ storageData.Log
 		return nil, storageData.ErrStorageTimeout
 	default:
 		s.mu.RLock()
-		for _, curIPData := range s.whitelist {
-			resIPData = append(resIPData, curIPData)
+		switch listname {
+		case "whitelist":
+			for _, curIPData := range s.whitelist {
+				resIPData = append(resIPData, curIPData)
+			}
+		case "blacklist":
+			for _, curIPData := range s.blacklist {
+				resIPData = append(resIPData, curIPData)
+			}
+		default:
+			return nil, ErrErrorBadListType
 		}
-		s.mu.RUnlock()
-		sort.SliceStable(resIPData, func(i, j int) bool {
-			return resIPData[i].ID < resIPData[j].ID
-		})
-
-		return resIPData, nil
-	}
-}
-
-// BLACKLIST
-
-func (s *StorageMock) AddIPToBlackList(ctx context.Context, logger storageData.Logger, value storageData.StorageIPData) (int, error) { //nolint: lll, nolintlint
-	select {
-	case <-ctx.Done():
-
-		return 0, storageData.ErrStorageTimeout
-	default:
-		tag := value.IP + "/" + strconv.Itoa(value.Mask)
-		s.mu.Lock()
-		defer s.mu.Unlock()
-		value.ID = s.idBL
-		s.blacklist[tag] = value
-		s.idBL++
-
-		return value.ID, nil
-	}
-}
-
-func (s *StorageMock) IsIPInBlackList(ctx context.Context, _ storageData.Logger, value storageData.StorageIPData) (bool, error) { //nolint: lll, nolintlint
-	select {
-	case <-ctx.Done():
-
-		return false, storageData.ErrStorageTimeout
-	default:
-		tag := value.IP + "/" + strconv.Itoa(value.Mask)
-		s.mu.RLock()
-		defer s.mu.RUnlock()
-		var err error
-		_, ok := s.blacklist[tag]
-
-		return ok, err
-	}
-}
-
-func (s *StorageMock) RemoveIPInBlackList(ctx context.Context, _ storageData.Logger, value storageData.StorageIPData) error { //nolint: lll, nolintlint
-	select {
-	case <-ctx.Done():
-
-		return storageData.ErrStorageTimeout
-	default:
-		tag := value.IP + "/" + strconv.Itoa(value.Mask)
-		_, ok := s.blacklist[tag]
-		if !ok {
-			return storageData.ErrNoRecord
-		}
-		s.mu.Lock()
-		defer s.mu.Unlock()
-		delete(s.blacklist, tag)
-
-		return nil
-	}
-}
-
-func (s *StorageMock) GetAllIPInBlackList(ctx context.Context, _ storageData.Logger) ([]storageData.StorageIPData, error) { //nolint: lll, nolintlint
-	resIPData := make([]storageData.StorageIPData, 0)
-	select {
-	case <-ctx.Done():
-
-		return nil, storageData.ErrStorageTimeout
-	default:
-		s.mu.RLock()
-		for _, curIPData := range s.blacklist {
-			resIPData = append(resIPData, curIPData)
-		}
+		
 		s.mu.RUnlock()
 		sort.SliceStable(resIPData, func(i, j int) bool {
 			return resIPData[i].ID < resIPData[j].ID

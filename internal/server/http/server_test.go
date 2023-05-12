@@ -210,7 +210,7 @@ func TestWhiteListREST(t *testing.T) {
 		}
 		require.Equal(t, flag, false)
 	})
-	t.Run("GetAllIPInWhiteList", func(t *testing.T) {
+	t.Run("GetAllIPInWhiteList", func(t *testing.T) {//nolint: dupl, nolintlint
 		t.Parallel()
 		data := bytes.NewBufferString(`{
 			"IP":"ALL",
@@ -351,7 +351,7 @@ func TestBlackListREST(t *testing.T) {
 		}
 		require.Equal(t, flag, false)
 	})
-	t.Run("GetAllIPInBlackList", func(t *testing.T) {
+	t.Run("GetAllIPInBlackList", func(t *testing.T) {//nolint: dupl, nolintlint
 		t.Parallel()
 		data := bytes.NewBufferString(`{
 			"IP":"ALL",

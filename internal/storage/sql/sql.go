@@ -75,19 +75,17 @@ func (s *Storage) Close(ctx context.Context, logger storageData.Logger) error {
 	return nil
 }
 
-// WHITELIST
-
-func (s *Storage) AddIPToWhiteList(ctx context.Context, logger storageData.Logger, ipdata storageData.StorageIPData) (int, error) { //nolint: lll, nolintlint
-	stmt := "INSERT INTO whitelist(mask,IP) VALUES (?,?)"
+func (s *Storage) AddIPToList(ctx context.Context, listname string, logger storageData.Logger, ipdata storageData.StorageIPData) (int, error) { //nolint: lll, nolintlint
+	stmt := "INSERT INTO " + listname + "(mask,IP) VALUES (?,?)"
 	res, err := s.DB.ExecContext(ctx, stmt, ipdata.Mask, ipdata.IP)
 	if err != nil {
-		logger.Error("SQL DB exec stmt AddIPToWhiteList error: " + err.Error() + " stmt: " + stmt)
+		logger.Error("SQL DB exec stmt AddIPToList error: " + err.Error() + " stmt: " + stmt)
 
 		return 0, err
 	}
 	id, err := res.LastInsertId()
 	if err != nil {
-		logger.Error("SQL AddIPToWhiteList get new id error: " + err.Error() + " stmt: " + stmt)
+		logger.Error("SQL AddIPToList get new id error: " + err.Error() + " stmt: " + stmt)
 
 		return 0, err
 	}
@@ -95,25 +93,25 @@ func (s *Storage) AddIPToWhiteList(ctx context.Context, logger storageData.Logge
 	return int(id), nil
 }
 
-func (s *Storage) RemoveIPInWhiteList(ctx context.Context, logger storageData.Logger, ipdata storageData.StorageIPData) error { //nolint: lll, nolintlint
-	stmt := "DELETE from whitelist WHERE IP=? AND mask=?"
+func (s *Storage) RemoveIPInList(ctx context.Context,listname string, logger storageData.Logger, ipdata storageData.StorageIPData) error { //nolint: lll, nolintlint
+	stmt := "DELETE from " + listname + " WHERE IP=? AND mask=?"
 
 	result, err := s.DB.ExecContext(ctx, stmt, ipdata.IP, ipdata.Mask)
 	if err != nil {
-		logger.Error("SQL DB exec stmt RemoveIPInWhiteList error: " + err.Error() + " stmt: " + stmt)
+		logger.Error("SQL DB exec stmt RemoveIPInList error: " + err.Error() + " stmt: " + stmt)
 
 		return err
 	}
 
 	count, err := result.RowsAffected()
 	if err != nil {
-		logger.Error("SQL DB type RemoveIPInWhiteList error: " + err.Error() + " stmt: " + stmt)
+		logger.Error("SQL DB type RemoveIPInList error: " + err.Error() + " stmt: " + stmt)
 
 		return err
 	}
 
 	if count == int64(0) {
-		logger.Error("SQL DB exec stmt RemoveIPInWhiteList error: " + storageData.ErrNoRecord.Error() + " stmt: " + stmt)
+		logger.Error("SQL DB exec stmt RemoveIPInList error: " + storageData.ErrNoRecord.Error() + " stmt: " + stmt)
 
 		return storageData.ErrNoRecord
 	}
@@ -121,8 +119,8 @@ func (s *Storage) RemoveIPInWhiteList(ctx context.Context, logger storageData.Lo
 	return nil
 }
 
-func (s *Storage) IsIPInWhiteList(ctx context.Context, logger storageData.Logger, ipdata storageData.StorageIPData) (bool, error) { //nolint: lll, nolintlint
-	stmt := "SELECT id, IP FROM whitelist WHERE IP = ? AND mask=?"
+func (s *Storage) IsIPInList(ctx context.Context, listname string, logger storageData.Logger, ipdata storageData.StorageIPData) (bool, error) { //nolint: lll, nolintlint
+	stmt := "SELECT id, IP FROM " + listname + " WHERE IP = ? AND mask=?"
 
 	row := s.DB.QueryRowContext(ctx, stmt, ipdata.IP, ipdata.Mask)
 
@@ -133,7 +131,7 @@ func (s *Storage) IsIPInWhiteList(ctx context.Context, logger storageData.Logger
 		if errors.Is(err, sql.ErrNoRows) {
 			return false, nil
 		}
-		logger.Error("SQL row scan IsIPInWhiteList error: " + err.Error() + " stmt: " + stmt)
+		logger.Error("SQL row scan IsIPInList error: " + err.Error() + " stmt: " + stmt)
 
 		return false, err
 	}
@@ -141,14 +139,14 @@ func (s *Storage) IsIPInWhiteList(ctx context.Context, logger storageData.Logger
 	return true, nil
 }
 
-func (s *Storage) GetAllIPInWhiteList(ctx context.Context, logger storageData.Logger) ([]storageData.StorageIPData, error) {
+func (s *Storage) GetAllIPInList(ctx context.Context, listname string, logger storageData.Logger) ([]storageData.StorageIPData, error) { //nolint: lll, nolintlint
 	resIP := make([]storageData.StorageIPData, 0)
 
-	stmt := "SELECT id, mask, IP  FROM whitelist"
+	stmt := "SELECT id, mask, IP  FROM " + listname 
 
 	rows, err := s.DB.QueryContext(ctx, stmt)
 	if err != nil {
-		logger.Error("SQL GetAllIPInWhiteList DB query error: " + err.Error() + " stmt: " + stmt)
+		logger.Error("SQL GetAllIPInList DB query error: " + err.Error() + " stmt: " + stmt)
 
 		return nil, err
 	}
@@ -160,7 +158,7 @@ func (s *Storage) GetAllIPInWhiteList(ctx context.Context, logger storageData.Lo
 	for rows.Next() {
 		err = rows.Scan(&storagedIP.ID, &storagedIP.Mask, &storagedIP.IP)
 		if err != nil {
-			logger.Error("SQL rows scan GetAllIPInWhiteList error")
+			logger.Error("SQL rows scan GetAllIPInList error")
 
 			return nil, err
 		}
@@ -170,109 +168,7 @@ func (s *Storage) GetAllIPInWhiteList(ctx context.Context, logger storageData.Lo
 	}
 
 	if err = rows.Err(); err != nil {
-		logger.Error("SQL GetAllIPInWhiteList  rows error: " + err.Error())
-
-		return nil, err
-	}
-
-	return resIP, nil
-}
-
-// BLACKLIST
-
-func (s *Storage) AddIPToBlackList(ctx context.Context, logger storageData.Logger, ipdata storageData.StorageIPData) (int, error) { //nolint: lll, nolintlint
-	stmt := "INSERT INTO blacklist(mask,IP) VALUES (?,?)"
-	res, err := s.DB.ExecContext(ctx, stmt, ipdata.Mask, ipdata.IP)
-	if err != nil {
-		logger.Error("SQL DB exec stmt AddIPToBlackList error: " + err.Error() + " stmt: " + stmt)
-
-		return 0, err
-	}
-	id, err := res.LastInsertId()
-	if err != nil {
-		logger.Error("SQL AddIPToBlackList get new id error: " + err.Error() + " stmt: " + stmt)
-
-		return 0, err
-	}
-
-	return int(id), nil
-}
-
-func (s *Storage) RemoveIPInBlackList(ctx context.Context, logger storageData.Logger, ipdata storageData.StorageIPData) error { //nolint: lll, nolintlint
-	stmt := "DELETE from blacklist WHERE IP=? AND mask=?"
-
-	result, err := s.DB.ExecContext(ctx, stmt, ipdata.IP, ipdata.Mask)
-	if err != nil {
-		logger.Error("SQL DB exec stmt RemoveIPInBlackList error: " + err.Error() + " stmt: " + stmt)
-
-		return err
-	}
-	count, err := result.RowsAffected()
-	if err != nil {
-		logger.Error("SQL DB type RemoveIPInWhiteList error: " + err.Error() + " stmt: " + stmt)
-
-		return err
-	}
-
-	if count == int64(0) {
-		logger.Error("SQL DB exec stmt RemoveIPInWhiteList error: " + storageData.ErrNoRecord.Error() + " stmt: " + stmt)
-
-		return storageData.ErrNoRecord
-	}
-
-	return nil
-}
-
-func (s *Storage) IsIPInBlackList(ctx context.Context, logger storageData.Logger, ipdata storageData.StorageIPData) (bool, error) { //nolint: lll, nolintlint
-	stmt := "SELECT id, IP FROM blacklist WHERE IP = ? AND mask=?"
-
-	row := s.DB.QueryRowContext(ctx, stmt, ipdata.IP, ipdata.Mask)
-
-	storagedIP := &storageData.StorageIPData{}
-
-	err := row.Scan(&storagedIP.ID, &storagedIP.IP)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return false, nil
-		}
-		logger.Error("SQL row scan IsIPInBlackList error: " + err.Error() + " stmt: " + stmt)
-
-		return false, err
-	}
-
-	return true, nil
-}
-
-func (s *Storage) GetAllIPInBlackList(ctx context.Context, logger storageData.Logger) ([]storageData.StorageIPData, error) {
-	resIP := make([]storageData.StorageIPData, 0)
-
-	stmt := "SELECT id, mask, IP  FROM blacklist"
-
-	rows, err := s.DB.QueryContext(ctx, stmt)
-	if err != nil {
-		logger.Error("SQL GetAllIPInBlackList DB query error: " + err.Error() + " stmt: " + stmt)
-
-		return nil, err
-	}
-
-	defer rows.Close()
-
-	storagedIP := storageData.StorageIPData{}
-
-	for rows.Next() {
-		err = rows.Scan(&storagedIP.ID, &storagedIP.Mask, &storagedIP.IP)
-		if err != nil {
-			logger.Error("SQL rows scan GetAllIPInBlackList error")
-
-			return nil, err
-		}
-
-		resIP = append(resIP, storagedIP)
-		storagedIP = storageData.StorageIPData{}
-	}
-
-	if err = rows.Err(); err != nil {
-		logger.Error("SQL GetAllIPInBlackList  rows error: " + err.Error())
+		logger.Error("SQL GetAllIPInList  rows error: " + err.Error())
 
 		return nil, err
 	}

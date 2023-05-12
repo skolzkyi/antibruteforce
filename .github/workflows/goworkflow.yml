@@ -1,4 +1,4 @@
-name: goworkflow
+name: Go
 
 on:
   push:

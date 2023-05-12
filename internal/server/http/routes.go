@@ -11,8 +11,8 @@ func (s *Server) routes() *http.ServeMux {
 	mux.HandleFunc("/request/", loggingMiddleware(s.AuthorizationRequest, s.logg))
 	mux.HandleFunc("/clearbucketbylogin/", loggingMiddleware(s.ClearBucketByLogin, s.logg))
 	mux.HandleFunc("/clearbucketbyip/", loggingMiddleware(s.ClearBucketByIP, s.logg))
-	mux.HandleFunc("/whitelist/", loggingMiddleware(s.WhiteList_REST, s.logg))
-	mux.HandleFunc("/blacklist/", loggingMiddleware(s.BlackList_REST, s.logg))
+	mux.HandleFunc("/whitelist/", loggingMiddleware(s.WhiteListREST, s.logg))
+	mux.HandleFunc("/blacklist/", loggingMiddleware(s.BlackListREST, s.logg))
 
 	return mux
 }

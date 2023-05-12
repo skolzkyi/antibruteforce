@@ -189,11 +189,11 @@ func (s *Server) clearBucketByTag(w http.ResponseWriter, r *http.Request, tagTyp
 	}
 }
 
-func (s *Server) WhiteList_REST(w http.ResponseWriter, r *http.Request) { 
+func (s *Server) WhiteListREST(w http.ResponseWriter, r *http.Request) { 
 	s.list_Rest(w, r, "whitelist")
 }
 
-func (s *Server) BlackList_REST(w http.ResponseWriter, r *http.Request) {
+func (s *Server) BlackListREST(w http.ResponseWriter, r *http.Request) {
 	s.list_Rest(w, r, "blacklist")
 }
 

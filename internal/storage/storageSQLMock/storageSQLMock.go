@@ -37,7 +37,7 @@ func (s *StorageMock) Close(_ context.Context, _ storageData.Logger) error {
 	return nil
 }
 
-func (s *StorageMock) AddIPToList(ctx context.Context, listname string, logger storageData.Logger, value storageData.StorageIPData) (int, error) { //nolint: lll, nolintlint
+func (s *StorageMock) AddIPToList(ctx context.Context, listname string, _ storageData.Logger, value storageData.StorageIPData) (int, error) { //nolint: lll, nolintlint
 	select {
 	case <-ctx.Done():
 
@@ -47,11 +47,11 @@ func (s *StorageMock) AddIPToList(ctx context.Context, listname string, logger s
 		s.mu.Lock()
 		defer s.mu.Unlock()
 		switch listname {
-		case "whitelist":
+		case storageData.WhiteListName:
 			value.ID = s.idWL
 			s.whitelist[tag] = value
 			s.idWL++
-		case "blacklist":
+		case storageData.BlackListName:
 			value.ID = s.idBL
 			s.blacklist[tag] = value
 			s.idBL++
@@ -75,9 +75,9 @@ func (s *StorageMock) IsIPInList(ctx context.Context, listname string, _ storage
 		var err error
 		var ok bool
 		switch listname {
-		case "whitelist":
+		case storageData.WhiteListName:
 			_, ok = s.whitelist[tag]
-		case "blacklist":
+		case storageData.BlackListName:
 			_, ok = s.blacklist[tag]
 		default:
 			return false, storageData.ErrErrorBadListType
@@ -96,9 +96,9 @@ func (s *StorageMock) RemoveIPInList(ctx context.Context, listname string, _ sto
 		var ok bool
 		tag := value.IP + "/" + strconv.Itoa(value.Mask)
 		switch listname {
-		case "whitelist":
+		case storageData.WhiteListName:
 			_, ok = s.whitelist[tag]
-		case "blacklist":
+		case storageData.BlackListName:
 			_, ok = s.blacklist[tag]
 		default:
 			return storageData.ErrErrorBadListType
@@ -110,9 +110,9 @@ func (s *StorageMock) RemoveIPInList(ctx context.Context, listname string, _ sto
 		s.mu.Lock()
 		defer s.mu.Unlock()
 		switch listname {
-		case "whitelist":
+		case storageData.WhiteListName:
 			delete(s.whitelist, tag)
-		case "blacklist":
+		case storageData.BlackListName:
 			delete(s.blacklist, tag)
 		default:
 			return storageData.ErrErrorBadListType
@@ -131,11 +131,11 @@ func (s *StorageMock) GetAllIPInList(ctx context.Context, listname string, _ sto
 	default:
 		s.mu.RLock()
 		switch listname {
-		case "whitelist":
+		case storageData.WhiteListName:
 			for _, curIPData := range s.whitelist {
 				resIPData = append(resIPData, curIPData)
 			}
-		case "blacklist":
+		case storageData.BlackListName:
 			for _, curIPData := range s.blacklist {
 				resIPData = append(resIPData, curIPData)
 			}

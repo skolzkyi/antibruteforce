@@ -197,10 +197,10 @@ func (a *App) AddIPToList(ctx context.Context, listname string, ipData storageDa
 	}
 	var otherlistname string
 	switch listname {
-	case "whitelist":
-		otherlistname = "blacklist"
-	case "blacklist":
-		otherlistname = "whitelist"
+	case storageData.WhiteListName:
+		otherlistname = storageData.BlackListName
+	case storageData.BlackListName:
+		otherlistname = storageData.WhiteListName
 	default:
 		return 0, storageData.ErrErrorBadListType
 	}
@@ -214,9 +214,9 @@ func (a *App) AddIPToList(ctx context.Context, listname string, ipData storageDa
 	}
 	if ok {
 		switch listname {
-		case "whitelist":
+		case storageData.WhiteListName:
 			return 0, ErrIPDataExistInBL
-		case "blacklist":
+		case storageData.BlackListName:
 			return 0, ErrIPDataExistInWL
 		default:
 			return 0, storageData.ErrErrorBadListType
@@ -320,7 +320,7 @@ func (a *App) isIPInListCheck(ctx context.Context, listname string, ip string) (
 
 
 func checkListnName(listname string) error {
-	if listname != "whitelist" && listname != "blacklist" {
+	if listname != storageData.WhiteListName  && listname != storageData.BlackListName {
 		return storageData.ErrErrorBadListType
 	}
 

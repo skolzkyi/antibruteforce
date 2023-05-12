@@ -118,7 +118,7 @@ func TestWhiteListREST(t *testing.T) {
 
 		r := httptest.NewRequest("POST", "/whitelist/", data)
 		w := httptest.NewRecorder()
-		server.WhiteList_REST(w, r)
+		server.WhiteListREST(w, r)
 
 		res := w.Result()
 		defer res.Body.Close()
@@ -147,7 +147,7 @@ func TestWhiteListREST(t *testing.T) {
 
 		r := httptest.NewRequest("GET", "/whitelist/", data)
 		w := httptest.NewRecorder()
-		server.WhiteList_REST(w, r)
+		server.WhiteListREST(w, r)
 
 		res := w.Result()
 		defer res.Body.Close()
@@ -159,7 +159,7 @@ func TestWhiteListREST(t *testing.T) {
 	})
 	t.Run("RemoveIPInWhiteList", func(t *testing.T) {//nolint: dupl, nolintlint
 		t.Parallel()
-		controldataTestIP := "192.168.16.0"
+		controldataTestIP := "192.168.16.0" //nolint: goconst
 		newData := storageData.StorageIPData{
 			IP:   controldataTestIP,
 			Mask: 8,
@@ -188,7 +188,7 @@ func TestWhiteListREST(t *testing.T) {
 
 		r := httptest.NewRequest("DELETE", "/whitelist/", data)
 		w := httptest.NewRecorder()
-		server.WhiteList_REST(w, r)
+		server.WhiteListREST(w, r)
 
 		res := w.Result()
 		defer res.Body.Close()
@@ -234,7 +234,7 @@ func TestWhiteListREST(t *testing.T) {
 
 		r := httptest.NewRequest("GET", "/whitelist/", data)
 		w := httptest.NewRecorder()
-		server.WhiteList_REST(w, r)
+		server.WhiteListREST(w, r)
 
 		res := w.Result()
 		defer res.Body.Close()
@@ -260,7 +260,7 @@ func TestBlackListREST(t *testing.T) {
 
 		r := httptest.NewRequest("POST", "/blacklist/", data)
 		w := httptest.NewRecorder()
-		server.BlackList_REST(w, r)
+		server.BlackListREST(w, r)
 
 		res := w.Result()
 		defer res.Body.Close()
@@ -289,7 +289,7 @@ func TestBlackListREST(t *testing.T) {
 
 		r := httptest.NewRequest("GET", "/blacklist/", data)
 		w := httptest.NewRecorder()
-		server.BlackList_REST(w, r)
+		server.BlackListREST(w, r)
 
 		res := w.Result()
 		defer res.Body.Close()
@@ -329,7 +329,7 @@ func TestBlackListREST(t *testing.T) {
 
 		r := httptest.NewRequest("DELETE", "/blacklist/", data)
 		w := httptest.NewRecorder()
-		server.BlackList_REST(w, r)
+		server.BlackListREST(w, r)
 
 		res := w.Result()
 		defer res.Body.Close()
@@ -375,7 +375,7 @@ func TestBlackListREST(t *testing.T) {
 
 		r := httptest.NewRequest("GET", "/blacklist/", data)
 		w := httptest.NewRecorder()
-		server.BlackList_REST(w, r)
+		server.BlackListREST(w, r)
 
 		res := w.Result()
 		defer res.Body.Close()

@@ -192,23 +192,23 @@ func TestAppNegativeAddIPCrossAdding(t *testing.T) {
 		IP:   "192.168.0.0",
 		Mask: 25,
 	}
-	_, err = app.AddIPToWhiteList(context.Background(), newData)
+	_, err = app.AddIPToList(context.Background(), "whitelist", newData)
 	require.NoError(t, err)
-	ok, err := app.IsIPInWhiteList(context.Background(), newData)
+	ok, err := app.IsIPInList(context.Background(), "whitelist", newData)
 	require.NoError(t, err)
 	require.Truef(t, ok == true, "IP not in whitelist", ok)
-	_, err = app.AddIPToBlackList(context.Background(), newData)
+	_, err = app.AddIPToList(context.Background(), "blacklist", newData)
 	require.Truef(t, errors.Is(err, ErrIPDataExistInWL), "actual error %q", err)
 	newData = storageData.StorageIPData{
 		IP:   "10.0.0.0",
 		Mask: 8,
 	}
-	_, err = app.AddIPToBlackList(context.Background(), newData)
+	_, err = app.AddIPToList(context.Background(), "blacklist", newData)
 	require.NoError(t, err)
-	ok, err = app.IsIPInBlackList(context.Background(), newData)
+	ok, err = app.IsIPInList(context.Background(), "blacklist", newData)
 	require.NoError(t, err)
 	require.Truef(t, ok == true, "IP not in blacklist", ok)
-	_, err = app.AddIPToWhiteList(context.Background(), newData)
+	_, err = app.AddIPToList(context.Background(), "whitelist", newData)
 	require.Truef(t, errors.Is(err, ErrIPDataExistInBL), "actual error %q", err)
 }
 
@@ -224,9 +224,9 @@ func TestAppPositiveAddIPToWhiteListAndIsIPInWhiteList(t *testing.T) {
 		IP:   "192.168.0.0",
 		Mask: 25,
 	}
-	_, err = app.AddIPToWhiteList(context.Background(), newData)
+	_, err = app.AddIPToList(context.Background(), "whitelist", newData)
 	require.NoError(t, err)
-	ok, err := app.IsIPInWhiteList(context.Background(), newData)
+	ok, err := app.IsIPInList(context.Background(), "whitelist", newData)
 	require.NoError(t, err)
 	require.Truef(t, ok == true, "IP not in whitelist", ok)
 }
@@ -241,14 +241,14 @@ func TestAppPositiveRemoveIPInWhiteListAndIsIPInWhiteList(t *testing.T) {
 		IP:   "192.168.0.0",
 		Mask: 25,
 	}
-	_, err = app.AddIPToWhiteList(context.Background(), newData)
+	_, err = app.AddIPToList(context.Background(),"whitelist", newData)
 	require.NoError(t, err)
-	ok, err := app.IsIPInWhiteList(context.Background(), newData)
+	ok, err := app.IsIPInList(context.Background(), "whitelist", newData)
 	require.NoError(t, err)
 	require.Truef(t, ok == true, "IP not in whitelist", ok)
-	err = app.RemoveIPInWhiteList(context.Background(), newData)
+	err = app.RemoveIPInList(context.Background(), "whitelist", newData)
 	require.NoError(t, err)
-	ok, err = app.IsIPInWhiteList(context.Background(), newData)
+	ok, err = app.IsIPInList(context.Background(), "whitelist", newData)
 	require.NoError(t, err)
 	require.Truef(t, ok == false, "IP in whitelist after removing", ok)
 }
@@ -271,11 +271,11 @@ func TestAppPositiveGetAllIPInWhiteList(t *testing.T) {
 		Mask: 8,
 	}
 	for _, curData := range newDataSl {
-		_, err = app.AddIPToWhiteList(context.Background(), curData)
+		_, err = app.AddIPToList(context.Background(), "whitelist", curData)
 		require.NoError(t, err)
 	}
 
-	controlDataSl, err := app.GetAllIPInWhiteList(context.Background())
+	controlDataSl, err := app.GetAllIPInList(context.Background(), "whitelist")
 	require.NoError(t, err)
 	require.Equal(t, newDataSl, controlDataSl)
 }
@@ -292,9 +292,9 @@ func TestAppPositiveAddIPToBlackListAndIsIPInBlackList(t *testing.T) {
 		IP:   "192.168.0.0",
 		Mask: 25,
 	}
-	_, err = app.AddIPToBlackList(context.Background(), newData)
+	_, err = app.AddIPToList(context.Background(), "blacklist", newData)
 	require.NoError(t, err)
-	ok, err := app.IsIPInBlackList(context.Background(), newData)
+	ok, err := app.IsIPInList(context.Background(), "blacklist", newData)
 	require.NoError(t, err)
 	require.Truef(t, ok == true, "IP not in blacklist", ok)
 }
@@ -309,16 +309,16 @@ func TestAppPositiveRemoveIPInBlackListAndIsIPInBlackList(t *testing.T) {
 		IP:   "192.168.0.0",
 		Mask: 25,
 	}
-	_, err = app.AddIPToBlackList(context.Background(), newData)
+	_, err = app.AddIPToList(context.Background(), "blacklist", newData)
 	require.NoError(t, err)
-	ok, err := app.IsIPInBlackList(context.Background(), newData)
+	ok, err := app.IsIPInList(context.Background(), "blacklist", newData)
 	require.NoError(t, err)
-	require.Truef(t, ok == true, "IP not in whitelist", ok)
-	err = app.RemoveIPInBlackList(context.Background(), newData)
+	require.Truef(t, ok == true, "IP not in blacklist", ok)
+	err = app.RemoveIPInList(context.Background(), "blacklist", newData)
 	require.NoError(t, err)
-	ok, err = app.IsIPInBlackList(context.Background(), newData)
+	ok, err = app.IsIPInList(context.Background(), "blacklist", newData)
 	require.NoError(t, err)
-	require.Truef(t, ok == false, "IP in whitelist after removing", ok)
+	require.Truef(t, ok == false, "IP in blacklist after removing", ok)
 }
 
 func TestAppPositiveGetAllIPInBlackList(t *testing.T) {
@@ -339,11 +339,11 @@ func TestAppPositiveGetAllIPInBlackList(t *testing.T) {
 		Mask: 8,
 	}
 	for _, curData := range newDataSl {
-		_, err = app.AddIPToBlackList(context.Background(), curData)
+		_, err = app.AddIPToList(context.Background(), "blacklist", curData)
 		require.NoError(t, err)
 	}
 
-	controlDataSl, err := app.GetAllIPInBlackList(context.Background())
+	controlDataSl, err := app.GetAllIPInList(context.Background(), "blacklist")
 	require.NoError(t, err)
 	require.Equal(t, newDataSl, controlDataSl)
 }
@@ -378,7 +378,7 @@ func TestRequestAuth(t *testing.T) {
 			IP:   "192.168.16.0",
 			Mask: 24,
 		}
-		_, err := app.AddIPToWhiteList(context.Background(), newData)
+		_, err := app.AddIPToList(context.Background(), "whitelist", newData)
 		require.NoError(t, err)
 		ok, message, err := app.CheckInputRequest(context.Background(), req)
 		require.NoError(t, err)
@@ -397,7 +397,7 @@ func TestRequestAuth(t *testing.T) {
 			IP:   "192.168.16.0",
 			Mask: 24,
 		}
-		_, err := app.AddIPToBlackList(context.Background(), newData)
+		_, err := app.AddIPToList(context.Background(), "blacklist", newData)
 		require.NoError(t, err)
 		ok, message, err := app.CheckInputRequest(context.Background(), req)
 		require.NoError(t, err)

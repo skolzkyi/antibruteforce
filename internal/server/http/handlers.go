@@ -253,7 +253,7 @@ func (s *Server) WhiteList_REST(w http.ResponseWriter, r *http.Request) { //noli
 		}
 
 		if newData.IP == "ALL" {
-			IPList, errInner := s.app.GetAllIPInWhiteList(ctx)
+			IPList, errInner := s.app.GetAllIPInList(ctx, "whitelist")
 			if errInner != nil {
 				newMessage.Text = errInner.Error()
 				newMessage.Code = 1
@@ -281,7 +281,7 @@ func (s *Server) WhiteList_REST(w http.ResponseWriter, r *http.Request) { //noli
 			return
 		}
 
-		ok, errInner := s.app.IsIPInWhiteList(ctx, newData)
+		ok, errInner := s.app.IsIPInList(ctx, "whitelist", newData)
 		if errInner != nil {
 			newMessage.Text = errInner.Error()
 			newMessage.Code = 1
@@ -330,7 +330,7 @@ func (s *Server) WhiteList_REST(w http.ResponseWriter, r *http.Request) { //noli
 			return
 		}
 
-		id, errInner := s.app.AddIPToWhiteList(ctx, newData)
+		id, errInner := s.app.AddIPToList(ctx, "whitelist", newData)
 		if errInner != nil {
 			newMessage.Text = errInner.Error()
 			newMessage.Code = 1
@@ -374,7 +374,7 @@ func (s *Server) WhiteList_REST(w http.ResponseWriter, r *http.Request) { //noli
 			return
 		}
 
-		errInner := s.app.RemoveIPInWhiteList(ctx, removeData)
+		errInner := s.app.RemoveIPInList(ctx, "whitelist", removeData)
 		if errInner != nil {
 			newMessage.Text = errInner.Error()
 			newMessage.Code = 1
@@ -433,7 +433,7 @@ func (s *Server) BlackList_REST(w http.ResponseWriter, r *http.Request) { //noli
 		}
 
 		if newData.IP == "ALL" {
-			IPList, errInner := s.app.GetAllIPInBlackList(ctx)
+			IPList, errInner := s.app.GetAllIPInList(ctx, "blacklist")
 			if errInner != nil {
 				newMessage.Text = errInner.Error()
 				newMessage.Code = 1
@@ -461,7 +461,7 @@ func (s *Server) BlackList_REST(w http.ResponseWriter, r *http.Request) { //noli
 			return
 		}
 
-		ok, errInner := s.app.IsIPInBlackList(ctx, newData)
+		ok, errInner := s.app.IsIPInList(ctx, "blacklist", newData)
 		if errInner != nil {
 			newMessage.Text = errInner.Error()
 			newMessage.Code = 1
@@ -510,7 +510,7 @@ func (s *Server) BlackList_REST(w http.ResponseWriter, r *http.Request) { //noli
 			return
 		}
 
-		id, errInner := s.app.AddIPToBlackList(ctx, newData)
+		id, errInner := s.app.AddIPToList(ctx, "blacklist", newData)
 		if errInner != nil {
 			newMessage.Text = errInner.Error()
 			newMessage.Code = 1
@@ -555,7 +555,7 @@ func (s *Server) BlackList_REST(w http.ResponseWriter, r *http.Request) { //noli
 			return
 		}
 
-		errInner := s.app.RemoveIPInBlackList(ctx, removeData)
+		errInner := s.app.RemoveIPInList(ctx, "blacklist", removeData)
 		if errInner != nil {
 			newMessage.Text = errInner.Error()
 			newMessage.Code = 1

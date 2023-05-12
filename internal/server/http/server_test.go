@@ -142,7 +142,7 @@ func TestWhiteListREST(t *testing.T) {
 		}`)
 		server := createServer(t)
 
-		_, err := server.app.AddIPToWhiteList(context.Background(), newData)
+		_, err := server.app.AddIPToList(context.Background(), "whitelist", newData)
 		require.NoError(t, err)
 
 		r := httptest.NewRequest("GET", "/whitelist/", data)
@@ -172,9 +172,9 @@ func TestWhiteListREST(t *testing.T) {
 		}`)
 		server := createServer(t)
 
-		_, err := server.app.AddIPToWhiteList(context.Background(), newData)
+		_, err := server.app.AddIPToList(context.Background(), "whitelist", newData)
 		require.NoError(t, err)
-		controlDataSl, err := server.app.GetAllIPInWhiteList(context.Background())
+		controlDataSl, err := server.app.GetAllIPInList(context.Background(), "whitelist")
 		require.NoError(t, err)
 		flag := false
 		for _, curControlData := range controlDataSl {
@@ -198,7 +198,7 @@ func TestWhiteListREST(t *testing.T) {
 		respExp := correctOutputJSONAnswer
 		require.Equal(t, respExp, string(respBody))
 
-		controlDataSl, err = server.app.GetAllIPInWhiteList(context.Background())
+		controlDataSl, err = server.app.GetAllIPInList(context.Background(), "whitelist")
 		require.NoError(t, err)
 		flag = false
 		for _, curControlData := range controlDataSl {
@@ -223,13 +223,13 @@ func TestWhiteListREST(t *testing.T) {
 		}
 		server := createServer(t)
 
-		_, err := server.app.AddIPToWhiteList(context.Background(), newData)
+		_, err := server.app.AddIPToList(context.Background(), "whitelist", newData)
 		require.NoError(t, err)
 		newData = storageData.StorageIPData{
 			IP:   "172.92.24.0",
 			Mask: 24,
 		}
-		_, err = server.app.AddIPToWhiteList(context.Background(), newData)
+		_, err = server.app.AddIPToList(context.Background(), "whitelist", newData)
 		require.NoError(t, err)
 
 		r := httptest.NewRequest("GET", "/whitelist/", data)
@@ -284,7 +284,7 @@ func TestBlackListREST(t *testing.T) {
 		}`)
 		server := createServer(t)
 
-		_, err := server.app.AddIPToBlackList(context.Background(), newData)
+		_, err := server.app.AddIPToList(context.Background(), "blacklist", newData)
 		require.NoError(t, err)
 
 		r := httptest.NewRequest("GET", "/blacklist/", data)
@@ -313,9 +313,9 @@ func TestBlackListREST(t *testing.T) {
 		}`)
 		server := createServer(t)
 
-		_, err := server.app.AddIPToBlackList(context.Background(), newData)
+		_, err := server.app.AddIPToList(context.Background(), "blacklist", newData)
 		require.NoError(t, err)
-		controlDataSl, err := server.app.GetAllIPInBlackList(context.Background())
+		controlDataSl, err := server.app.GetAllIPInList(context.Background(), "blacklist")
 		require.NoError(t, err)
 		flag := false
 		for _, curControlData := range controlDataSl {
@@ -339,7 +339,7 @@ func TestBlackListREST(t *testing.T) {
 		respExp := correctOutputJSONAnswer
 		require.Equal(t, respExp, string(respBody))
 
-		controlDataSl, err = server.app.GetAllIPInBlackList(context.Background())
+		controlDataSl, err = server.app.GetAllIPInList(context.Background(), "blacklist")
 		require.NoError(t, err)
 		flag = false
 		for _, curControlData := range controlDataSl {
@@ -364,13 +364,13 @@ func TestBlackListREST(t *testing.T) {
 		}
 		server := createServer(t)
 
-		_, err := server.app.AddIPToBlackList(context.Background(), newData)
+		_, err := server.app.AddIPToList(context.Background(), "blacklist", newData)
 		require.NoError(t, err)
 		newData = storageData.StorageIPData{
 			IP:   "172.92.24.0",
 			Mask: 24,
 		}
-		_, err = server.app.AddIPToBlackList(context.Background(), newData)
+		_, err = server.app.AddIPToList(context.Background(), "blacklist", newData)
 		require.NoError(t, err)
 
 		r := httptest.NewRequest("GET", "/blacklist/", data)

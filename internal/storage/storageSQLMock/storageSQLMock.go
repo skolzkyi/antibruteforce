@@ -5,12 +5,10 @@ import (
 	"sort"
 	"strconv"
 	"sync"
-	"errors"
 
 	storageData "github.com/skolzkyi/antibruteforce/internal/storage/storageData"
 )
 
-var ErrErrorBadListType = errors.New("bad list type")
 
 type StorageMock struct {
 	mu        sync.RWMutex
@@ -58,7 +56,7 @@ func (s *StorageMock) AddIPToList(ctx context.Context, listname string, logger s
 			s.blacklist[tag] = value
 			s.idBL++
 		default:
-			return 0, ErrErrorBadListType
+			return 0, storageData.ErrErrorBadListType
 		}
 		
 		return value.ID, nil
@@ -82,7 +80,7 @@ func (s *StorageMock) IsIPInList(ctx context.Context, listname string, _ storage
 		case "blacklist":
 			_, ok = s.blacklist[tag]
 		default:
-			return false, ErrErrorBadListType
+			return false, storageData.ErrErrorBadListType
 		}
 		
 		return ok, err
@@ -103,7 +101,7 @@ func (s *StorageMock) RemoveIPInList(ctx context.Context, listname string, _ sto
 		case "blacklist":
 			_, ok = s.blacklist[tag]
 		default:
-			return ErrErrorBadListType
+			return storageData.ErrErrorBadListType
 		}
 		
 		if !ok {
@@ -117,7 +115,7 @@ func (s *StorageMock) RemoveIPInList(ctx context.Context, listname string, _ sto
 		case "blacklist":
 			delete(s.blacklist, tag)
 		default:
-			return ErrErrorBadListType
+			return storageData.ErrErrorBadListType
 		}
 
 		return nil
@@ -142,7 +140,7 @@ func (s *StorageMock) GetAllIPInList(ctx context.Context, listname string, _ sto
 				resIPData = append(resIPData, curIPData)
 			}
 		default:
-			return nil, ErrErrorBadListType
+			return nil, storageData.ErrErrorBadListType
 		}
 		
 		s.mu.RUnlock()

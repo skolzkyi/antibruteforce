@@ -49,8 +49,19 @@ type Logger interface {
 }
 
 type Application interface {
+	InitBStorageAndLimits(ctx context.Context, config storageData.Config) error
+	CloseBStorage(ctx context.Context) error
+	CheckInputRequest(ctx context.Context, req storageData.RequestAuth) (bool, string, error)
+	RLTicker(ctx context.Context)
+	ClearBucketByLogin(ctx context.Context, login string) error
+	ClearBucketByIP(ctx context.Context, IP string) error
 	InitStorage(ctx context.Context, config storageData.Config) error
 	CloseStorage(ctx context.Context) error
+	AddIPToList(ctx context.Context, listname string, IPData storageData.StorageIPData) (int, error)
+	RemoveIPInList(ctx context.Context, listname string, IPData storageData.StorageIPData) error
+	IsIPInList(ctx context.Context, listname string, IPData storageData.StorageIPData) (bool, error)
+	GetAllIPInList(ctx context.Context, listname string) ([]storageData.StorageIPData, error)
+/*
 	AddIPToWhiteList(ctx context.Context, IPData storageData.StorageIPData) (int, error)
 	RemoveIPInWhiteList(ctx context.Context, IPData storageData.StorageIPData) error
 	IsIPInWhiteList(ctx context.Context, IPData storageData.StorageIPData) (bool, error)
@@ -59,12 +70,8 @@ type Application interface {
 	RemoveIPInBlackList(ctx context.Context, IPData storageData.StorageIPData) error
 	IsIPInBlackList(ctx context.Context, IPData storageData.StorageIPData) (bool, error)
 	GetAllIPInBlackList(ctx context.Context) ([]storageData.StorageIPData, error)
-	InitBStorageAndLimits(ctx context.Context, config storageData.Config) error
-	CloseBStorage(ctx context.Context) error
-	CheckInputRequest(ctx context.Context, req storageData.RequestAuth) (bool, string, error)
-	RLTicker(ctx context.Context)
-	ClearBucketByLogin(ctx context.Context, login string) error
-	ClearBucketByIP(ctx context.Context, IP string) error
+	*/
+	
 }
 
 func NewServer(logger Logger, app Application, config Config) *Server {

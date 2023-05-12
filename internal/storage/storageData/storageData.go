@@ -12,6 +12,7 @@ import (
 var (
 	ErrNoRecord       = errors.New("record not searched")
 	ErrStorageTimeout = errors.New("storage timeout")
+	ErrErrorBadListType = errors.New("bad list type")
 )
 
 type Config interface {

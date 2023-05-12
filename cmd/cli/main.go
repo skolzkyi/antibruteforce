@@ -11,6 +11,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	helpers "github.com/skolzkyi/antibruteforce/helpers"
 	"github.com/skolzkyi/antibruteforce/internal/loggercli"
@@ -97,9 +98,17 @@ func main() {
 }
 
 func pingAB(address string) error {
-	url := helpers.StringBuild("http://", address, "/")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	url:=helpers.StringBuild("http://", address, "/")
 
-	resp, err := http.Get(url)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return err
+	}
+
+	client := &http.Client{}
+	resp, err := client.Do(req.WithContext(ctx))
 	if err != nil {
 		return err
 	}

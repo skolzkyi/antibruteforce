@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
+	"context"
 
 	helpers "github.com/skolzkyi/antibruteforce/helpers"
 	loggercli "github.com/skolzkyi/antibruteforce/internal/loggercli"
@@ -29,10 +31,6 @@ type outputJSON struct {
 type IPListAnswer struct {
 	IPList  []storageData.StorageIPData
 	Message outputJSON
-}
-
-type InputTag struct {
-	Tag string
 }
 
 type CommandController struct {
@@ -113,6 +111,8 @@ long: ClearBucketByIP [IP], short: cbip [IP] - cleared IP bucket in bucket stora
 }
 
 func (cc *CommandController) addToWhiteList(arg []string) string {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 	if len(arg) != 2 {
 		errStr := "error: " + ErrBadArgCount.Error()
 		cc.logger.Error(errStr)
@@ -131,7 +131,17 @@ func (cc *CommandController) addToWhiteList(arg []string) string {
 	url := helpers.StringBuild("http://", cc.address, "/whitelist/")
 
 	jsonStr := []byte(`{"IP":"` + subArgs[0] + `","Mask":` + subArgs[1] + `}`)
-	resp, err := http.Post(url, "application/json", bytes.NewBuffer(jsonStr))
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
+	if err != nil {
+		errStr := "error: " + err.Error()
+		cc.logger.Error(errStr)
+
+		return errStr
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req.WithContext(ctx))
 	if err != nil {
 		errStr := "error: " + err.Error()
 		cc.logger.Error(errStr)
@@ -170,6 +180,8 @@ func (cc *CommandController) addToWhiteList(arg []string) string {
 }
 
 func (cc *CommandController) removeFromWhiteList(arg []string) string {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 	if len(arg) != 2 {
 		errStr := "error: " + ErrBadArgCount.Error()
 		cc.logger.Error(errStr)
@@ -198,7 +210,7 @@ func (cc *CommandController) removeFromWhiteList(arg []string) string {
 	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := client.Do(req.WithContext(ctx))
 	if err != nil {
 		errStr := "error: " + err.Error()
 		cc.logger.Error(errStr)
@@ -237,6 +249,8 @@ func (cc *CommandController) removeFromWhiteList(arg []string) string {
 }
 
 func (cc *CommandController) isInWhiteList(arg []string) string {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 	if len(arg) != 2 {
 		errStr := "error: " + ErrBadArgCount.Error()
 		cc.logger.Error(errStr)
@@ -262,7 +276,7 @@ func (cc *CommandController) isInWhiteList(arg []string) string {
 	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := client.Do(req.WithContext(ctx))
 	if err != nil {
 		errStr := "error: " + err.Error()
 		cc.logger.Error(errStr)
@@ -300,6 +314,8 @@ func (cc *CommandController) isInWhiteList(arg []string) string {
 }
 
 func (cc *CommandController) allInWhiteList() string {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 	url := helpers.StringBuild("http://", cc.address, "/whitelist/")
 
 	jsonStr := []byte(`{"IP":"ALL","Mask":0}`)
@@ -310,7 +326,7 @@ func (cc *CommandController) allInWhiteList() string {
 	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := client.Do(req.WithContext(ctx))
 	if err != nil {
 		errStr := "error: " + err.Error()
 		cc.logger.Error(errStr)
@@ -353,6 +369,8 @@ func (cc *CommandController) allInWhiteList() string {
 }
 
 func (cc *CommandController) addToBlackList(arg []string) string {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 	if len(arg) != 2 {
 		errStr := "error: " + ErrBadArgCount.Error()
 		cc.logger.Error(errStr)
@@ -371,7 +389,17 @@ func (cc *CommandController) addToBlackList(arg []string) string {
 	url := helpers.StringBuild("http://", cc.address, "/blacklist/")
 
 	jsonStr := []byte(`{"IP":"` + subArgs[0] + `","Mask":` + subArgs[1] + `}`)
-	resp, err := http.Post(url, "application/json", bytes.NewBuffer(jsonStr))
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
+	if err != nil {
+		errStr := "error: " + err.Error()
+		cc.logger.Error(errStr)
+
+		return errStr
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req.WithContext(ctx))
 	if err != nil {
 		errStr := "error: " + err.Error()
 		cc.logger.Error(errStr)
@@ -410,6 +438,8 @@ func (cc *CommandController) addToBlackList(arg []string) string {
 }
 
 func (cc *CommandController) removeFromBlackList(arg []string) string {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 	if len(arg) != 2 {
 		errStr := "error: " + ErrBadArgCount.Error()
 		cc.logger.Error(errStr)
@@ -438,7 +468,7 @@ func (cc *CommandController) removeFromBlackList(arg []string) string {
 	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := client.Do(req.WithContext(ctx))
 	if err != nil {
 		errStr := "error: " + err.Error()
 		cc.logger.Error(errStr)
@@ -477,6 +507,8 @@ func (cc *CommandController) removeFromBlackList(arg []string) string {
 }
 
 func (cc *CommandController) isInBlackList(arg []string) string {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 	if len(arg) != 2 {
 		errStr := "error: " + ErrBadArgCount.Error()
 		cc.logger.Error(errStr)
@@ -502,7 +534,7 @@ func (cc *CommandController) isInBlackList(arg []string) string {
 	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := client.Do(req.WithContext(ctx))
 	if err != nil {
 		errStr := "error: " + err.Error()
 		cc.logger.Error(errStr)
@@ -541,6 +573,8 @@ func (cc *CommandController) isInBlackList(arg []string) string {
 }
 
 func (cc *CommandController) allInBlackList() string {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 	url := helpers.StringBuild("http://", cc.address, "/blacklist/")
 
 	jsonStr := []byte(`{"IP":"ALL","Mask":0}`)
@@ -554,7 +588,7 @@ func (cc *CommandController) allInBlackList() string {
 	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := client.Do(req.WithContext(ctx))
 	if err != nil {
 		errStr := "error: " + err.Error()
 		cc.logger.Error(errStr)
@@ -597,6 +631,8 @@ func (cc *CommandController) allInBlackList() string {
 }
 
 func (cc *CommandController) request(arg []string) string {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 	if len(arg) != 4 {
 		errStr := "error: " + ErrBadArgCount.Error()
 		cc.logger.Error(errStr)
@@ -621,7 +657,7 @@ func (cc *CommandController) request(arg []string) string {
 	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := client.Do(req.WithContext(ctx))
 	if err != nil {
 		errStr := "error: " + err.Error()
 		cc.logger.Error(errStr)
@@ -660,6 +696,8 @@ func (cc *CommandController) request(arg []string) string {
 }
 
 func (cc *CommandController) clearBucketByLogin(arg []string) string {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 	if len(arg) != 2 {
 		errStr := "error: " + ErrBadArgCount.Error()
 		cc.logger.Error(errStr)
@@ -680,7 +718,7 @@ func (cc *CommandController) clearBucketByLogin(arg []string) string {
 	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := client.Do(req.WithContext(ctx))
 	if err != nil {
 		errStr := "error: " + err.Error()
 		cc.logger.Error(errStr)
@@ -719,6 +757,8 @@ func (cc *CommandController) clearBucketByLogin(arg []string) string {
 }
 
 func (cc *CommandController) clearBucketByIP(arg []string) string {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 	if len(arg) != 2 {
 		errStr := "error: " + ErrBadArgCount.Error()
 		cc.logger.Error(errStr)
@@ -739,7 +779,7 @@ func (cc *CommandController) clearBucketByIP(arg []string) string {
 	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := client.Do(req.WithContext(ctx))
 	if err != nil {
 		errStr := "error: " + err.Error()
 		cc.logger.Error(errStr)
